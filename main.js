@@ -19,8 +19,57 @@ window.onload = function() {
     var padding = 10
     var canvas = new fabric.Canvas('canvas', {
         isDrawingMode: true,
-        left: padding,
-        top: padding,
+    })
+
+    // undo/redo/clear
+    var history = []
+    var historyIndex = 0
+    var doingHistory = false
+    function doHistory(index) {
+        // redraw
+        canvas.clear()
+        doingHistory = true
+        for (var i = 0; i < index && i < history.length; i++) {
+            canvas.add(history[i])
+        }
+        doingHistory = false
+        canvas.renderAll()
+        // update buttons
+        undoButton.disabled = index <= 0
+        redoButton.disabled = index >= history.length
+        clearButton.disabled = index <= 0
+    }
+
+    var undoButton = document.querySelector('.undo')
+    var redoButton = document.querySelector('.redo')
+    var clearButton = document.querySelector('.clear')
+    undoButton.onclick = e => {
+        historyIndex = Math.max(historyIndex - 1, 0)
+        doHistory(historyIndex)
+    }
+    redoButton.onclick = e => {
+        historyIndex = Math.min(historyIndex + 1, history.length)
+        doHistory(historyIndex)
+    }
+    clearButton.onclick = e => {
+        historyIndex = 0
+        doHistory(historyIndex)
+    }
+    
+    doHistory(0)
+
+    // new path drawn
+    canvas.on('object:added', e => {
+        if (doingHistory) return
+
+        if (historyIndex < history.length) {
+            history = history.slice(0, historyIndex)
+        }
+        history.push(e.target)
+        historyIndex++
+        undoButton.disabled = false
+        redoButton.disabled = true
+        clearButton.disabled = false
     })
 
     // color controls

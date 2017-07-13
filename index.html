@@ -79,11 +79,23 @@
         .width-input {
             .height: 20px;
         }
+
+        .buttons {
+            display: inline-flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            width: 15%;
+            padding: 5px 0px;
+            background-color: white;
+        }
+        .button {
+            height: 50%;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
 <body>
-    <div class="prompt">hey draw a "dog" or something</div>
+    <div class="prompt">hey draw a "tree" or something</div>
     <div class="controls">
         <div class="colors">
             <div data-color="red"></div>
@@ -99,6 +111,11 @@
                 <div class="width-circle main"></div>
             </div>
             <input class="width-input" type="range" min="6" max="36" step="6" value="12">
+        </div>
+        <div class="buttons">
+            <input class="button undo" type="button" value="UNDO">
+            <input class="button redo" type="button" value="REDO">
+            <input class="button clear" type="button" value="CLEAR">
         </div>
     </div>
     <canvas id="canvas"></canvas>
