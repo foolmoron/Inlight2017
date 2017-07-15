@@ -4,6 +4,9 @@ const favicon = require('serve-favicon')
 const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
+const session = require('express-session')
+
+const config = require('./config.js')
 
 const PORT = 8000
 const app = express()
@@ -18,10 +21,41 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(session({
+    secret: config.SECRET,
+    resave: true,
+    saveUninitialized: true,
+}))
+
+// auth
+var adminAuth = (req, res, next) => {
+    if (req.session && req.session.isAdmin) {
+        next()
+    }
+    res.redirect('/login')
+}
+
+app.get('/login', (req, res, next) => {
+    if (req.session) {
+        req.session.destroy()
+    }
+    res.render('login', { })
+})
+app.post('/login', (req, res, next) => {
+    if (req.body.password.trim() === config.PASSWORD) {
+        req.session.isAdmin = true
+        res.redirect('/')
+    } else {
+        res.render('login', { 
+            previousInput: req.body.password, 
+            error: `That's the incorrect incantation... are you sure you're in the right place?`,
+        })
+    }
+})
 
 // routes
-app.get('/', (req, res, next) => {
-    res.render('index', { title: 'Inlight Server Test' })
+app.get('/', adminAuth, (req, res, next) => {
+    res.render('index', { })
 })
 
 // catch 404 and forward to error handler

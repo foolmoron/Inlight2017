@@ -1,8 +1,42 @@
 body {
-    padding: 50px;
+    margin: 0;
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-a {
-    color: #00B7FF;
+/* header */
+header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 5px;
+    background-color: #999bff;
+}
+.title {
+    color: white;
+    font-weight: bold;
+    font-size: 30px;
+}
+.login {
+    color: #5254ff;
+    font-weight: bold;
+    align-self: center;
+}
+
+/* footer */
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 5px;
+    background-color: #999bff;
+}
+
+/* content */
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
 }

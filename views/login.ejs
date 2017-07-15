@@ -1,0 +1,13 @@
+<% var title = 'Login' %>
+<% include header %>
+
+<form class="password-form" method="post">
+    <input type="password" name="password" placeholder="Enter the holy incantation..." value="<%= locals.previousInput %>" />
+    <br><br>
+    <input type="submit" value="Unleash ultimate power!">
+</form>
+<% if (locals.error) { %>
+    <div class="password-error"><%= error %></div>
+<% } %>
+
+<% include footer %>
