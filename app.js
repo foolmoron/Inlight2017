@@ -5,6 +5,8 @@ const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const session = require('express-session')
+const loki = require('lokijs')
+const uuid = require('uuid/v4')
 
 const config = require('./config.js')
 
@@ -27,12 +29,29 @@ app.use(session({
     saveUninitialized: true,
 }))
 
+// database
+const db = new loki('db/db.json')
+const data = {}
+function initCollection(container, name, opts) {
+    var collection = db.getCollection(name)
+    if (!collection) {
+        collection = db.addCollection(name, opts)
+    }
+    container[name] = collection
+}
+
+db.loadDatabase({}, () => {
+    initCollection(data, 'drawings', { unique: ['uuid'] })
+    db.saveDatabase()
+})
+
 // auth
 var adminAuth = (req, res, next) => {
     if (req.session && req.session.isAdmin) {
         next()
+    } else {
+        res.redirect('/login')
     }
-    res.redirect('/login')
 }
 
 app.get('/login', (req, res, next) => {
@@ -56,6 +75,29 @@ app.post('/login', (req, res, next) => {
 // routes
 app.get('/', adminAuth, (req, res, next) => {
     res.render('index', { })
+})
+app.get('/drawings', adminAuth, (req, res, next) => {
+    res.render('drawings', { drawings: data.drawings.data })
+})
+
+// drawing
+app.get('/drawing', (req, res, next) => {
+    var newDrawing = {
+        uuid: uuid(),
+        json: '',
+    }
+    data.drawings.insert(newDrawing)
+    db.saveDatabase()
+    res.json({uuid: newDrawing.uuid})
+})
+app.post('/drawing', (req, res, next) => {
+    var drawing = data.drawings.findOne({uuid: req.body.uuid})
+    if (!drawing) {
+        return res.status(400).json({error : 'invalid drawing uuid'});
+    }
+    drawing.json = req.body.json
+    data.drawings.update(drawing)
+    db.saveDatabase()
 })
 
 // catch 404 and forward to error handler
