@@ -13,6 +13,59 @@ function lerp(a, b, t) {
 function ilerp(x, a, b) {
     return (x - a) / (b - a)
 }
+function throttleBounce(func, interval) {
+    var firedThisInterval = false
+    var timeoutId = null
+    return () => {
+        if (!firedThisInterval) {
+            // throttle
+            func()
+            firedThisInterval = true
+            setTimeout(() => { firedThisInterval = false }, interval)
+        } else {
+            // debounce
+            clearTimeout(timeoutId)
+            timeoutId = setTimeout(() => { func() }, interval)
+        }
+    }
+}
+function ajax(method, form, url, callback, error) {
+    var xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = () => { 
+        if (xhr.readyState === 4) {
+            if (xhr.status < 300 && callback) {
+                callback(xhr)
+            } else if (xhr.status >= 300 && error) {
+                error(xhr)
+            }
+        }
+    }
+    xhr.open(method, url, true)
+    if (form) {
+        xhr.setRequestHeader('Content-type', 'application/json')
+    }
+    xhr.send(form)
+}
+function get(url, callback, error) { return ajax('GET', null, url, callback, error) }
+function post(url, form, callback, error) { return ajax('POST', JSON.stringify(form), url, callback, error) }
+
+// server
+var URL = 'http://localhost:8000/drawing'
+var RATELIMIT = 1000
+
+var uuid = null
+get(URL, res => {
+    uuid = JSON.parse(res.responseText).uuid
+    console.log('UUID = ' + uuid)
+})
+
+var push = throttleBounce(function(data) {
+    if (!uuid) return
+    post(URL, {
+        uuid: uuid,
+        json: data,
+    })
+}, RATELIMIT)
 
 // main
 window.onload = function() {
@@ -38,6 +91,9 @@ window.onload = function() {
         undoButton.disabled = index <= 0
         redoButton.disabled = index >= history.length
         clearButton.disabled = index <= 0
+
+        // push to server
+        push(canvas.toObject())
     }
 
     var undoButton = document.querySelector('.undo')
@@ -70,6 +126,9 @@ window.onload = function() {
         undoButton.disabled = false
         redoButton.disabled = true
         clearButton.disabled = false
+
+        // push to server
+        push(canvas.toObject())
     })
 
     // color controls
