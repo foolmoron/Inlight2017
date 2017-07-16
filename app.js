@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const path = require('path')
 const favicon = require('serve-favicon')
 const logger = require('morgan')
@@ -23,6 +24,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(cors())
 app.use(session({
     secret: config.SECRET,
     resave: true,
@@ -98,6 +100,7 @@ app.post('/drawing', (req, res, next) => {
     drawing.json = req.body.json
     data.drawings.update(drawing)
     db.saveDatabase()
+    res.send(200)
 })
 
 // catch 404 and forward to error handler

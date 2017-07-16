@@ -4,7 +4,7 @@
 <% drawings.forEach(drawing => { %>
     <p>
         <div><b><%= drawing.uuid %></b></div>
-        <div><%= drawing.json %></div>
+        <div style="word-break: break-all;"><%= JSON.stringify(drawing.json) %></div>
     </p>
 <% }) %>
 
