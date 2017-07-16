@@ -3,4 +3,5 @@
 node_modules/
 bundle.js
 bin/
-db/db.json
+db/
+public/img/drawings/

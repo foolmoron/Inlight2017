@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const path = require('path')
+const fs = require('fs')
 const favicon = require('serve-favicon')
 const logger = require('morgan')
 const cookieParser = require('cookie-parser')
@@ -8,6 +9,7 @@ const bodyParser = require('body-parser')
 const session = require('express-session')
 const loki = require('lokijs')
 const uuid = require('uuid/v4')
+const fabric = require('fabric').fabric
 
 const config = require('./config.js')
 
@@ -79,10 +81,15 @@ app.get('/', adminAuth, (req, res, next) => {
     res.render('index', { })
 })
 app.get('/drawings', adminAuth, (req, res, next) => {
-    res.render('drawings', { drawings: data.drawings.data })
+    res.render('drawings', { drawings: data.drawings.data, dir: 'http://localhost:8000/img/drawings/' })
 })
 
 // drawing
+const drawingDirectory = __dirname + '/public/img/drawings/'
+if (!fs.existsSync(drawingDirectory)) {
+    fs.mkdirSync(drawingDirectory)
+}
+
 app.get('/drawing', (req, res, next) => {
     var newDrawing = {
         uuid: uuid(),
@@ -97,10 +104,19 @@ app.post('/drawing', (req, res, next) => {
     if (!drawing) {
         return res.status(400).json({error : 'invalid drawing uuid'});
     }
+    // update model
     drawing.json = req.body.json
     data.drawings.update(drawing)
     db.saveDatabase()
-    res.send(200)
+    // render to png
+    var canvas = fabric.createCanvasForNode(500, 500)
+    canvas.loadFromJSON(drawing.json, () => {
+        canvas.renderAll()
+        var destStream = fs.createWriteStream(drawingDirectory + drawing.uuid + '.png')
+        canvas.createPNGStream().on('data', chunk => destStream.write(chunk))
+    })
+    // return
+    res.sendStatus(200)
 })
 
 // catch 404 and forward to error handler
