@@ -16,16 +16,16 @@ function ilerp(x, a, b) {
 function throttleBounce(func, interval) {
     var firedThisInterval = false
     var timeoutId = null
-    return () => {
+    return function() { // use explicit function syntax to get wrapped arguments context
         if (!firedThisInterval) {
             // throttle
-            func()
+            func.apply(null, arguments)
             firedThisInterval = true
             setTimeout(() => { firedThisInterval = false }, interval)
         } else {
             // debounce
             clearTimeout(timeoutId)
-            timeoutId = setTimeout(() => { func() }, interval)
+            timeoutId = setTimeout(() => { func.apply(null, arguments) }, interval)
         }
     }
 }
