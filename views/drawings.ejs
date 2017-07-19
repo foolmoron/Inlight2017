@@ -1,12 +1,36 @@
 <% var title = 'Drawings' %>
 <% include header %>
 
-<% drawings.forEach(drawing => { %>
-    <p>
-        <div><b><%= drawing.uuid %></b></div>
-        <img src="<%= dir %><%= drawing.uuid %>.png" />
-        <div style="word-break: break-all;"><%= JSON.stringify(drawing.json) %></div>
-    </p>
-<% }) %>
+<div class="container-fluid drawings">
+    <div class="row">
+        <div class="col-xs-12">
+            <button class="btn btn-success" type="submit" style="padding: 16px 0px; font-size: 1.7em;">Enable Global Auto-Approve</button>
+            <button class="btn btn-warning hidden" type="submit" style="padding: 16px 0px; font-size: 1.7em;">Disable Global Auto-Approve</button>
+        </div>
+    </div>
+    <% drawings.forEach(drawing => { %>
+        <div class="row drawing-row">
+            <div class="col-xs-4 col-md-3">
+                <button class="btn btn-warning primary-button" type="submit">Ignore</button>
+                <button class="btn btn-info primary-button hidden" type="submit">Disable Ignore</button>
+                <button class="btn btn-danger secondary-button" type="submit">Delete Forever</button>
+            </div>
+            <div class="col-xs-4 col-md-6 text-center">
+                <div class="col-xs-12">
+                    <b><%= drawing.uuid %></b>
+                </div>
+                <div class="col-xs-12">
+                    <img src="<%= dir %><%= drawing.uuid %>.png" />
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-3">
+                <button class="btn btn-primary primary-button" type="submit">Approve Once</button>
+                <button class="btn btn-success secondary-button" type="submit">Auto-Approve</button>
+                <button class="btn btn-warning secondary-button hidden" type="submit">Disable Auto-Approve</button>
+            </div>
+        </div>
+        <br>
+    <% }) %>
+</div>
 
 <% include footer %>
