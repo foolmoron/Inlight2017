@@ -34,7 +34,7 @@ app.use(session({
 }))
 
 // database
-const db = new loki('db/db.json')
+const db = new loki('db/db.json', { autosave: true })
 const data = {}
 function initCollection(container, name, opts) {
     var collection = db.getCollection(name)
@@ -46,7 +46,6 @@ function initCollection(container, name, opts) {
 
 db.loadDatabase({}, () => {
     initCollection(data, 'drawings', { unique: ['uuid'] })
-    db.saveDatabase()
 })
 
 // auth
@@ -96,7 +95,6 @@ app.get('/drawing', (req, res, next) => {
         json: '',
     }
     data.drawings.insert(newDrawing)
-    db.saveDatabase()
     res.json({uuid: newDrawing.uuid})
 })
 app.post('/drawing', (req, res, next) => {
@@ -107,7 +105,6 @@ app.post('/drawing', (req, res, next) => {
     // update model
     drawing.json = req.body.json
     data.drawings.update(drawing)
-    db.saveDatabase()
     // render to png
     var canvas = fabric.createCanvasForNode(500, 500)
     canvas.loadFromJSON(drawing.json, () => {
