@@ -70,7 +70,7 @@ app.get('/login', (req, res, next) => {
 app.post('/login', (req, res, next) => {
     if (req.body.password.trim() === config.PASSWORD) {
         req.session.isAdmin = true
-        res.redirect('/')
+        res.redirect('/drawings')
     } else {
         res.render('login', { 
             previousInput: req.body.password, 
@@ -108,6 +108,7 @@ const STATUS = {
     UPDATED: 'updated',
     APPROVED: 'approved',
     IGNORED: 'ignored',
+    DELETED: 'deleted',
 }
 
 const Drawing = (init) => Object.assign({
@@ -136,6 +137,15 @@ app.get('/drawingupdates/:sinceTime', (req, res, next) => {
     var sinceTime = parseInt(req.params.sinceTime) || 0
     var drawings = data.drawings.where(drawing => drawing.meta.updated >= sinceTime)
     res.json(drawings)
+})
+app.get('/drawingindex/:sinceTime', (req, res, next) => {
+    var sinceTime = parseInt(req.params.sinceTime) || 0
+    var drawings = data.drawings.where(drawing => drawing.meta.updated >= sinceTime)
+    var drawingIndex = drawings.map(drawing => ({
+        uuid: drawing.uuid,
+        deleted: drawing.status == STATUS.DELETED,
+    }))
+    res.json(drawingIndex)
 })
 
 app.post('/drawing', (req, res, next) => {
@@ -229,7 +239,9 @@ app.get('/drawing/:uuid/delete', (req, res, next) => {
         return res.status(400).json({error : 'invalid drawing uuid'})
     }
     // update
-    data.drawings.remove(drawing)
+    drawing.status = STATUS.DELETED
+    drawing.autoapprove = false
+    data.drawings.update(drawing)
     // delete file
     fs.unlink(drawingApproved + drawing.uuid + '.png', (err) => { if (err) console.log('delete: ' + err) })
     // return

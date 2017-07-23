@@ -61,9 +61,16 @@ footer {
     background-color: #fff47c;
     opacity: 0.7;
 }
+.drawings .drawing-row.deleted {
+    background-color: #f9d2d2;
+    opacity: 0.7;
+}
 .drawings .drawing-row img {
     max-width: 100%;
     max-height: 250px;
+    min-width: 50px;
+    min-height: 50px;
+    background-color: white;
 }
 .drawings button {
     display: block;
