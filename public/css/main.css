@@ -47,6 +47,19 @@ footer {
     padding: 10px 0px;
     border-radius: 10px;
 }
+.drawings .drawing-row.new {
+    background-color: #ececec;
+}
+.drawings .drawing-row.updated {
+    background-color: #d9e8da;
+}
+.drawings .drawing-row.approved {
+    background-color: #d2f9d4;
+}
+.drawings .drawing-row.ignored {
+    background-color: #fff47c;
+    opacity: 0.7;
+}
 .drawings .drawing-row img {
     max-width: 100%;
     max-height: 250px;

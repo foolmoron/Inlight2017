@@ -48,6 +48,10 @@ db.loadDatabase({}, () => {
     initCollection(data, 'drawings', { unique: ['uuid'] })
 })
 
+const GLOBAL = {
+    autoapprove: false,    
+}
+
 // auth
 var adminAuth = (req, res, next) => {
     if (req.session && req.session.isAdmin) {
@@ -80,38 +84,153 @@ app.get('/', adminAuth, (req, res, next) => {
     res.render('index', { })
 })
 app.get('/drawings', adminAuth, (req, res, next) => {
-    res.render('drawings', { drawings: data.drawings.data, dir: 'http://localhost:8000/img/drawings/' })
+    res.render('drawings', { 
+        drawings: data.drawings.data, 
+        globalAutoApprove: GLOBAL.autoapprove, 
+        dirNew: 'http://localhost:8000/img/drawings/new/', 
+        dirApproved: 'http://localhost:8000/img/drawings/approved/' 
+    })
 })
 
 // drawing
 const drawingDirectory = __dirname + '/public/img/drawings/'
-if (!fs.existsSync(drawingDirectory)) {
-    fs.mkdirSync(drawingDirectory)
+const drawingNew = drawingDirectory + 'new/'
+if (!fs.existsSync(drawingNew)) {
+    fs.mkdirSync(drawingNew)
+}
+const drawingApproved = drawingDirectory + 'approved/'
+if (!fs.existsSync(drawingApproved)) {
+    fs.mkdirSync(drawingApproved)
 }
 
+const STATUS = {
+    NEW: 'new',
+    UPDATED: 'updated',
+    APPROVED: 'approved',
+    IGNORED: 'ignored',
+}
+
+const Drawing = (init) => Object.assign({
+    uuid: uuid(),
+    json: '',
+    status: STATUS.NEW,
+    autoapprove: false,
+}, init)
+
 app.get('/drawing', (req, res, next) => {
-    var newDrawing = {
-        uuid: uuid(),
-        json: '',
-    }
+    var newDrawing = Drawing()
     data.drawings.insert(newDrawing)
     res.json({uuid: newDrawing.uuid})
+})
+app.get('/drawing/:uuid', (req, res, next) => {
+    var drawing = data.drawings.findOne({uuid: req.params.uuid})
+    if (!drawing) {
+        return res.status(400).json({error : 'invalid drawing uuid'})
+    }
+    delete drawing.json
+    res.json(drawing)
 })
 app.post('/drawing', (req, res, next) => {
     var drawing = data.drawings.findOne({uuid: req.body.uuid})
     if (!drawing) {
-        return res.status(400).json({error : 'invalid drawing uuid'});
+        drawing = Drawing({uuid: req.body.uuid})
+        data.drawings.insert(drawing)
     }
     // update model
     drawing.json = req.body.json
+    if (drawing.status == STATUS.UPDATED || drawing.status == STATUS.APPROVED) {
+        drawing.status = STATUS.UPDATED
+    }
+    var autoapprove = drawing.status != STATUS.IGNORED && (GLOBAL.autoapprove ||drawing.autoapprove)
+    if (autoapprove) {
+        drawing.status = STATUS.APPROVED
+    }
     data.drawings.update(drawing)
     // render to png
     var canvas = fabric.createCanvasForNode(500, 500)
     canvas.loadFromJSON(drawing.json, () => {
         canvas.renderAll()
-        var destStream = fs.createWriteStream(drawingDirectory + drawing.uuid + '.png')
+        var destStream = fs.createWriteStream(drawingNew + drawing.uuid + '.png')
         canvas.createPNGStream().on('data', chunk => destStream.write(chunk))
+        // autoapprove copy file
+        if (autoapprove) {
+            var destStream2 = fs.createWriteStream(drawingApproved + drawing.uuid + '.png')
+            canvas.createPNGStream().on('data', chunk => destStream2.write(chunk))
+        }
     })
+    // return
+    res.sendStatus(200)
+})
+
+app.get('/drawing/:uuid/approve', (req, res, next) => {
+    var drawing = data.drawings.findOne({uuid: req.params.uuid})
+    if (!drawing) {
+        return res.status(400).json({error : 'invalid drawing uuid'})
+    }
+    // update
+    drawing.status = STATUS.APPROVED
+    data.drawings.update(drawing)
+    // copy file
+    try {
+        fs.createReadStream(drawingNew + drawing.uuid + '.png')
+        .on('error', (err) => { if (err) console.log('approve: ' + err) })
+        .pipe(fs.createWriteStream(drawingApproved + drawing.uuid + '.png'))
+    } catch (e) {
+    }
+    // return
+    res.sendStatus(200)
+})
+app.get('/drawing/:uuid/autoapprove/:toggle', (req, res, next) => {
+    var drawing = data.drawings.findOne({uuid: req.params.uuid})
+    if (!drawing) {
+        return res.status(400).json({error : 'invalid drawing uuid'})
+    }
+    // update
+    drawing.autoapprove = req.params.toggle == 'true'
+    if (drawing.autoapprove) {
+        drawing.status = STATUS.APPROVED
+        // copy file
+        try {
+            fs.createReadStream(drawingNew + drawing.uuid + '.png')
+            .on('error', (err) => { if (err) console.log('autoapprove: ' + err) })
+            .pipe(fs.createWriteStream(drawingApproved + drawing.uuid + '.png'))
+        } catch (e) {
+        }
+    }
+    data.drawings.update(drawing)
+    // return
+    res.sendStatus(200)
+})
+app.get('/drawing/:uuid/ignore/:toggle', (req, res, next) => {
+    var drawing = data.drawings.findOne({uuid: req.params.uuid})
+    if (!drawing) {
+        return res.status(400).json({error : 'invalid drawing uuid'})
+    }
+    // update
+    drawing.status = req.params.toggle == 'true' ? STATUS.IGNORED : STATUS.NEW
+    if (drawing.status == STATUS.IGNORED) {
+        drawing.autoapprove = false
+    }
+    data.drawings.update(drawing)
+    // return
+    res.sendStatus(200)
+})
+app.get('/drawing/:uuid/delete', (req, res, next) => {
+    var drawing = data.drawings.findOne({uuid: req.params.uuid})
+    if (!drawing) {
+        return res.status(400).json({error : 'invalid drawing uuid'})
+    }
+    // update
+    data.drawings.remove(drawing)
+    // delete file
+    fs.unlink(drawingApproved + drawing.uuid + '.png', (err) => { if (err) console.log('delete: ' + err) })
+    // return
+    res.sendStatus(200)
+})
+
+app.get('/globalautoapprove/:toggle', (req, res, next) => {
+    // update
+    GLOBAL.autoapprove = req.params.toggle == 'true'
     // return
     res.sendStatus(200)
 })

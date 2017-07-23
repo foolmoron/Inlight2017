@@ -4,29 +4,30 @@
 <div class="container-fluid drawings">
     <div class="row">
         <div class="col-xs-12">
-            <button class="btn btn-success" type="submit" style="padding: 16px 0px; font-size: 1.7em;">Enable Global Auto-Approve</button>
-            <button class="btn btn-warning hidden" type="submit" style="padding: 16px 0px; font-size: 1.7em;">Disable Global Auto-Approve</button>
+            <button class="btn btn-success <%= globalAutoApprove ? 'hidden' : '' %>" onclick="get('/globalautoapprove/true')" style="padding: 16px 10px; font-size: 1.7em;">Enable Global Auto-Approve</button>
+            <button class="btn btn-warning <%= globalAutoApprove ? '' : 'hidden' %>" onclick="get('/globalautoapprove/false')" style="padding: 16px 10px; font-size: 1.7em;">Disable Global Auto-Approve</button>
         </div>
     </div>
     <% drawings.forEach(drawing => { %>
-        <div class="row drawing-row">
+        <div class="row drawing-row <%= drawing.status %>">
             <div class="col-xs-4 col-md-3">
-                <button class="btn btn-warning primary-button" type="submit">Ignore</button>
-                <button class="btn btn-info primary-button hidden" type="submit">Disable Ignore</button>
-                <button class="btn btn-danger secondary-button" type="submit">Delete Forever</button>
+                <button class="btn btn-warning primary-button <%= drawing.status == 'ignored' ? 'hidden' : '' %>" onclick="get('/drawing/<%= drawing.uuid %>/ignore/true')">Ignore</button>
+                <button class="btn btn-info primary-button <%= drawing.status != 'ignored' ? 'hidden' : '' %>" type="submit" onclick="get('/drawing/<%= drawing.uuid %>/ignore/false')">Disable Ignore</button>
+                <button class="btn btn-danger secondary-button" type="submit" onclick="get('/drawing/<%= drawing.uuid %>/delete')">Delete</button>
             </div>
             <div class="col-xs-4 col-md-6 text-center">
                 <div class="col-xs-12">
-                    <b><%= drawing.uuid %></b>
+                    <b><%= drawing.uuid %> -- <%= drawing.status %></b>
                 </div>
                 <div class="col-xs-12">
-                    <img src="<%= dir %><%= drawing.uuid %>.png" />
+                    <img src="<%= dirApproved %><%= drawing.uuid %>.png" />
+                    <img src="<%= dirNew %><%= drawing.uuid %>.png" />
                 </div>
             </div>
             <div class="col-xs-4 col-md-3">
-                <button class="btn btn-primary primary-button" type="submit">Approve Once</button>
-                <button class="btn btn-success secondary-button" type="submit">Auto-Approve</button>
-                <button class="btn btn-warning secondary-button hidden" type="submit">Disable Auto-Approve</button>
+                <button class="btn btn-primary primary-button" onclick="get('/drawing/<%= drawing.uuid %>/approve')">Approve Once</button>
+                <button class="btn btn-success secondary-button <%= drawing.autoapprove ? 'hidden' : '' %>" onclick="get('/drawing/<%= drawing.uuid %>/autoapprove/true')">Auto-Approve</button>
+                <button class="btn btn-warning secondary-button <%= drawing.autoapprove ? '' : 'hidden' %>" onclick="get('/drawing/<%= drawing.uuid %>/autoapprove/false')">Disable Auto-Approve</button>
             </div>
         </div>
         <br>
