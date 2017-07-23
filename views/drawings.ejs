@@ -4,34 +4,94 @@
 <div class="container-fluid drawings">
     <div class="row">
         <div class="col-xs-12">
-            <button class="btn btn-success <%= globalAutoApprove ? 'hidden' : '' %>" onclick="get('/globalautoapprove/true')" style="padding: 16px 10px; font-size: 1.7em;">Enable Global Auto-Approve</button>
-            <button class="btn btn-warning <%= globalAutoApprove ? '' : 'hidden' %>" onclick="get('/globalautoapprove/false')" style="padding: 16px 10px; font-size: 1.7em;">Disable Global Auto-Approve</button>
+            <button class="btn btn-success global-aa-enable" onclick="get('/globalautoapprove/true', update)" style="padding: 16px 10px; font-size: 1.7em;">Enable Global Auto-Approve</button>
+            <button class="btn btn-warning global-aa-disable" onclick="get('/globalautoapprove/false', update)" style="padding: 16px 10px; font-size: 1.7em;">Disable Global Auto-Approve</button>
         </div>
     </div>
-    <% drawings.forEach(drawing => { %>
-        <div class="row drawing-row <%= drawing.status %>">
-            <div class="col-xs-4 col-md-3">
-                <button class="btn btn-warning primary-button <%= drawing.status == 'ignored' ? 'hidden' : '' %>" onclick="get('/drawing/<%= drawing.uuid %>/ignore/true')">Ignore</button>
-                <button class="btn btn-info primary-button <%= drawing.status != 'ignored' ? 'hidden' : '' %>" type="submit" onclick="get('/drawing/<%= drawing.uuid %>/ignore/false')">Disable Ignore</button>
-                <button class="btn btn-danger secondary-button" type="submit" onclick="get('/drawing/<%= drawing.uuid %>/delete')">Delete</button>
+    <div class="drawing-container">
+    </div>
+</div>
+
+<script id="drawing-template" type="text/template">
+    <div class="row drawing-row <$= drawing.status $>" data-uuid="<$= drawing.uuid $>">
+        <div class="col-xs-4 col-md-3">
+            <button class="btn btn-warning primary-button <$= drawing.status == 'ignored' ? 'hidden' : '' $>" onclick="get('/drawing/<$= drawing.uuid $>/ignore/true', update)">Ignore</button>
+            <button class="btn btn-info primary-button <$= drawing.status != 'ignored' ? 'hidden' : '' $>" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/ignore/false', update)">Disable Ignore</button>
+            <button class="btn btn-danger secondary-button" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/delete', update)">Delete</button>
+        </div>
+        <div class="col-xs-4 col-md-6 text-center">
+            <div class="col-xs-12">
+                <b><$= drawing.uuid $> -- <$= drawing.status $></b>
             </div>
-            <div class="col-xs-4 col-md-6 text-center">
-                <div class="col-xs-12">
-                    <b><%= drawing.uuid %> -- <%= drawing.status %></b>
-                </div>
-                <div class="col-xs-12">
-                    <img src="<%= dirApproved %><%= drawing.uuid %>.png" />
-                    <img src="<%= dirNew %><%= drawing.uuid %>.png" />
-                </div>
-            </div>
-            <div class="col-xs-4 col-md-3">
-                <button class="btn btn-primary primary-button" onclick="get('/drawing/<%= drawing.uuid %>/approve')">Approve Once</button>
-                <button class="btn btn-success secondary-button <%= drawing.autoapprove ? 'hidden' : '' %>" onclick="get('/drawing/<%= drawing.uuid %>/autoapprove/true')">Auto-Approve</button>
-                <button class="btn btn-warning secondary-button <%= drawing.autoapprove ? '' : 'hidden' %>" onclick="get('/drawing/<%= drawing.uuid %>/autoapprove/false')">Disable Auto-Approve</button>
+            <div class="col-xs-12">
+                <img src="<$= dirApproved $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
+                <img src="<$= dirNew $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
             </div>
         </div>
-        <br>
-    <% }) %>
-</div>
+        <div class="col-xs-4 col-md-3">
+            <button class="btn btn-primary primary-button" onclick="get('/drawing/<$= drawing.uuid $>/approve', update)">Approve Once</button>
+            <button class="btn btn-success secondary-button <$= drawing.autoapprove ? 'hidden' : '' $>" onclick="get('/drawing/<$= drawing.uuid $>/autoapprove/true', update)">Auto-Approve</button>
+            <button class="btn btn-warning secondary-button <$= drawing.autoapprove ? '' : 'hidden' $>" onclick="get('/drawing/<$= drawing.uuid $>/autoapprove/false', update)">Disable Auto-Approve</button>
+        </div>
+    </div>
+</script>
+
+<script src="js/ejs.min.js"></script>
+<script>
+var drawingContainer = document.querySelector('.drawing-container')
+var drawingTemplate = document.querySelector('#drawing-template').innerHTML.trim()
+
+var globalAutoApproveEnable = document.querySelector('.global-aa-enable')
+var globalAutoApproveDisable = document.querySelector('.global-aa-disable')
+
+const dirNew = '<%= dirNew %>'
+const dirApproved = '<%= dirApproved %>'
+
+function renderDrawing(drawing) {
+    var html = ejs.render(drawingTemplate, {drawing, dirNew, dirApproved}, {delimiter: '$'})
+    var div = document.createElement('div')
+    div.innerHTML = html
+    var newNode = div.firstChild
+
+    var existingNode = document.querySelector('[data-uuid="' + drawing.uuid + '"]')
+    if (existingNode) {
+        drawingContainer.replaceChild(newNode, existingNode)
+    } else {
+        drawingContainer.appendChild(newNode)
+    }
+}
+
+function updateDrawing(uuid) {
+    get('/drawing/' + uuid, xhr => {
+        renderDrawing(JSON.parse(xhr.responseText))
+    })
+}
+
+function updateGlobalAutoApprove(toggle) {
+    if (toggle) {
+        globalAutoApproveEnable.classList.add('hidden')
+        globalAutoApproveDisable.classList.remove('hidden')
+    } else {
+        globalAutoApproveEnable.classList.remove('hidden')
+        globalAutoApproveDisable.classList.add('hidden')
+    }
+}
+
+var lastUpdateTime = 0
+function update() {
+    get('/drawingupdates/' + lastUpdateTime, xhr => {
+        JSON.parse(xhr.responseText).map(renderDrawing)
+    })
+    get('/globalautoapprove', xhr => {
+        updateGlobalAutoApprove(xhr.responseText == 'true')
+    })
+    lastUpdateTime = new Date().getTime()
+}
+
+// initial pull
+document.addEventListener('DOMContentLoaded', update, false)
+// interval
+var updateInterval = setInterval(update, 3000)
+</script>
 
 <% include footer %>

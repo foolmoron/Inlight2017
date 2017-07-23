@@ -120,7 +120,9 @@ const Drawing = (init) => Object.assign({
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
     data.drawings.insert(newDrawing)
-    res.json({uuid: newDrawing.uuid})
+    var drawing = data.drawings.findOne({uuid: newDrawing.uuid})
+    data.drawings.update(drawing)
+    res.json({uuid: drawing.uuid})
 })
 app.get('/drawing/:uuid', (req, res, next) => {
     var drawing = data.drawings.findOne({uuid: req.params.uuid})
@@ -130,6 +132,12 @@ app.get('/drawing/:uuid', (req, res, next) => {
     delete drawing.json
     res.json(drawing)
 })
+app.get('/drawingupdates/:sinceTime', (req, res, next) => {
+    var sinceTime = parseInt(req.params.sinceTime) || 0
+    var drawings = data.drawings.where(drawing => drawing.meta.updated >= sinceTime)
+    res.json(drawings)
+})
+
 app.post('/drawing', (req, res, next) => {
     var drawing = data.drawings.findOne({uuid: req.body.uuid})
     if (!drawing) {
@@ -228,6 +236,9 @@ app.get('/drawing/:uuid/delete', (req, res, next) => {
     res.sendStatus(200)
 })
 
+app.get('/globalautoapprove', (req, res, next) => {
+    res.send(GLOBAL.autoapprove)
+})
 app.get('/globalautoapprove/:toggle', (req, res, next) => {
     // update
     GLOBAL.autoapprove = req.params.toggle == 'true'

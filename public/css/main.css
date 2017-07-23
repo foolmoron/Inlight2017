@@ -46,6 +46,7 @@ footer {
     background-color: #ececec;
     padding: 10px 0px;
     border-radius: 10px;
+    margin-bottom: 10px;
 }
 .drawings .drawing-row.new {
     background-color: #ececec;
