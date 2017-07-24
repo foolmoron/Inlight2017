@@ -145,16 +145,16 @@ app.get('/drawing/:uuid', (req, res, next) => {
 app.get('/drawingupdates/:sinceTime', (req, res, next) => {
     var sinceTime = parseInt(req.params.sinceTime) || 0
     var drawings = data.drawings.where(drawing => drawing.meta.updated >= sinceTime)
-    res.json(drawings)
+    res.json({time: new Date().getTime(), drawings})
 })
 app.get('/drawingindex/:sinceTime', (req, res, next) => {
     var sinceTime = parseInt(req.params.sinceTime) || 0
     var drawings = data.drawings.where(drawing => drawing.meta.updated >= sinceTime)
-    var drawingIndex = drawings.map(drawing => ({
+    var changes = drawings.map(drawing => ({
         uuid: drawing.uuid,
         deleted: drawing.status == STATUS.DELETED,
     }))
-    res.json(drawingIndex)
+    res.json({time: new Date().getTime(), changes})
 })
 
 app.post('/drawing', (req, res, next) => {

@@ -80,12 +80,13 @@ function updateGlobalAutoApprove(toggle) {
 var lastUpdateTime = 0
 function update() {
     get('/drawingupdates/' + lastUpdateTime, xhr => {
-        JSON.parse(xhr.responseText).map(renderDrawing)
+        var response = JSON.parse(xhr.responseText)
+        lastUpdateTime = response.time
+        response.drawings.map(renderDrawing)
     })
     get('/globalautoapprove', xhr => {
         updateGlobalAutoApprove(xhr.responseText == 'true')
     })
-    lastUpdateTime = new Date().getTime()
 }
 
 // initial pull
