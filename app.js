@@ -93,7 +93,14 @@ app.get('/drawings', adminAuth, (req, res, next) => {
 })
 
 // drawing
-const drawingDirectory = __dirname + '/public/img/drawings/'
+const drawingDirs = ['/public','/img','/drawings/']
+const drawingDirectory = drawingDirs.reduce((acc, dir) => {
+    acc += dir
+    if (!fs.existsSync(acc)) {
+        fs.mkdirSync(acc)
+    }
+    return acc
+}, __dirname)
 const drawingNew = drawingDirectory + 'new/'
 if (!fs.existsSync(drawingNew)) {
     fs.mkdirSync(drawingNew)
