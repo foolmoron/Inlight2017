@@ -33,6 +33,9 @@ app.use(session({
 }))
 
 // database
+if (!fs.existsSync('db')) {
+    fs.mkdirSync('db')
+}
 const db = new loki('db/db.json', { autosave: true })
 const data = {}
 function initCollection(container, name, opts) {
