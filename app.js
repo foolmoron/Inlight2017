@@ -13,7 +13,6 @@ const fabric = require('fabric').fabric
 
 const config = require('./config.js')
 
-const PORT = 8000
 const app = express()
 
 // view engine setup
@@ -87,8 +86,8 @@ app.get('/drawings', adminAuth, (req, res, next) => {
     res.render('drawings', { 
         drawings: data.drawings.data, 
         globalAutoApprove: GLOBAL.autoapprove, 
-        dirNew: 'http://localhost:8000/img/drawings/new/', 
-        dirApproved: 'http://localhost:8000/img/drawings/approved/' 
+        dirNew: `${config.HOST}:${config.PORT}/img/drawings/new/`,
+        dirApproved: `${config.HOST}:${config.PORT}/img/drawings/approved/`
     })
 })
 
@@ -284,10 +283,10 @@ app.use((err, req, res, next) => {
 })
 
 // start listening
-app.listen(PORT, function () {
+app.listen(config.PORT, function () {
     console.log(`
 ************************************
-** Started listening on port ${PORT} **
+** Started listening on port ${config.PORT} **
 ************************************`)
 })
 module.exports = app
