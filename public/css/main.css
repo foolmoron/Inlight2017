@@ -3,6 +3,18 @@ body {
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.password-form {
+    text-align: center;
+}
+.password-form input[type="password"] {
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.28);
+    background-color: #cfe0ff;
+    font-size: 2em;
+    width: 18em;
+}
+
 /* header */
 header {
     display: flex;
