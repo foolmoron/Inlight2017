@@ -50,7 +50,7 @@ function get(url, callback, error) { return ajax('GET', null, url, callback, err
 function post(url, form, callback, error) { return ajax('POST', JSON.stringify(form), url, callback, error) }
 
 // server
-var URL = 'http://localhost:8000/drawing'
+var URL = 'http://34.206.49.42:8000/drawing'
 var RATELIMIT = 1000
 
 var uuid = null
