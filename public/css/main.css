@@ -61,7 +61,7 @@ footer {
     margin-bottom: 10px;
 }
 .drawings .drawing-row.completed {
-    border: 8px solid rgba(0, 0, 0, 0.7);
+    border: 8px solid #ffeb3b;
 }
 .drawings .drawing-row.new {
     background-color: #ececec;
