@@ -90,12 +90,20 @@
         }
         .button {
             height: 50%;
+            -webkit-text-stroke: initial;
+        }
+        .button.done {
+            font-size: 20px;
+            float: right;
         }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
 <body>
-    <div class="prompt">hey draw a "tree" or something</div>
+    <div class="prompt">
+        <span>hey draw a "tree" or something</span>
+        <input class="button done" type="button" value="I'm done, new drawing!" onclick="location.href = location.href">
+    </div>
     <div class="controls">
         <div class="colors">
             <div data-color="red"></div>
