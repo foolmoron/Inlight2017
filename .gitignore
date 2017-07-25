@@ -19,3 +19,5 @@ Assets/UnityVS/
 *.gp4
 *.suo
 ProjectSettings/ProjectVersion.txt
+TestImages/index.txt
+TestImages/*.png
