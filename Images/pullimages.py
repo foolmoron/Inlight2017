@@ -46,13 +46,14 @@ def pullIndex():
                     except OSError:
                         pass
                 else:
-                    # add to index
-                    if uuid not in index:
-                        index.append(uuid)
                     # download file
                     imgRes = requests.get(URL_IMG + str(uuid) + '.png')
                     if imgRes.status_code == 200:
+                        # add to index
+                        if uuid not in index:
+                            index.append(uuid)
                         print URL_IMG + str(uuid) + '.png'
+                        # save
                         with open('./' + uuid + '.png', 'wb+') as imgFile:
                             imgFile.write(imgRes.content)
             # save index
