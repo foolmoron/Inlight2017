@@ -29,7 +29,7 @@ function throttleBounce(func, interval) {
         }
     }
 }
-function ajax(method, form, url, callback, error) {
+function ajax(method, sync, url, form, callback, error) {
     var xhr = new XMLHttpRequest()
     xhr.onreadystatechange = () => { 
         if (xhr.readyState === 4) {
@@ -40,14 +40,16 @@ function ajax(method, form, url, callback, error) {
             }
         }
     }
-    xhr.open(method, url, true)
+    xhr.open(method, url, !sync)
     if (form) {
         xhr.setRequestHeader('Content-type', 'application/json')
     }
     xhr.send(form)
 }
-function get(url, callback, error) { return ajax('GET', null, url, callback, error) }
-function post(url, form, callback, error) { return ajax('POST', JSON.stringify(form), url, callback, error) }
+function get(url, callback, error) { return ajax('GET', false, url, null, callback, error) }
+function post(url, form, callback, error) { return ajax('POST', false, url, JSON.stringify(form), callback, error) }
+function getSync(url, callback, error) { return ajax('GET', true, url, null, callback, error) }
+function postSync(url, form, callback, error) { return ajax('POST', true, url, JSON.stringify(form), callback, error) }
 
 // server
 var URL = 'http://localhost:8000/drawing'
@@ -68,7 +70,7 @@ var push = throttleBounce(function(data) {
 }, RATELIMIT)
 
 function complete() {
-    get(URL + '/' + uuid + '/complete')    
+    getSync(URL + '/' + uuid + '/complete')
 }
 
 // events
