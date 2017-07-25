@@ -60,6 +60,9 @@ footer {
     border-radius: 10px;
     margin-bottom: 10px;
 }
+.drawings .drawing-row.completed {
+    border: 8px solid rgba(0, 0, 0, 0.7);
+}
 .drawings .drawing-row.new {
     background-color: #ececec;
 }
@@ -90,11 +93,12 @@ footer {
     margin-bottom: 10px;
     font-size: 1.2em;
     font-weight: bold;
+    white-space: normal;
 }
 .drawings .primary-button {
-    height: 215px;
+    height: 195px;
 }
 .drawings .secondary-button {
-    height: 40px;
+    height: 60px;
     margin-bottom: 0px;
 }

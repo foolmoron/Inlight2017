@@ -103,13 +103,13 @@ const drawingDirectory = drawingDirs.reduce((acc, dir) => {
     }
     return acc
 }, __dirname)
-const drawingNew = drawingDirectory + 'new/'
-if (!fs.existsSync(drawingNew)) {
-    fs.mkdirSync(drawingNew)
+const drawingDirNew = drawingDirectory + 'new/'
+if (!fs.existsSync(drawingDirNew)) {
+    fs.mkdirSync(drawingDirNew)
 }
-const drawingApproved = drawingDirectory + 'approved/'
-if (!fs.existsSync(drawingApproved)) {
-    fs.mkdirSync(drawingApproved)
+const drawingDirApproved = drawingDirectory + 'approved/'
+if (!fs.existsSync(drawingDirApproved)) {
+    fs.mkdirSync(drawingDirApproved)
 }
 
 const STATUS = {
@@ -124,8 +124,18 @@ const Drawing = (init) => Object.assign({
     uuid: uuid(),
     json: '',
     status: STATUS.NEW,
+    completed: false,
     autoapprove: false,
 }, init)
+
+function checkDrawing(req, res, next) {
+    var drawing = data.drawings.findOne({uuid: req.params.uuid})
+    if (!drawing) {
+        return res.status(400).json({error : 'invalid drawing uuid'})
+    }
+    req.drawing = drawing
+    next()
+}
 
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
@@ -134,11 +144,8 @@ app.get('/drawing', (req, res, next) => {
     data.drawings.update(drawing)
     res.json({uuid: drawing.uuid})
 })
-app.get('/drawing/:uuid', (req, res, next) => {
-    var drawing = data.drawings.findOne({uuid: req.params.uuid})
-    if (!drawing) {
-        return res.status(400).json({error : 'invalid drawing uuid'})
-    }
+app.get('/drawing/:uuid', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
     delete drawing.json
     res.json(drawing)
 })
@@ -177,11 +184,11 @@ app.post('/drawing', (req, res, next) => {
     var canvas = fabric.createCanvasForNode(500, 500)
     canvas.loadFromJSON(drawing.json, () => {
         canvas.renderAll()
-        var destStream = fs.createWriteStream(drawingNew + drawing.uuid + '.png')
+        var destStream = fs.createWriteStream(drawingDirNew + drawing.uuid + '.png')
         canvas.createPNGStream().on('data', chunk => destStream.write(chunk))
         // autoapprove copy file
         if (autoapprove) {
-            var destStream2 = fs.createWriteStream(drawingApproved + drawing.uuid + '.png')
+            var destStream2 = fs.createWriteStream(drawingDirApproved + drawing.uuid + '.png')
             canvas.createPNGStream().on('data', chunk => destStream2.write(chunk))
         }
     })
@@ -189,38 +196,40 @@ app.post('/drawing', (req, res, next) => {
     res.sendStatus(200)
 })
 
-app.get('/drawing/:uuid/approve', (req, res, next) => {
-    var drawing = data.drawings.findOne({uuid: req.params.uuid})
-    if (!drawing) {
-        return res.status(400).json({error : 'invalid drawing uuid'})
-    }
+app.get('/drawing/:uuid/complete', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
+    // update
+    drawing.completed = true
+    data.drawings.update(drawing)
+    // return
+    res.sendStatus(200)
+})
+app.get('/drawing/:uuid/approve', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
     // update
     drawing.status = STATUS.APPROVED
     data.drawings.update(drawing)
     // copy file
     try {
-        fs.createReadStream(drawingNew + drawing.uuid + '.png')
+        fs.createReadStream(drawingDirNew + drawing.uuid + '.png')
         .on('error', (err) => { if (err) console.log('approve: ' + err) })
-        .pipe(fs.createWriteStream(drawingApproved + drawing.uuid + '.png'))
+        .pipe(fs.createWriteStream(drawingDirApproved + drawing.uuid + '.png'))
     } catch (e) {
     }
     // return
     res.sendStatus(200)
 })
-app.get('/drawing/:uuid/autoapprove/:toggle', (req, res, next) => {
-    var drawing = data.drawings.findOne({uuid: req.params.uuid})
-    if (!drawing) {
-        return res.status(400).json({error : 'invalid drawing uuid'})
-    }
+app.get('/drawing/:uuid/autoapprove/:toggle', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
     // update
     drawing.autoapprove = req.params.toggle == 'true'
     if (drawing.autoapprove) {
         drawing.status = STATUS.APPROVED
         // copy file
         try {
-            fs.createReadStream(drawingNew + drawing.uuid + '.png')
+            fs.createReadStream(drawingDirNew + drawing.uuid + '.png')
             .on('error', (err) => { if (err) console.log('autoapprove: ' + err) })
-            .pipe(fs.createWriteStream(drawingApproved + drawing.uuid + '.png'))
+            .pipe(fs.createWriteStream(drawingDirApproved + drawing.uuid + '.png'))
         } catch (e) {
         }
     }
@@ -228,11 +237,8 @@ app.get('/drawing/:uuid/autoapprove/:toggle', (req, res, next) => {
     // return
     res.sendStatus(200)
 })
-app.get('/drawing/:uuid/ignore/:toggle', (req, res, next) => {
-    var drawing = data.drawings.findOne({uuid: req.params.uuid})
-    if (!drawing) {
-        return res.status(400).json({error : 'invalid drawing uuid'})
-    }
+app.get('/drawing/:uuid/ignore/:toggle', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
     // update
     drawing.status = req.params.toggle == 'true' ? STATUS.IGNORED : STATUS.NEW
     if (drawing.status == STATUS.IGNORED) {
@@ -242,17 +248,14 @@ app.get('/drawing/:uuid/ignore/:toggle', (req, res, next) => {
     // return
     res.sendStatus(200)
 })
-app.get('/drawing/:uuid/delete', (req, res, next) => {
-    var drawing = data.drawings.findOne({uuid: req.params.uuid})
-    if (!drawing) {
-        return res.status(400).json({error : 'invalid drawing uuid'})
-    }
+app.get('/drawing/:uuid/delete', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
     // update
     drawing.status = STATUS.DELETED
     drawing.autoapprove = false
     data.drawings.update(drawing)
     // delete file
-    fs.unlink(drawingApproved + drawing.uuid + '.png', (err) => { if (err) console.log('delete: ' + err) })
+    fs.unlink(drawingDirApproved + drawing.uuid + '.png', (err) => { if (err) console.log('delete: ' + err) })
     // return
     res.sendStatus(200)
 })

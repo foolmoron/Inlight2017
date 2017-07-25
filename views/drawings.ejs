@@ -13,22 +13,22 @@
 </div>
 
 <script id="drawing-template" type="text/template">
-    <div class="row drawing-row <$= drawing.status $>" data-uuid="<$= drawing.uuid $>">
-        <div class="col-xs-4 col-md-3">
+    <div class="row drawing-row <$= drawing.status $> <$= drawing.completed ? 'completed' : '' $>" data-uuid="<$= drawing.uuid $>">
+        <div class="col-xs-12 text-center">
+            <b><$= drawing.uuid $> -- <$= drawing.status $> <$ if (drawing.completed) { $>-- COMPLETED<$ } $></b>
+        </div>
+        <div class="col-xs-3 col-md-3">
             <button class="btn btn-warning primary-button <$= drawing.status == 'ignored' ? 'hidden' : '' $>" onclick="get('/drawing/<$= drawing.uuid $>/ignore/true', update)">Ignore</button>
             <button class="btn btn-info primary-button <$= drawing.status != 'ignored' ? 'hidden' : '' $>" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/ignore/false', update)">Disable Ignore</button>
             <button class="btn btn-danger secondary-button" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/delete', update)">Delete</button>
         </div>
-        <div class="col-xs-4 col-md-6 text-center">
-            <div class="col-xs-12">
-                <b><$= drawing.uuid $> -- <$= drawing.status $></b>
-            </div>
+        <div class="col-xs-6 col-md-6 text-center">
             <div class="col-xs-12">
                 <img src="<$= dirApproved $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
                 <img src="<$= dirNew $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
             </div>
         </div>
-        <div class="col-xs-4 col-md-3">
+        <div class="col-xs-3 col-md-3">
             <button class="btn btn-primary primary-button" onclick="get('/drawing/<$= drawing.uuid $>/approve', update)">Approve Once</button>
             <button class="btn btn-success secondary-button <$= drawing.autoapprove ? 'hidden' : '' $>" onclick="get('/drawing/<$= drawing.uuid $>/autoapprove/true', update)">Auto-Approve</button>
             <button class="btn btn-warning secondary-button <$= drawing.autoapprove ? '' : 'hidden' $>" onclick="get('/drawing/<$= drawing.uuid $>/autoapprove/false', update)">Disable Auto-Approve</button>
