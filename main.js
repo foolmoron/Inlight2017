@@ -67,6 +67,13 @@ var push = throttleBounce(function(data) {
     })
 }, RATELIMIT)
 
+function complete() {
+    get(URL + '/' + uuid + '/complete')    
+}
+
+// events
+window.addEventListener("beforeunload", complete)
+
 // main
 window.onload = function() {
     var padding = 10
