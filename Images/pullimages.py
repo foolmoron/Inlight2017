@@ -23,7 +23,7 @@ def pullIndex():
         json = res.json()
         time = json[u'time']
         changes = json[u'changes']
-        print 'SUCCESS: ' + str(res.status_code) + ': ' + str(len(changes)) + ' changes ' + ' at ' + str(lastUpdateTime)
+        print('SUCCESS: ' + str(res.status_code) + ': ' + str(len(changes)) + ' changes ' + ' at ' + str(lastUpdateTime))
         lastUpdateTime = time
 
         if len(changes) > 0:
@@ -31,10 +31,10 @@ def pullIndex():
             indexText = ''
             with open('./index.txt', 'r') as indexFile:
                 indexText = indexFile.read()
-            index = filter(str.strip, indexText.splitlines())
+            index = list(filter(str.strip, indexText.splitlines()))
             # process changes
             for change in changes:
-                print change
+                print(change)
                 uuid = change[u'uuid']
                 if change[u'deleted']:
                     # remove from index
@@ -52,7 +52,7 @@ def pullIndex():
                         # add to index
                         if uuid not in index:
                             index.append(uuid)
-                        print URL_IMG + str(uuid) + '.png'
+                        print(URL_IMG + str(uuid) + '.png')
                         # save
                         with open('./' + uuid + '.png', 'wb+') as imgFile:
                             imgFile.write(imgRes.content)
@@ -60,7 +60,7 @@ def pullIndex():
             with open('./index.txt', 'w') as indexFile:
                 indexFile.write('\n'.join(index))
     else:
-        print 'ERROR: ' + str(res.status_code) + ': at ' + str(lastUpdateTime)
+        print('ERROR: ' + str(res.status_code) + ': at ' + str(lastUpdateTime))
 
 # init
 with open('./index.txt', 'w+') as indexFile:
