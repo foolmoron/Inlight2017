@@ -21,7 +21,12 @@ public class ImageReader : Manager<ImageReader> {
     public event Action<ImageRecord> OnUpdated = delegate { };
     public event Action<ImageRecord> OnRemoved = delegate { };
 
-    public string RootPath = @"\..\TestImages\";
+    public string RootPath = @"\..\Images\";
+
+    string root;
+    string indexPath;
+    DateTime lastIndexWrite;
+    List<string> files = new List<string>(1000);
 
     public GameObject QuadPrefab;
 
@@ -33,6 +38,8 @@ public class ImageReader : Manager<ImageReader> {
     readonly WaitForEndOfFrame endOfFrame = new WaitForEndOfFrame();
 
     void Start() {
+        root = Application.dataPath + RootPath;
+        indexPath = root + "index.txt";
         StartCoroutine(MainReader());
     }
     
@@ -44,9 +51,16 @@ public class ImageReader : Manager<ImageReader> {
             // timing stuff
             var tickBudget = (int) (FrameBudgetMillis * 10000);
             sw.Restart();
-            // get files
-            var root = Application.dataPath + RootPath;
-            var files = Directory.GetFiles(root);
+            // get file index if changed
+            if (File.GetLastWriteTime(indexPath) > lastIndexWrite) {
+                lastIndexWrite = File.GetLastWriteTime(indexPath);
+                files.Clear();
+                using (var fileReader = File.OpenText(indexPath)) {
+                    while (!fileReader.EndOfStream) {
+                        files.Add(fileReader.ReadLine());
+                    }
+                }
+            }
             /* FRAME BREAK */ if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
             // loop files
             foreach (var file in files) {
@@ -55,19 +69,17 @@ public class ImageReader : Manager<ImageReader> {
                     var newQuad = Instantiate(QuadPrefab, Vector3.down * 1000, Quaternion.identity);
                     Records[file] = new ImageRecord {
                         Quad = newQuad.GetComponent<MeshRenderer>(),
-                        Path = file,
+                        Path = root + file + ".png",
                     };
                     OnAdded(Records[file]);
-                    /* FRAME BREAK */
-                    if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
+                    /* FRAME BREAK */ if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
                 }
                 // update file if image was changed
                 var record = Records[file];
-                var lastWrite = File.GetLastWriteTime(record.Path);
-                if (lastWrite > record.LastUpdated) {
+                if (File.GetLastWriteTime(record.Path) > record.LastUpdated) {
                     record.Texture.LoadImage(File.ReadAllBytes(record.Path));
                     record.Quad.material.mainTexture = record.Texture;
-                    record.LastUpdated = lastWrite;
+                    record.LastUpdated = File.GetLastWriteTime(record.Path);
                     OnUpdated(record);
                 }
                 /* FRAME BREAK */ if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
