@@ -84,6 +84,9 @@ var push = throttleBounce(function(canvas) {
         obj.left = obj.left - group.left
         obj.top = obj.top - group.top
     })
+    // save object shifts
+    localStorage.setItem('objectShiftLeft', group.left)
+    localStorage.setItem('objectShiftTop', group.top)
     // post data and dimensions
     post(URL, {
         uuid: uuid,
@@ -230,8 +233,19 @@ window.onload = function() {
         if (window.jsonToLoad && canvas) {
             window.loadingJSON = true
             canvas.loadFromJSON(window.jsonToLoad, () => {
+                // shift objects to original position
+                var shiftLeft = parseInt(localStorage.getItem('objectShiftLeft'))
+                var shiftTop = parseInt(localStorage.getItem('objectShiftTop'))
+                canvas._objects.forEach(obj => {
+                    obj.setLeft(obj.left + shiftLeft)
+                    obj.setTop(obj.top + shiftTop)
+                    obj.setCoords()
+                })
+                // render
                 canvas.renderAll()
+                // save
                 push(canvas)
+                // clear loading flags
                 window.jsonToLoad = null
                 window.loadingJSON = false
             })
