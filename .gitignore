@@ -4,3 +4,4 @@ node_modules/
 bundle.js
 db/
 public/img/drawings/
+build/config.gypi

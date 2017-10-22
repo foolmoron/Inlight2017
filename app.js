@@ -146,7 +146,6 @@ app.get('/drawing', (req, res, next) => {
 })
 app.get('/drawing/:uuid', checkDrawing, (req, res, next) => {
     var drawing = req.drawing
-    delete drawing.json
     res.json(drawing)
 })
 app.get('/drawingupdates/:sinceTime', (req, res, next) => {
