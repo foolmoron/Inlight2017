@@ -73,11 +73,22 @@ get(URL + (uuid ? "/" + uuid : ""), res => {
     console.log('UUID = ' + uuid + " withJSON = " + !!obj.json)
 })
 
-var push = throttleBounce(function(data) {
+var push = throttleBounce(function(canvas) {
     if (!uuid) return
+    // calculate bounds
+    var group = new fabric.Group(canvas._objects, null, true)
+    group._calcBounds()
+    // get data and shift objects to top-left
+    var data = JSON.parse(JSON.stringify(canvas.toObject()))
+    data.objects.forEach(obj => {
+        obj.left = obj.left - group.left
+        obj.top = obj.top - group.top
+    })
+    // post data and dimensions
     post(URL, {
         uuid: uuid,
         json: data,
+        dimensions: { width: group.width, height: group.height },
     })
 }, RATE_LIMIT)
 
@@ -114,7 +125,7 @@ window.onload = function() {
 
         // push to server
         if (canvas._objects.length > 0 || forcePush) {
-            push(canvas.toObject())
+            push(canvas)
         }
     }
 
@@ -149,7 +160,7 @@ window.onload = function() {
         clearButton.disabled = false
 
         // push to server
-        push(canvas.toObject())
+        push(canvas)
     })
 
     // color controls
@@ -220,7 +231,7 @@ window.onload = function() {
             window.loadingJSON = true
             canvas.loadFromJSON(window.jsonToLoad, () => {
                 canvas.renderAll()
-                push(canvas.toObject())
+                push(canvas)
                 window.jsonToLoad = null
                 window.loadingJSON = false
             })
