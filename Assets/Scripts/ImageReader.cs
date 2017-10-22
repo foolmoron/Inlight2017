@@ -35,16 +35,18 @@ public class ImageReader : Manager<ImageReader> {
 
     [Range(0, 5f)]
     public float FrameBudgetMillis = 1;
-    Stopwatch sw = new Stopwatch();
     readonly WaitForEndOfFrame endOfFrame = new WaitForEndOfFrame();
+    ProgressiveFunc reader;
 
     void Start() {
         root = Application.dataPath + RootPath;
         indexPath = root + "index.txt";
-        StartCoroutine(new ProgressiveFunc(MainReader()));
+        reader = new ProgressiveFunc(MainReader());
+        StartCoroutine(reader);
     }
     
     void Update() {
+        reader.FrameBudgetMillis = FrameBudgetMillis;
     }
 
     IEnumerator MainReader() {
