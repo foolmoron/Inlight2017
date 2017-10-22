@@ -12,6 +12,7 @@ public class ImageRecord {
     public MeshRenderer Quad;
     public string Path;
     public Texture2D Texture = new Texture2D(2, 2);
+    public Vector2 Dimensions;
     public DateTime LastUpdated;
 }
 
@@ -79,6 +80,7 @@ public class ImageReader : Manager<ImageReader> {
                 if (File.GetLastWriteTime(record.Path) > record.LastUpdated) {
                     record.Texture.LoadImage(File.ReadAllBytes(record.Path));
                     record.Quad.material.mainTexture = record.Texture;
+                    record.Dimensions = new Vector2(record.Texture.width / 100f, record.Texture.height / 100f);
                     record.LastUpdated = File.GetLastWriteTime(record.Path);
                     OnUpdated(record);
                 }
