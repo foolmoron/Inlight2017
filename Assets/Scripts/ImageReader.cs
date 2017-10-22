@@ -41,7 +41,7 @@ public class ImageReader : Manager<ImageReader> {
     void Start() {
         root = Application.dataPath + RootPath;
         indexPath = root + "index.txt";
-        StartCoroutine(MainReader());
+        StartCoroutine(new ProgressiveFunc(MainReader()));
     }
     
     void Update() {
@@ -49,9 +49,6 @@ public class ImageReader : Manager<ImageReader> {
 
     IEnumerator MainReader() {
         while (true) {
-            // timing stuff
-            var tickBudget = (int) (FrameBudgetMillis * 10000);
-            sw.Restart();
             // get file index if changed
             if (File.GetLastWriteTime(indexPath) > lastIndexWrite) {
                 lastIndexWrite = File.GetLastWriteTime(indexPath);
@@ -62,7 +59,7 @@ public class ImageReader : Manager<ImageReader> {
                     }
                 }
             }
-            /* FRAME BREAK */ if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
+            yield return null;
             // loop files
             foreach (var file in files) {
                 // create if new file in directory
@@ -73,7 +70,7 @@ public class ImageReader : Manager<ImageReader> {
                         Path = root + file + ".png",
                     };
                     OnAdded(Records[file]);
-                    /* FRAME BREAK */ if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
+                    yield return null;
                 }
                 // update file if image was changed
                 var record = Records[file];
@@ -84,7 +81,7 @@ public class ImageReader : Manager<ImageReader> {
                     record.LastUpdated = File.GetLastWriteTime(record.Path);
                     OnUpdated(record);
                 }
-                /* FRAME BREAK */ if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
+                yield return null;
             }
             // remove record and quad if file is deleted
             for (int i = 0; i < Records.Count; i++) {
@@ -95,7 +92,7 @@ public class ImageReader : Manager<ImageReader> {
                     OnRemoved(record);
                     i--;
                 }
-                /* FRAME BREAK */ if (sw.ElapsedTicks >= tickBudget) { yield return endOfFrame; sw.Restart(); }
+                yield return null;
             }
             // wait until next frame
             yield return endOfFrame;
