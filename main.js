@@ -1,3 +1,7 @@
+// shim
+window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
+    window.setTimeout(callback, 1000 / 60)
+}
 // util
 function debounce(func, time, context) {
     var timeoutId
@@ -53,12 +57,20 @@ function postSync(url, form, callback, error) { return ajax('POST', true, url, J
 
 // server
 var URL = 'http://localhost:8000/drawing'
-var RATELIMIT = 1000
+var RATE_LIMIT = 1000
+var DRAWING_MIN_TIME = 5000
 
-var uuid = null
-get(URL, res => {
-    uuid = JSON.parse(res.responseText).uuid
-    console.log('UUID = ' + uuid)
+var uuid = localStorage.getItem('uuid')
+var uuidTime = new Date(parseInt(localStorage.getItem('uuidTime'))).getTime()
+get(URL + (uuid ? "/" + uuid : ""), res => {
+    var obj = JSON.parse(res.responseText)
+    if (uuid != obj.uuid) {
+        uuid = obj.uuid
+        localStorage.setItem('uuid', uuid = uuid)
+        localStorage.setItem('uuidTime', uuidTime = new Date().getTime())
+    }
+    window.jsonToLoad = obj.json
+    console.log('UUID = ' + uuid + " withJSON = " + !!obj.json)
 })
 
 var push = throttleBounce(function(data) {
@@ -67,7 +79,7 @@ var push = throttleBounce(function(data) {
         uuid: uuid,
         json: data,
     })
-}, RATELIMIT)
+}, RATE_LIMIT)
 
 function complete() {
     getSync(URL + '/' + uuid + '/complete')
@@ -83,11 +95,14 @@ window.onload = function() {
         isDrawingMode: true,
     })
 
+    // misc
+    var doneButton = document.querySelector('.button.done')
+
     // undo/redo/clear
     var history = []
     var historyIndex = 0
     var doingHistory = false
-    function doHistory(index) {
+    function doHistory(index, forcePush) {
         // redraw
         canvas.clear()
         doingHistory = true
@@ -96,13 +111,11 @@ window.onload = function() {
         }
         doingHistory = false
         canvas.renderAll()
-        // update buttons
-        undoButton.disabled = index <= 0
-        redoButton.disabled = index >= history.length
-        clearButton.disabled = index <= 0
 
         // push to server
-        push(canvas.toObject())
+        if (canvas._objects.length > 0 || forcePush) {
+            push(canvas.toObject())
+        }
     }
 
     var undoButton = document.querySelector('.undo')
@@ -110,22 +123,21 @@ window.onload = function() {
     var clearButton = document.querySelector('.clear')
     undoButton.onclick = e => {
         historyIndex = Math.max(historyIndex - 1, 0)
-        doHistory(historyIndex)
+        doHistory(historyIndex, true)
     }
     redoButton.onclick = e => {
         historyIndex = Math.min(historyIndex + 1, history.length)
-        doHistory(historyIndex)
+        doHistory(historyIndex, true)
     }
     clearButton.onclick = e => {
         historyIndex = 0
-        doHistory(historyIndex)
+        doHistory(historyIndex, true)
     }
-    
-    doHistory(0)
 
     // new path drawn
     canvas.on('object:added', e => {
         if (doingHistory) return
+        if (window.loadingJSON) return
 
         if (historyIndex < history.length) {
             history = history.slice(0, historyIndex)
@@ -197,4 +209,33 @@ window.onload = function() {
     }
     window.addEventListener('resize', debounce(handleResize, 100))
     handleResize()
+
+    // update
+    var d = new Date().getTime()
+    function update() {
+        // dt
+        var dt = d - (d = new Date().getTime())
+        // load json
+        if (window.jsonToLoad && canvas) {
+            window.loadingJSON = true
+            canvas.loadFromJSON(window.jsonToLoad, () => {
+                canvas.renderAll()
+                push(canvas.toObject())
+                window.jsonToLoad = null
+                window.loadingJSON = false
+            })
+        }
+        // toggle done button based on min drawing time
+        doneButton.disabled = (d - uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0
+        // toggle canvas buttons
+        undoButton.disabled = historyIndex <= 0
+        redoButton.disabled = historyIndex >= history.length
+        clearButton.disabled = canvas._objects.length == 0
+        // loop
+        requestAnimationFrame(update)
+    }
+    requestAnimationFrame(update)
+
+    // kickoff history
+    doHistory(0)
 }
