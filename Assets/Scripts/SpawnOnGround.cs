@@ -3,6 +3,8 @@ using System.Collections;
 
 public class SpawnOnGround : MonoBehaviour {
 
+    public GameObject QuadPrefab;
+
     public LayerMask CollisionLayers;
     public float HeightOffsetFromGround;
 
@@ -13,6 +15,9 @@ public class SpawnOnGround : MonoBehaviour {
 
     void Start() {
         ImageReader.Inst.OnAdded += record => {
+            var quad = Instantiate(QuadPrefab.gameObject);
+            quad.GetComponent<Renderer>().material.mainTexture = record.Texture;
+
             var startPosition =
                 TargetTransform.position +
                 PositionOffset +
@@ -20,9 +25,9 @@ public class SpawnOnGround : MonoBehaviour {
                 ;
             RaycastHit hit;
             Physics.Raycast(startPosition, Vector3.down, out hit, 100, CollisionLayers.value);
-            record.Quad.transform.position = hit.point.plusY(HeightOffsetFromGround);
+            quad.transform.position = hit.point.plusY(HeightOffsetFromGround);
 
-            record.Quad.transform.rotation =
+            quad.transform.rotation =
                 Quaternion.Euler((Random.value - 0.5f) * RotationRandomness.x, (Random.value - 0.5f) * RotationRandomness.y, (Random.value - 0.5f) * RotationRandomness.z)
                 ;
         };

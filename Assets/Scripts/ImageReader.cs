@@ -9,7 +9,6 @@ using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public class ImageRecord {
-    public MeshRenderer Quad;
     public string Path;
     public Texture2D Texture = new Texture2D(2, 2);
     public Vector2 Dimensions;
@@ -28,8 +27,6 @@ public class ImageReader : Manager<ImageReader> {
     string indexPath;
     DateTime lastIndexWrite;
     List<string> files = new List<string>(1000);
-
-    public GameObject QuadPrefab;
 
     public ListDict<string, ImageRecord> Records = new ListDict<string, ImageRecord>(100);
 
@@ -66,9 +63,7 @@ public class ImageReader : Manager<ImageReader> {
             foreach (var file in files) {
                 // create if new file in directory
                 if (!Records.ContainsKey(file)) {
-                    var newQuad = Instantiate(QuadPrefab, Vector3.down * 1000, Quaternion.identity);
                     Records[file] = new ImageRecord {
-                        Quad = newQuad.GetComponent<MeshRenderer>(),
                         Path = root + file + ".png",
                     };
                     OnAdded(Records[file]);
@@ -78,7 +73,6 @@ public class ImageReader : Manager<ImageReader> {
                 var record = Records[file];
                 if (File.GetLastWriteTime(record.Path) > record.LastUpdated) {
                     record.Texture.LoadImage(File.ReadAllBytes(record.Path));
-                    record.Quad.material.mainTexture = record.Texture;
                     record.Dimensions = new Vector2(record.Texture.width / 100f, record.Texture.height / 100f);
                     record.LastUpdated = File.GetLastWriteTime(record.Path);
                     OnUpdated(record);
@@ -89,7 +83,6 @@ public class ImageReader : Manager<ImageReader> {
             for (int i = 0; i < Records.Count; i++) {
                 if (!File.Exists(Records.Values[i].Path)) {
                     var record = Records.Values[i];
-                    Destroy(Records.Values[i].Quad.gameObject);
                     Records.RemoveAt(i);
                     OnRemoved(record);
                     i--;

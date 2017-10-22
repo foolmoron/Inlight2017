@@ -3,8 +3,8 @@ import threading
 import requests
 
 # config
-URL_INDEX = 'http://34.206.49.42:8000/drawingindex/'
-URL_IMG = 'http://34.206.49.42:8000/img/drawings/approved/'
+URL_INDEX = 'http://localhost:8000/drawingindex/'
+URL_IMG = 'http://localhost:8000/img/drawings/approved/'
 INTERVAL = 1.5
 
 # lib
