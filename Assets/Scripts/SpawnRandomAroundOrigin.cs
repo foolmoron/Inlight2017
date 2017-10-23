@@ -12,7 +12,7 @@ public class SpawnRandomAroundOrigin : MonoBehaviour {
     void Start() {
         ImageReader.Inst.OnAdded += record => {
             var quad = Instantiate(QuadPrefab.gameObject);
-            quad.GetComponent<Renderer>().material.mainTexture = record.Texture;
+            quad.GetComponentInSelfOrChildren<Renderer>().material.mainTexture = record.Texture;
 
             quad.transform.position =
                 PositionOffset +

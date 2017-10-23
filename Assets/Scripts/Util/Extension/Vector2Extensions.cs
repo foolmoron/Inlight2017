@@ -43,6 +43,10 @@ public static class Vector2Extensions {
         return Mathf.Atan2(vector.y, vector.x);
     }
 
+    public static float aspect(this Vector2 vector) {
+        return vector.x / vector.y;
+    }
+
 	public static Vector2 Rotate(this Vector2 vector, float degrees) {
 		float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
 		float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
