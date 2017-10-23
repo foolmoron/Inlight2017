@@ -5,12 +5,12 @@ using System.Collections.Generic;
 public class Spawner : MonoBehaviour {
 
     public GameObject TreePrefab;
-    List<GameObject> trees = new List<GameObject>();
     ObjectPool treePool;
 
     public GameObject AnimalPrefab;
-    List<GameObject> animals = new List<GameObject>();
     ObjectPool animalPool;
+
+    List<SpawnedObject> objects = new List<SpawnedObject>(100);
 
     public LayerMask CollisionLayers;
     public float HeightOffsetFromGround;
@@ -30,10 +30,21 @@ public class Spawner : MonoBehaviour {
     void Start() {
         treePool = TreePrefab.GetObjectPool(20);
         animalPool = AnimalPrefab.GetObjectPool(20);
+
+        // kill objects on image removed
+        ImageReader.Inst.OnRemoved += record => {
+            for (int i = 0; i < objects.Count; i++) {
+                if (objects[i].Record == record) {
+                    objects[i].gameObject.Release();
+                    objects.RemoveAt(i);
+                    i--;
+                }
+            }
+        };
     }
 
     void Update() {
-        // spawn
+        // spawn new objects
         {
             SpawnTimer += Time.deltaTime;
             if (SpawnTimer >= SpawnInterval) {
@@ -45,8 +56,9 @@ public class Spawner : MonoBehaviour {
     
     void Spawn(ImageRecord record) {
         var obj = (record.Dimensions.aspect() > 1 ? treePool : animalPool).Obtain();
+        objects.Add(obj.GetComponent<SpawnedObject>());
 
-        obj.GetComponentInSelfOrChildren<SpawnedObject>().Record = record;
+        obj.GetComponent<SpawnedObject>().Record = record;
         obj.GetComponentInSelfOrChildren<Renderer>().material.mainTexture = record.Texture;
 
         var startPosition =
