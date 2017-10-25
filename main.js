@@ -151,7 +151,6 @@ window.onload = function() {
     // new path drawn
     canvas.on('object:added', e => {
         if (doingHistory) return
-        if (window.loadingJSON) return
 
         if (historyIndex < history.length) {
             history = history.slice(0, historyIndex)
@@ -162,8 +161,10 @@ window.onload = function() {
         redoButton.disabled = true
         clearButton.disabled = false
 
-        // push to server
-        push(canvas)
+        // push new drawings to server
+        if (!window.loadingJSON) {
+            push(canvas)
+        }
     })
 
     // color controls
@@ -173,7 +174,12 @@ window.onload = function() {
     var widthCircleOutline = document.querySelector('.width-circle.outline')
     var widthCircleOutlineInner = document.querySelector('.width-circle.outline-inner')
 
-    function setColor(color) {
+    function setColor(colorPicker) {
+        // set pickers
+        colorButtons.forEach(b => b.classList.remove('selected'))
+        colorPicker.classList.add('selected')
+        // set color
+        var color = colorPicker.dataset.color
         canvas.freeDrawingBrush.color = color
         document.body.style.backgroundColor = color
         widthCircle.style.backgroundColor = color
@@ -183,9 +189,9 @@ window.onload = function() {
     for (var i = 0; i < colorButtons.length; i++) {
         var colorButton = colorButtons[i]
         colorButton.style.backgroundColor = colorButton.dataset.color
-        colorButton.onclick = e => setColor(e.target.dataset.color)
+        colorButton.onclick = e => setColor(e.target)
     }
-    setColor(colorButtons[0].dataset.color)
+    setColor(colorButtons[0])
 
     // width controls
     var widthInput = document.querySelector('.width-input')

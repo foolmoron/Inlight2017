@@ -3,6 +3,7 @@
 <head>
     <title>Inlight 2017</title>
     <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
+    <meta name="viewport" content="user-scalable=no" />
     <style>
         html {
             width: 100%;
@@ -51,6 +52,12 @@
             flex-grow: 1;
             height: 100%;
             cursor: pointer;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .colors > div.selected {
+            border-bottom-left-radius: 0px;
+            border-bottom-right-radius: 0px;
         }
 
         .width {
