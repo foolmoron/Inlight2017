@@ -171,6 +171,7 @@ app.post('/drawing', (req, res, next) => {
     }
     // update model
     drawing.json = req.body.json
+    drawing.dimensions = req.body.dimensions
     if (drawing.status == STATUS.UPDATED || drawing.status == STATUS.APPROVED) {
         drawing.status = STATUS.UPDATED
     }
@@ -179,10 +180,12 @@ app.post('/drawing', (req, res, next) => {
         drawing.status = STATUS.APPROVED
     }
     data.drawings.update(drawing)
-    // render to png
-    var canvas = fabric.createCanvasForNode(500, 500)
+    // save to png using minimally cropped dimensions provided by client
+    var canvas = fabric.createCanvasForNode(drawing.dimensions.width, drawing.dimensions.height)
     canvas.loadFromJSON(drawing.json, () => {
+        // render objects
         canvas.renderAll()
+        // save file
         var destStream = fs.createWriteStream(drawingDirNew + drawing.uuid + '.png')
         canvas.createPNGStream().on('data', chunk => destStream.write(chunk))
         // autoapprove copy file
