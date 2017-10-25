@@ -55,7 +55,7 @@ public class Spawner : MonoBehaviour {
     }
     
     void Spawn(ImageRecord record) {
-        var obj = (record.Dimensions.aspect() > 1 ? treePool : animalPool).Obtain();
+        var obj = (record.Dimensions.aspect() > 1 ? animalPool : treePool).Obtain();
         objects.Add(obj.GetComponent<SpawnedObject>());
 
         obj.GetComponent<SpawnedObject>().Record = record;
