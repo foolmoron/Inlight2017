@@ -58,23 +58,30 @@ function postSync(url, form, callback, error) { return ajax('POST', true, url, J
 // server
 var URL = 'http://localhost:8000/drawing'
 var RATE_LIMIT = 1000
-var DRAWING_MIN_TIME = 5000
+var DRAWING_MIN_TIME = 10000
 
-var uuid = localStorage.getItem('uuid')
-var uuidTime = new Date(parseInt(localStorage.getItem('uuidTime'))).getTime()
-get(URL + (uuid ? "/" + uuid : ""), res => {
+var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
+var colorsToLoad = null
+var jsonToLoad = null
+get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
     var obj = JSON.parse(res.responseText)
-    if (uuid != obj.uuid) {
-        uuid = obj.uuid
-        localStorage.setItem('uuid', uuid = uuid)
-        localStorage.setItem('uuidTime', uuidTime = new Date().getTime())
+    if (drawingObj.uuid != obj.uuid) {
+        // read
+        drawingObj.uuid = obj.uuid
+        drawingObj.uuidTime = new Date().getTime()
+        drawingObj.prompt = Math.random() < 0.5 ? 'tree' : 'animal'
+        drawingObj.colors = ['red', 'blue', '#0f0', '#a48012', '#404040']
+        // save
+        localStorage.setItem('drawing', JSON.stringify(drawingObj))
     }
-    window.jsonToLoad = obj.json
-    console.log('UUID = ' + uuid + " withJSON = " + !!obj.json)
+    // setup
+    colorsToLoad = drawingObj.colors
+    jsonToLoad = obj.json
+    console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
 })
 
 var push = throttleBounce(function(canvas) {
-    if (!uuid) return
+    if (!drawingObj.uuid) return
     // calculate bounds
     var group = new fabric.Group(canvas._objects, null, true)
     group._calcBounds()
@@ -89,14 +96,14 @@ var push = throttleBounce(function(canvas) {
     localStorage.setItem('objectShiftTop', group.top)
     // post data and dimensions
     post(URL, {
-        uuid: uuid,
+        uuid: drawingObj.uuid,
         json: data,
         dimensions: { width: group.width, height: group.height },
     })
 }, RATE_LIMIT)
 
 function complete() {
-    getSync(URL + '/' + uuid + '/complete')
+    getSync(URL + '/' + drawingObj.uuid + '/complete')
 }
 
 // events
@@ -174,13 +181,9 @@ window.onload = function() {
     })
 
     // color controls
-    var colorContainer = document.querySelector('.colors')
-    var colorButtons = Array.from(document.querySelectorAll('.colors > div'))
-
-    function setColor(colorPicker) {
+    function setColor(colorPicker, colorButtons) {
         // set color pickers
         var currentIndex = colorButtons.indexOf(colorPicker)
-        console.log(currentIndex)
         for (var i = 0; i < colorButtons.length; i++) {
             var button = colorButtons[i]
             button.classList.remove('bottom-left-radius')
@@ -199,12 +202,29 @@ window.onload = function() {
         document.body.style.backgroundColor = color
     }
 
-    for (var i = 0; i < colorButtons.length; i++) {
-        var colorButton = colorButtons[i]
-        colorButton.style.backgroundColor = colorButton.dataset.color
-        colorButton.onclick = e => setColor(e.target)
+    function setupColors(colors) {
+        var colorContainer = document.querySelector('.colors')
+        
+        // clear old buttons
+        var colorButtons = Array.from(document.querySelectorAll('.colors > div'))
+        for (var i = 0; i < colorButtons.length; i++) {
+            colorButtons[i].remove()
+        }
+
+        // add new buttons
+        colorButtons = []
+        for (var i = 0; i < colors.length; i++) {
+            var button = document.createElement('div')
+            button.dataset.color = colors[i]
+            button.style.backgroundColor = colors[i]
+            button.onclick = e => setColor(e.target, colorButtons)
+
+            colorContainer.appendChild(button)
+            colorButtons.push(button)
+        }
+
+        setColor(colorButtons[0], colorButtons)
     }
-    setColor(colorButtons[0])
 
     // width controls
     var widthButtons = Array.from(document.querySelectorAll('.width'))
@@ -246,10 +266,15 @@ window.onload = function() {
     function update() {
         // dt
         var dt = d - (d = new Date().getTime())
+        // load colors
+        if (colorsToLoad && canvas) {
+            setupColors(colorsToLoad)
+            colorsToLoad = null
+        }
         // load json
-        if (window.jsonToLoad && canvas) {
+        if (jsonToLoad && canvas) {
             window.loadingJSON = true
-            canvas.loadFromJSON(window.jsonToLoad, () => {
+            canvas.loadFromJSON(jsonToLoad, () => {
                 // shift objects to original position
                 var shiftLeft = parseInt(localStorage.getItem('objectShiftLeft'))
                 var shiftTop = parseInt(localStorage.getItem('objectShiftTop'))
@@ -263,12 +288,12 @@ window.onload = function() {
                 // save
                 push(canvas)
                 // clear loading flags
-                window.jsonToLoad = null
+                jsonToLoad = null
                 window.loadingJSON = false
             })
         }
         // toggle done button based on min drawing time
-        doneButton.disabled = (d - uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0
+        doneButton.disabled = (d - drawingObj.uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0
         // toggle canvas buttons
         undoButton.classList.toggle('disabled', historyIndex <= 0)
         redoButton.classList.toggle('disabled', historyIndex >= history.length)
