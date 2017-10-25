@@ -176,8 +176,20 @@ window.onload = function() {
 
     function setColor(colorPicker) {
         // set pickers
-        colorButtons.forEach(b => b.classList.remove('selected'))
-        colorPicker.classList.add('selected')
+        var currentIndex = colorButtons.indexOf(colorPicker)
+        console.log(currentIndex)
+        for (var i = 0; i < colorButtons.length; i++) {
+            var button = colorButtons[i]
+            button.classList.remove('bottom-left-radius')
+            button.classList.remove('bottom-right-radius')
+            if (i == currentIndex) {
+                // leave alone
+            } else if (i == (currentIndex - 1)) {
+                button.classList.add('bottom-right-radius')
+            } else if (i == (currentIndex + 1)) {
+                button.classList.add('bottom-left-radius')
+            }
+        }
         // set color
         var color = colorPicker.dataset.color
         canvas.freeDrawingBrush.color = color

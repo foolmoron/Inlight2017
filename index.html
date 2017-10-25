@@ -37,6 +37,9 @@
 
         .controls {
             display: flex;
+            -webkit-box-shadow: inset 0px 70px 0px 0px white;
+            -moz-box-shadow: inset 0px 70px 0px 0px white;
+            box-shadow: inset 0px 70px 0px 0px white;
         }
         .controls > * {
             display: inline-block;
@@ -52,12 +55,15 @@
             flex-grow: 1;
             height: 100%;
             cursor: pointer;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            transition: border-radius 0.3s;
         }
-        .colors > div.selected {
-            border-bottom-left-radius: 0px;
-            border-bottom-right-radius: 0px;
+        .colors > div.bottom-left-radius {
+            border-bottom-left-radius: 12px;
+        }
+        .colors > div.bottom-right-radius {
+            border-bottom-right-radius: 12px;
         }
 
         .width {
