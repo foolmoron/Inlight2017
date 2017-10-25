@@ -42,6 +42,7 @@
         }
         .float-left {
             float: left;
+            margin-left: 14px;
         }
         .float-right {
             float: right;
@@ -73,33 +74,6 @@
             height: 4vh;
         }
 
-        .width {
-            display: inline-flex;
-            width: 15%;
-            background-color: white;
-            flex-direction: column;
-        }
-        .width-circle-container {
-            display: flex;
-            flex-grow: 1;
-            align-self: center;
-        }
-        .width-circle {
-            align-self: center;
-            width: 20px;
-            height: 20px;
-            position: absolute;
-            transform: translateX(-50%);
-            background-color: black;
-            border-radius: 50%;
-        }
-        .width-circle.outline-inner {
-            background-color: white;
-        }
-        .width-input {
-            .height: 20px;
-        }
-
         .button {
             height: 50%;
             margin: 0px 5%;
@@ -111,6 +85,22 @@
             font-size: 20px;
         }
 
+        .border-button {
+            height: 3.8vh;
+            width: 6.3vh;
+            box-sizing: border-box;
+            margin-top: 0.4vh;
+            border: 8px solid white;
+            border-radius: 8px;
+            opacity: 0.7;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .border-button.selected {
+            opacity: 1;
+            cursor: default;
+        }
+
         .img-button {
             height: 3.8vh;
             width: 6.3vh;
@@ -120,6 +110,7 @@
             margin-top: 0.4vh;
             background-position: 50%;
             cursor: pointer;
+            transition: opacity 0.3s;
         }
         .img-button.disabled {
             opacity: 0.7;
@@ -153,17 +144,14 @@
         </div>
     </div>
     <div class="controls">
-        <div class="width">
-            <div class="width-circle-container">
-                <div class="width-circle outline"></div>
-                <div class="width-circle outline-inner"></div>
-                <div class="width-circle main"></div>
-            </div>
-            <input class="width-input" type="range" min="6" max="36" step="6" value="12">
-        </div>
-        <div class="img-button float-right clear" src="img/clear.png"></div>
-        <div class="img-button float-right redo" src="img/undo.png"></div>
-        <div class="img-button float-right undo" src="img/undo.png"></div>
+        <div class="border-button width float-left" data-size="12" style="border-top-width: 16px; border-bottom-width: 16px;"></div>
+        <div class="border-button width float-left" data-size="20" style="border-top-width: 14px; border-bottom-width: 14px;"></div>
+        <div class="border-button width float-left" data-size="34" style="border-top-width: 11px; border-bottom-width: 11px;"></div>
+        <div class="border-button width float-left" data-size="52" style="border-top-width: 8px; border-bottom-width: 8px;"></div>
+
+        <div class="img-button control float-right clear"></div>
+        <div class="img-button control float-right redo"></div>
+        <div class="img-button control float-right undo"></div>
     </div>
     <canvas id="canvas"></canvas>
 </body>
