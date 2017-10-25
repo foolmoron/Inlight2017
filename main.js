@@ -136,16 +136,22 @@ window.onload = function() {
     var redoButton = document.querySelector('.redo')
     var clearButton = document.querySelector('.clear')
     undoButton.onclick = e => {
-        historyIndex = Math.max(historyIndex - 1, 0)
-        doHistory(historyIndex, true)
+        if (historyIndex > 0) {
+            historyIndex = Math.max(historyIndex - 1, 0)
+            doHistory(historyIndex, true)
+        }
     }
     redoButton.onclick = e => {
-        historyIndex = Math.min(historyIndex + 1, history.length)
-        doHistory(historyIndex, true)
+        if (historyIndex < history.length) {
+            historyIndex = Math.min(historyIndex + 1, history.length)
+            doHistory(historyIndex, true)
+        }
     }
     clearButton.onclick = e => {
-        historyIndex = 0
-        doHistory(historyIndex, true)
+        if (historyIndex > 0) {
+            historyIndex = 0
+            doHistory(historyIndex, true)
+        }
     }
 
     // new path drawn
@@ -157,9 +163,9 @@ window.onload = function() {
         }
         history.push(e.target)
         historyIndex++
-        undoButton.disabled = false
-        redoButton.disabled = true
-        clearButton.disabled = false
+        undoButton.classList.toggle('disabled', false)
+        redoButton.classList.toggle('disabled', true)
+        clearButton.classList.toggle('disabled', false)
 
         // push new drawings to server
         if (!window.loadingJSON) {
@@ -271,9 +277,9 @@ window.onload = function() {
         // toggle done button based on min drawing time
         doneButton.disabled = (d - uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0
         // toggle canvas buttons
-        undoButton.disabled = historyIndex <= 0
-        redoButton.disabled = historyIndex >= history.length
-        clearButton.disabled = canvas._objects.length == 0
+        undoButton.classList.toggle('disabled', historyIndex <= 0)
+        redoButton.classList.toggle('disabled', historyIndex >= history.length)
+        clearButton.classList.toggle('disabled', canvas._objects.length == 0)
         // loop
         requestAnimationFrame(update)
     }

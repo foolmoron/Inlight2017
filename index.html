@@ -35,19 +35,22 @@
             box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.39);
         }
 
-        .controls {
-            display: flex;
+        .top-border {
             -webkit-box-shadow: inset 0px 70px 0px 0px white;
             -moz-box-shadow: inset 0px 70px 0px 0px white;
-            box-shadow: inset 0px 70px 0px 0px white;
+            box-shadow: inset 0px 70px 0px 0px white;            
         }
-        .controls > * {
-            display: inline-block;
+        .float-left {
+            float: left;
+        }
+        .float-right {
+            float: right;
+            margin-right: 14px;
         }
 
         .colors {
             display: inline-flex;
-            width: 70%;
+            width: 100%;
             height: 10vh;
         }
         .colors > div {
@@ -64,6 +67,10 @@
         }
         .colors > div.bottom-right-radius {
             border-bottom-right-radius: 12px;
+        }
+
+        .controls {
+            height: 4vh;
         }
 
         .width {
@@ -93,21 +100,40 @@
             .height: 20px;
         }
 
-        .buttons {
-            display: inline-flex;
-            flex-direction: column;
-            justify-content: space-around;
-            width: 15%;
-            padding: 5px 0px;
-            background-color: white;
-        }
         .button {
             height: 50%;
-            -webkit-text-stroke: initial;
+            margin: 0px 5%;
         }
         .button.done {
+            position: absolute;
+            right: 0;
+            height: 40px;
             font-size: 20px;
-            float: right;
+        }
+
+        .img-button {
+            height: 3.8vh;
+            width: 6.3vh;
+            background-size: contain;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            margin-top: 0.4vh;
+            background-position: 50%;
+            cursor: pointer;
+        }
+        .img-button.disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+        .img-button.undo {
+            background-image: url('img/undo.png');
+        }
+        .img-button.redo {
+            background-image: url('img/undo.png');
+            transform: scaleX(-1);
+        }
+        .img-button.clear {
+            background-image: url('img/clear.png');
         }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
@@ -117,7 +143,7 @@
         <span>hey draw a "tree" or something</span>
         <input class="button done" type="button" value="I'm done, new drawing!" onclick="localStorage.clear(); location.href = location.href;">
     </div>
-    <div class="controls">
+    <div class="top-border">
         <div class="colors">
             <div data-color="red"></div>
             <div data-color="blue"></div>
@@ -125,6 +151,8 @@
             <div data-color="#a48012"></div>
             <div data-color="#404040"></div>
         </div>
+    </div>
+    <div class="controls">
         <div class="width">
             <div class="width-circle-container">
                 <div class="width-circle outline"></div>
@@ -133,11 +161,9 @@
             </div>
             <input class="width-input" type="range" min="6" max="36" step="6" value="12">
         </div>
-        <div class="buttons">
-            <input class="button undo" type="button" value="UNDO">
-            <input class="button redo" type="button" value="REDO">
-            <input class="button clear" type="button" value="CLEAR">
-        </div>
+        <div class="img-button float-right clear" src="img/clear.png"></div>
+        <div class="img-button float-right redo" src="img/undo.png"></div>
+        <div class="img-button float-right undo" src="img/undo.png"></div>
     </div>
     <canvas id="canvas"></canvas>
 </body>
