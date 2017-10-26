@@ -97,7 +97,7 @@ var push = throttleBounce(function(canvas) {
     post(URL, {
         uuid: drawingObj.uuid,
         json: data,
-        dimensions: { width: group.width, height: group.height },
+        dimensions: { width: Math.ceil(group.width), height: Math.ceil(group.height) },
     })
 }, RATE_LIMIT)
 
