@@ -68,8 +68,8 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
         // read
         drawingObj.uuid = obj.uuid
         drawingObj.uuidTime = new Date().getTime()
-        drawingObj.prompt = Math.random() < 0.5 ? 'plant' : 'animal'
-        drawingObj.colors = ['red', 'blue', '#0f0', '#a48012', '#404040']
+        drawingObj.prompt = obj.prompt
+        drawingObj.colors = obj.colors
         // save
         localStorage.setItem('drawing', JSON.stringify(drawingObj))
     }
