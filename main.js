@@ -63,13 +63,18 @@ var DRAWING_MIN_TIME = 10000
 var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
 var readyToSetup = false
 get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
+    if (!res.responseText) {
+        return
+    }
+    document.body.classList.remove('loading')
+
     var obj = JSON.parse(res.responseText)
     if (drawingObj.uuid != obj.uuid) {
         // read
         drawingObj.uuid = obj.uuid
         drawingObj.uuidTime = new Date().getTime()
-        drawingObj.prompt = Math.random() < 0.5 ? 'plant' : 'animal'
-        drawingObj.colors = ['red', 'blue', '#0f0', '#a48012', '#404040']
+        drawingObj.prompt = obj.prompt
+        drawingObj.colors = obj.colors
         // save
         localStorage.setItem('drawing', JSON.stringify(drawingObj))
     }
@@ -97,16 +102,13 @@ var push = throttleBounce(function(canvas) {
     post(URL, {
         uuid: drawingObj.uuid,
         json: data,
-        dimensions: { width: group.width, height: group.height },
+        dimensions: { width: Math.ceil(group.width), height: Math.ceil(group.height) },
     })
 }, RATE_LIMIT)
 
 function complete() {
-    getSync(URL + '/' + drawingObj.uuid + '/complete')
+    get(URL + '/' + drawingObj.uuid + '/complete')
 }
-
-// events
-window.addEventListener("beforeunload", complete)
 
 // main
 window.onload = function() {
@@ -246,7 +248,7 @@ window.onload = function() {
                     200, () => dots.forEach(t => t.textContent = '...'),
                     400, () => dots.forEach(t => t.textContent = '.....'),
                     400, () => dots.forEach(t => t.textContent = '.......'),
-                    400, () => enableByPrompt(doneMessages),
+                    400, () => { enableByPrompt(doneMessages); complete(); },
                     1600, () => { localStorage.clear(); location.href = location.href; },
                 ])
             }
