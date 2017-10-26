@@ -3,6 +3,7 @@
 <head>
     <title>Inlight 2017</title>
     <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
+    <meta name="viewport" content="user-scalable=no" />
     <style>
         html {
             width: 100%;
@@ -15,6 +16,9 @@
             margin: 0;
             transition: background-color 0.4s;
         }
+        .hidden {
+            display: none !important;
+        }
 
         .prompt {
             background-color: white;
@@ -26,6 +30,21 @@
             letter-spacing: 3px;
             -webkit-text-stroke: 2px black;
             text-transform: uppercase;
+            cursor: pointer;
+        }
+        .text-plant { color: #c3f10e; }
+        .text-animal { color: #fd9a00; }
+        .text-finish { color: #ff3d00; }
+        .text-praise { color: #f452fd; }
+        @media (max-width : 675px) {
+            .prompt {
+                font-size: 1.6rem;
+            }
+        }
+        @media (max-width : 535px) {
+            .prompt {
+                font-size: 1.38rem;
+            }
         }
 
         .canvas-container {
@@ -34,16 +53,23 @@
             box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.39);
         }
 
-        .controls {
-            display: flex;
+        .top-border {
+            -webkit-box-shadow: inset 0px 70px 0px 0px white;
+            -moz-box-shadow: inset 0px 70px 0px 0px white;
+            box-shadow: inset 0px 70px 0px 0px white;            
         }
-        .controls > * {
-            display: inline-block;
+        .float-left {
+            float: left;
+            margin-left: 14px;
+        }
+        .float-right {
+            float: right;
+            margin-right: 14px;
         }
 
         .colors {
             display: inline-flex;
-            width: 70%;
+            width: 100%;
             height: 10vh;
         }
         .colors > div {
@@ -51,60 +77,105 @@
             flex-grow: 1;
             height: 100%;
             cursor: pointer;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            transition: border-radius 0.3s;
+        }
+        .colors > div.bottom-left-radius {
+            border-bottom-left-radius: 12px;
+        }
+        .colors > div.bottom-right-radius {
+            border-bottom-right-radius: 12px;
         }
 
-        .width {
-            display: inline-flex;
-            width: 15%;
-            background-color: white;
-            flex-direction: column;
-        }
-        .width-circle-container {
-            display: flex;
-            flex-grow: 1;
-            align-self: center;
-        }
-        .width-circle {
-            align-self: center;
-            width: 20px;
-            height: 20px;
-            position: absolute;
-            transform: translateX(-50%);
-            background-color: black;
-            border-radius: 50%;
-        }
-        .width-circle.outline-inner {
-            background-color: white;
-        }
-        .width-input {
-            .height: 20px;
+        .controls {
+            height: 4vh;
         }
 
-        .buttons {
-            display: inline-flex;
-            flex-direction: column;
-            justify-content: space-around;
-            width: 15%;
-            padding: 5px 0px;
-            background-color: white;
-        }
         .button {
             height: 50%;
-            -webkit-text-stroke: initial;
+            margin: 0px 5%;
         }
         .button.done {
+            position: absolute;
+            right: 0;
+            height: 40px;
             font-size: 20px;
-            float: right;
+        }
+
+        .border-button {
+            height: 3.8vh;
+            width: 6.3vh;
+            box-sizing: border-box;
+            margin-top: 0.4vh;
+            border: 8px solid white;
+            border-radius: 8px;
+            opacity: 0.7;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .border-button.selected {
+            opacity: 1;
+            cursor: default;
+        }
+
+        .img-button {
+            height: 3.8vh;
+            width: 6.3vh;
+            background-size: contain;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            margin-top: 0.4vh;
+            background-position: 50%;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .img-button.disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+        .img-button.undo {
+            background-image: url('img/undo.png');
+        }
+        .img-button.redo {
+            background-image: url('img/undo.png');
+            transform: scaleX(-1);
+        }
+        .img-button.clear {
+            background-image: url('img/clear.png');
+        }
+
+        @media (max-width : 535px) {
+            .prompt {
+                font-size: 1.38rem;
+            }
+            .border-button {
+                width: 4.3vh;
+            }
+            .img-button {
+                width: 4.3vh;
+                height: 2.69vh;
+                margin-top: 0.8vh;
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
 <body>
     <div class="prompt">
-        <span>hey draw a "tree" or something</span>
-        <input class="button done" type="button" value="I'm done, new drawing!" onclick="location.href = location.href">
+        <span class="instructions" data-type="plant">Draw a nice <span class="text-plant">PLANT</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
+        <span class="instructions" data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
+        <span class="time-error" data-type="plant">Shouldn't you spend some more<br>time drawing your <span class="text-plant">PLANT</span>..?</span>
+        <span class="time-error" data-type="animal">Shouldn't you spend some more<br>time drawing your <span class="text-animal">ANIMAL</span>..?</span>
+        <span class="empty-error" data-type="plant">Hey I said draw a <span class="text-plant">PLANT</span>,<br>not a blank page!</span>
+        <span class="empty-error" data-type="animal">Hey I said draw an <span class="text-animal">ANIMAL</span>,<br>not a blank page!</span>
+        <span class="okay-message" data-type="*">Okay that's better, tap here to<br> <span class="text-finish">FINISH</span> when you're ready!</span>
+        <span class="submit-message" data-type="plant">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-plant">PLANT</span> drawing</span>
+        <span class="submit-message" data-type="animal">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-animal">ANIMAL</span> drawing</span>
+        <span class="dots" data-type="*"></span>
+        <span class="done-message" data-type="*"> DONE!</span>
     </div>
-    <div class="controls">
+    <div class="top-border">
         <div class="colors">
             <div data-color="red"></div>
             <div data-color="blue"></div>
@@ -112,19 +183,16 @@
             <div data-color="#a48012"></div>
             <div data-color="#404040"></div>
         </div>
-        <div class="width">
-            <div class="width-circle-container">
-                <div class="width-circle outline"></div>
-                <div class="width-circle outline-inner"></div>
-                <div class="width-circle main"></div>
-            </div>
-            <input class="width-input" type="range" min="6" max="36" step="6" value="12">
-        </div>
-        <div class="buttons">
-            <input class="button undo" type="button" value="UNDO">
-            <input class="button redo" type="button" value="REDO">
-            <input class="button clear" type="button" value="CLEAR">
-        </div>
+    </div>
+    <div class="controls">
+        <div class="border-button width float-left" data-size="12" style="border-top-width: 16px; border-bottom-width: 16px;"></div>
+        <div class="border-button width float-left" data-size="20" style="border-top-width: 14px; border-bottom-width: 14px;"></div>
+        <div class="border-button width float-left" data-size="34" style="border-top-width: 11px; border-bottom-width: 11px;"></div>
+        <div class="border-button width float-left" data-size="52" style="border-top-width: 8px; border-bottom-width: 8px;"></div>
+
+        <div class="img-button control float-right clear"></div>
+        <div class="img-button control float-right redo"></div>
+        <div class="img-button control float-right undo"></div>
     </div>
     <canvas id="canvas"></canvas>
 </body>

@@ -1,3 +1,7 @@
+// shim
+window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
+    window.setTimeout(callback, 1000 / 60)
+}
 // util
 function debounce(func, time, context) {
     var timeoutId
@@ -53,24 +57,52 @@ function postSync(url, form, callback, error) { return ajax('POST', true, url, J
 
 // server
 var URL = 'http://34.206.49.42:8000/drawing'
-var RATELIMIT = 1000
+var RATE_LIMIT = 1000
+var DRAWING_MIN_TIME = 10000
 
-var uuid = null
-get(URL, res => {
-    uuid = JSON.parse(res.responseText).uuid
-    console.log('UUID = ' + uuid)
+var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
+var readyToSetup = false
+get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
+    var obj = JSON.parse(res.responseText)
+    if (drawingObj.uuid != obj.uuid) {
+        // read
+        drawingObj.uuid = obj.uuid
+        drawingObj.uuidTime = new Date().getTime()
+        drawingObj.prompt = Math.random() < 0.5 ? 'plant' : 'animal'
+        drawingObj.colors = ['red', 'blue', '#0f0', '#a48012', '#404040']
+        // save
+        localStorage.setItem('drawing', JSON.stringify(drawingObj))
+    }
+    // setup
+    drawingObj.json = obj.json
+    readyToSetup = true
+    console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
 })
 
-var push = throttleBounce(function(data) {
-    if (!uuid) return
-    post(URL, {
-        uuid: uuid,
-        json: data,
+var push = throttleBounce(function(canvas) {
+    if (!drawingObj.uuid) return
+    // calculate bounds
+    var group = new fabric.Group(canvas._objects, null, true)
+    group._calcBounds()
+    // get data and shift objects to top-left
+    var data = JSON.parse(JSON.stringify(canvas.toObject()))
+    data.objects.forEach(obj => {
+        obj.left = obj.left - group.left
+        obj.top = obj.top - group.top
     })
-}, RATELIMIT)
+    // save object shifts
+    localStorage.setItem('objectShiftLeft', group.left)
+    localStorage.setItem('objectShiftTop', group.top)
+    // post data and dimensions
+    post(URL, {
+        uuid: drawingObj.uuid,
+        json: data,
+        dimensions: { width: group.width, height: group.height },
+    })
+}, RATE_LIMIT)
 
 function complete() {
-    getSync(URL + '/' + uuid + '/complete')
+    getSync(URL + '/' + drawingObj.uuid + '/complete')
 }
 
 // events
@@ -83,11 +115,14 @@ window.onload = function() {
         isDrawingMode: true,
     })
 
+    // misc
+    var doneButton = document.querySelector('.button.done')
+
     // undo/redo/clear
     var history = []
     var historyIndex = 0
     var doingHistory = false
-    function doHistory(index) {
+    function doHistory(index, forcePush) {
         // redraw
         canvas.clear()
         doingHistory = true
@@ -96,32 +131,34 @@ window.onload = function() {
         }
         doingHistory = false
         canvas.renderAll()
-        // update buttons
-        undoButton.disabled = index <= 0
-        redoButton.disabled = index >= history.length
-        clearButton.disabled = index <= 0
 
         // push to server
-        push(canvas.toObject())
+        if (canvas._objects.length > 0 || forcePush) {
+            push(canvas)
+        }
     }
 
     var undoButton = document.querySelector('.undo')
     var redoButton = document.querySelector('.redo')
     var clearButton = document.querySelector('.clear')
     undoButton.onclick = e => {
-        historyIndex = Math.max(historyIndex - 1, 0)
-        doHistory(historyIndex)
+        if (historyIndex > 0) {
+            historyIndex = Math.max(historyIndex - 1, 0)
+            doHistory(historyIndex, true)
+        }
     }
     redoButton.onclick = e => {
-        historyIndex = Math.min(historyIndex + 1, history.length)
-        doHistory(historyIndex)
+        if (historyIndex < history.length) {
+            historyIndex = Math.min(historyIndex + 1, history.length)
+            doHistory(historyIndex, true)
+        }
     }
     clearButton.onclick = e => {
-        historyIndex = 0
-        doHistory(historyIndex)
+        if (historyIndex > 0) {
+            historyIndex = 0
+            doHistory(historyIndex, true)
+        }
     }
-    
-    doHistory(0)
 
     // new path drawn
     canvas.on('object:added', e => {
@@ -132,60 +169,169 @@ window.onload = function() {
         }
         history.push(e.target)
         historyIndex++
-        undoButton.disabled = false
-        redoButton.disabled = true
-        clearButton.disabled = false
 
-        // push to server
-        push(canvas.toObject())
+        // push new drawings to server
+        if (!window.loadingJSON) {
+            push(canvas)
+        }
     })
 
-    // color controls
-    var colorContainer = document.querySelector('.colors')
-    var colorButtons = Array.from(document.querySelectorAll('.colors > div'))
-    var widthCircle = document.querySelector('.width-circle.main')
-    var widthCircleOutline = document.querySelector('.width-circle.outline')
-    var widthCircleOutlineInner = document.querySelector('.width-circle.outline-inner')
+    // prompt text and animation
+    function setupPrompt(prompt) {
+        var promptDiv = document.querySelector('.prompt')
 
-    function setColor(color) {
+        var instructions = Array.from(document.querySelectorAll('.prompt .instructions'))
+        var timeErrors = Array.from(document.querySelectorAll('.prompt .time-error'))
+        var emptyErrors = Array.from(document.querySelectorAll('.prompt .empty-error'))
+        var okayMessages = Array.from(document.querySelectorAll('.prompt .okay-message'))
+        var submitMessages = Array.from(document.querySelectorAll('.prompt .submit-message'))
+        var doneMessages = Array.from(document.querySelectorAll('.prompt .done-message'))
+        var dots = Array.from(document.querySelectorAll('.prompt .dots'))
+        var allMessages = [].concat([instructions, timeErrors, emptyErrors, okayMessages, submitMessages, doneMessages, dots])
+
+        var SUBMIT_PRAISES = ['BRILLIANT', 'AMAZING', 'MAGNIFICENT', 'MARVELOUS', 'SPLENDID', 'AWESOME', 'BEAUTIFUL', 'FANTASTIC', 'UNIQUE', 'PHENOMENAL', 'GORGEOUS']
+        var praiseTexts = Array.from(document.querySelectorAll('.prompt .praise-text'))
+
+        function disableAll() {
+            allMessages.forEach(list => list.forEach(item => item.classList.add('hidden')))
+        }
+        function enableByPrompt(list) {
+            list.forEach(item => {
+                item.classList.toggle('hidden', item.dataset.type != prompt && item.dataset.type != '*')
+            })
+        }
+        function showOnly(list) {
+            disableAll()
+            enableByPrompt(list)
+        }
+        function chainTimeouts(funcsAndTimes) {
+            function doFunc(i) {
+                if (i < funcsAndTimes.length) {
+                    setTimeout(() => { funcsAndTimes[i + 1](); doFunc(i + 2); }, funcsAndTimes[i])
+                }
+            }
+            doFunc(0)
+        }
+
+        // show instructions
+        showOnly(instructions)
+
+        // try to submit on click
+        var hadError = false
+        var submitted = false
+        promptDiv.onclick = e => {
+            if (submitted) {
+                return
+            }
+
+            if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME) {
+                showOnly(timeErrors)
+                hadError = true
+            } else if (canvas._objects.length == 0) {
+                showOnly(emptyErrors)
+                hadError = true
+            } else {
+                // submit
+                submitted = true
+                document.body.style.pointerEvents = 'none' // hard freeze all input on screen
+
+                praiseTexts.forEach(t => t.textContent = SUBMIT_PRAISES[Math.floor(Math.random() * SUBMIT_PRAISES.length)])
+                dots.forEach(t => t.textContent = '')
+                showOnly(submitMessages)
+                enableByPrompt(dots)
+
+                chainTimeouts([
+                    200, () => dots.forEach(t => t.textContent = '.'),
+                    200, () => dots.forEach(t => t.textContent = '..'),
+                    200, () => dots.forEach(t => t.textContent = '...'),
+                    400, () => dots.forEach(t => t.textContent = '.....'),
+                    400, () => dots.forEach(t => t.textContent = '.......'),
+                    400, () => enableByPrompt(doneMessages),
+                    1600, () => { localStorage.clear(); location.href = location.href; },
+                ])
+            }
+        }
+
+        // check for error being resolved
+        setInterval(() => {
+            if (hadError) {
+                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME && canvas._objects.length == 0) {
+                    return
+                }
+                hadError = false
+            }
+        }, 500)
+    }
+
+    // color controls
+    function setColor(colorPicker, colorButtons) {
+        // set color pickers
+        var currentIndex = colorButtons.indexOf(colorPicker)
+        for (var i = 0; i < colorButtons.length; i++) {
+            var button = colorButtons[i]
+            button.classList.remove('bottom-left-radius')
+            button.classList.remove('bottom-right-radius')
+            if (i == currentIndex) {
+                // leave alone
+            } else if (i == (currentIndex - 1)) {
+                button.classList.add('bottom-right-radius')
+            } else if (i == (currentIndex + 1)) {
+                button.classList.add('bottom-left-radius')
+            }
+        }
+        // set color
+        var color = colorPicker.dataset.color
         canvas.freeDrawingBrush.color = color
         document.body.style.backgroundColor = color
-        widthCircle.style.backgroundColor = color
-        widthCircleOutline.style.backgroundColor = color
     }
 
-    for (var i = 0; i < colorButtons.length; i++) {
-        var colorButton = colorButtons[i]
-        colorButton.style.backgroundColor = colorButton.dataset.color
-        colorButton.onclick = e => setColor(e.target.dataset.color)
+    function setupColors(colors) {
+        var colorContainer = document.querySelector('.colors')
+        
+        // clear old buttons
+        var colorButtons = Array.from(document.querySelectorAll('.colors > div'))
+        for (var i = 0; i < colorButtons.length; i++) {
+            colorButtons[i].remove()
+        }
+
+        // add new buttons
+        colorButtons = []
+        for (var i = 0; i < colors.length; i++) {
+            var button = document.createElement('div')
+            button.dataset.color = colors[i]
+            button.style.backgroundColor = colors[i]
+            button.onclick = e => setColor(e.target, colorButtons)
+
+            colorContainer.appendChild(button)
+            colorButtons.push(button)
+        }
+
+        setColor(colorButtons[0], colorButtons)
     }
-    setColor(colorButtons[0].dataset.color)
 
     // width controls
-    var widthInput = document.querySelector('.width-input')
+    var widthButtons = Array.from(document.querySelectorAll('.width'))
     
-    function setWidth(width, minWidth, maxWidth) {
-        canvas.freeDrawingBrush.width = width
-        var parentHeight = widthCircle.parentElement.offsetHeight
-        var percHeight = ilerp(width, minWidth, maxWidth) * 0.9 + 0.1
-        widthCircle.style.width = parentHeight*percHeight + 'px'
-        widthCircle.style.height = parentHeight*percHeight + 'px'
-        widthCircleOutline.style.width = parentHeight+2 + 'px'
-        widthCircleOutline.style.height = parentHeight+2 + 'px'
-        widthCircleOutlineInner.style.width = parentHeight + 'px'
-        widthCircleOutlineInner.style.height = parentHeight + 'px'
+    function setWidth(widthButton) {
+        // set width pickers
+        for (var i = 0; i < widthButtons.length; i++) {
+            widthButtons[i].classList.remove('selected')
+        }
+        widthButton.classList.add('selected')
+        // set width
+        canvas.freeDrawingBrush.width = parseFloat(widthButton.dataset.size)
     }
 
-    widthInput.oninput = e => setWidth(e.target.valueAsNumber, parseFloat(e.target.min), parseFloat(e.target.max))
-    setWidth(widthInput.valueAsNumber, parseFloat(widthInput.min), parseFloat(widthInput.max))
+    for (var i = 0; i < widthButtons.length; i++) {
+        widthButtons[i].onclick = e => setWidth(e.target)
+    }
+    setWidth(widthButtons[1])
 
     // resizing
-    var offsettingElements = ['.prompt', '.colors']
+    var offsettingElements = ['.prompt', '.colors', '.controls']
         .map(s => Array.from(document.querySelectorAll(s)))
         .reduce((acc, arr) => acc.concat(arr), [])
     function handleResize() {
-        // controls
-        setWidth(widthInput.valueAsNumber, parseFloat(widthInput.min), parseFloat(widthInput.max))
         // canvas
         var elementOffset = offsettingElements.reduce((acc, item) => acc + item.offsetHeight, 0)
         var extraOffset = 0
@@ -197,4 +343,54 @@ window.onload = function() {
     }
     window.addEventListener('resize', debounce(handleResize, 100))
     handleResize()
+    setTimeout(handleResize, 80)
+    setTimeout(handleResize, 160)
+    setTimeout(handleResize, 250)
+
+    // update
+    var d = new Date().getTime()
+    function update() {
+        // dt
+        var dt = d - (d = new Date().getTime())
+        if (readyToSetup && canvas) {
+            // load colors
+            setupColors(drawingObj.colors)
+
+            // load prompt
+            setupPrompt(drawingObj.prompt)
+
+            // load json
+            if (drawingObj.json) {
+                window.loadingJSON = true
+                canvas.loadFromJSON(drawingObj.json, () => {
+                    // shift objects to original position
+                    var shiftLeft = parseInt(localStorage.getItem('objectShiftLeft'))
+                    var shiftTop = parseInt(localStorage.getItem('objectShiftTop'))
+                    canvas._objects.forEach(obj => {
+                        obj.setLeft(obj.left + shiftLeft)
+                        obj.setTop(obj.top + shiftTop)
+                        obj.setCoords()
+                    })
+                    // render
+                    canvas.renderAll()
+                    // save
+                    push(canvas)
+                    // clear loading flag
+                    window.loadingJSON = false
+                })
+            }
+
+            readyToSetup = false
+        }
+        // toggle canvas buttons
+        undoButton.classList.toggle('disabled', historyIndex <= 0 && canvas.isDrawingMode)
+        redoButton.classList.toggle('disabled', historyIndex >= history.length && canvas.isDrawingMode)
+        clearButton.classList.toggle('disabled', canvas._objects.length == 0 && canvas.isDrawingMode)
+        // loop
+        requestAnimationFrame(update)
+    }
+    requestAnimationFrame(update)
+
+    // kickoff history
+    doHistory(0)
 }
