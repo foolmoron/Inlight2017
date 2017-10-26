@@ -63,6 +63,11 @@ var DRAWING_MIN_TIME = 10000
 var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
 var readyToSetup = false
 get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
+    if (!res.responseText) {
+        return
+    }
+    document.body.classList.remove('loading')
+
     var obj = JSON.parse(res.responseText)
     if (drawingObj.uuid != obj.uuid) {
         // read

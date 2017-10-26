@@ -20,6 +20,10 @@
             display: none !important;
         }
 
+        .loading .prompt {
+            display: none;
+        }
+
         .prompt {
             background-color: white;
             padding: 5px 0px;
@@ -161,7 +165,7 @@
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
-<body>
+<body class="loading">
     <div class="prompt">
         <span class="instructions" data-type="plant">Draw a nice <span class="text-plant">PLANT</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
         <span class="instructions" data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
