@@ -102,11 +102,8 @@ var push = throttleBounce(function(canvas) {
 }, RATE_LIMIT)
 
 function complete() {
-    getSync(URL + '/' + drawingObj.uuid + '/complete')
+    get(URL + '/' + drawingObj.uuid + '/complete')
 }
-
-// events
-window.addEventListener("beforeunload", complete)
 
 // main
 window.onload = function() {
@@ -246,7 +243,7 @@ window.onload = function() {
                     200, () => dots.forEach(t => t.textContent = '...'),
                     400, () => dots.forEach(t => t.textContent = '.....'),
                     400, () => dots.forEach(t => t.textContent = '.......'),
-                    400, () => enableByPrompt(doneMessages),
+                    400, () => { enableByPrompt(doneMessages); complete(); },
                     1600, () => { localStorage.clear(); location.href = location.href; },
                 ])
             }
