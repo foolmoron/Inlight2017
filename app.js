@@ -94,6 +94,11 @@ app.get('/drawings', adminAuth, (req, res, next) => {
     })
 })
 
+// colors
+function getNewColorPalette() {
+    return ['red', 'blue', '#0f0', '#a48012', '#404040']
+}
+
 // drawing
 const drawingDirs = ['/public','/img','/drawings/']
 const drawingDirectory = drawingDirs.reduce((acc, dir) => {
@@ -127,6 +132,8 @@ const Drawing = (init) => Object.assign({
     empty: true,
     completedTime: null,
     autoapprove: false,
+    colors: [],
+    prompt: '',
 }, init)
 
 function checkDrawing(req, res, next) {
@@ -140,10 +147,13 @@ function checkDrawing(req, res, next) {
 
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
+    newDrawing.colors = getNewColorPalette()
+    newDrawing.prompt = Math.random() < 0.5 ? 'plant' : 'animal'
     data.drawings.insert(newDrawing)
+
     var drawing = data.drawings.findOne({uuid: newDrawing.uuid})
     data.drawings.update(drawing)
-    res.json({uuid: drawing.uuid})
+    res.json(drawing)
 })
 app.get('/drawing/:uuid', checkDrawing, (req, res, next) => {
     var drawing = req.drawing
