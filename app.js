@@ -36,7 +36,7 @@ app.use(session({
 if (!fs.existsSync('db')) {
     fs.mkdirSync('db')
 }
-const db = new loki('db/db.json', { autosave: true })
+const db = new loki('db/db.json', { autosave: true, serializationMethod: 'pretty' })
 const data = {}
 function initCollection(container, name, opts) {
     var collection = db.getCollection(name)
@@ -124,7 +124,8 @@ const Drawing = (init) => Object.assign({
     uuid: uuid(),
     json: '',
     status: STATUS.NEW,
-    completed: false,
+    empty: true,
+    completedTime: null,
     autoapprove: false,
 }, init)
 
@@ -171,11 +172,12 @@ app.post('/drawing', (req, res, next) => {
     }
     // update model
     drawing.json = req.body.json
+    drawing.empty = ((drawing.json || {}).objects || []).length == 0
     drawing.dimensions = req.body.dimensions
     if (drawing.status == STATUS.UPDATED || drawing.status == STATUS.APPROVED) {
         drawing.status = STATUS.UPDATED
     }
-    var autoapprove = drawing.status != STATUS.IGNORED && (GLOBAL.autoapprove ||drawing.autoapprove)
+    var autoapprove = drawing.status != STATUS.IGNORED && (GLOBAL.autoapprove || drawing.autoapprove)
     if (autoapprove) {
         drawing.status = STATUS.APPROVED
     }
@@ -201,7 +203,7 @@ app.post('/drawing', (req, res, next) => {
 app.get('/drawing/:uuid/complete', checkDrawing, (req, res, next) => {
     var drawing = req.drawing
     // update
-    drawing.completed = true
+    drawing.completedTime = new Date().getTime()
     data.drawings.update(drawing)
     // return
     res.sendStatus(200)

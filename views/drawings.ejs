@@ -8,14 +8,28 @@
             <button class="btn btn-warning global-aa-disable hidden" onclick="get('/globalautoapprove/false', update)" style="padding: 16px 10px; font-size: 1.7em;">Disable Global Auto-Approve</button>
         </div>
     </div>
+    <div class="filter-container">
+        <div class="btn" data-filter="queue" data-color="rgb(228, 8, 211)" onclick="changeFilterMode(this)">Priority Queue</div>
+        <div class="btn" data-filter="fresh" data-color="rgb(0, 189, 219)" onclick="changeFilterMode(this)">Fresh</div>
+        <div class="btn" data-filter="approved" data-color="rgb(0, 67, 219)" onclick="changeFilterMode(this)">Approved</div>
+        <div class="btn" data-filter="autoapproved" data-color="rgb(13, 219, 0)" onclick="changeFilterMode(this)">Auto-Approved</div>
+        <div class="btn" data-filter="ignored" data-color="rgb(219, 142, 0)" onclick="changeFilterMode(this)">Ignored</div>
+        <div class="btn" data-filter="deleted" data-color="rgb(219, 40, 0)" onclick="changeFilterMode(this)">Deleted</div>
+    </div>
     <div class="drawing-container">
     </div>
 </div>
 
 <script id="drawing-template" type="text/template">
-    <div class="row drawing-row <$= drawing.status $> <$= drawing.completed ? 'completed' : '' $>" data-uuid="<$= drawing.uuid $>">
-        <div class="col-xs-12 text-center">
-            <b><$= drawing.uuid $> -- <$= drawing.status $> <$ if (drawing.completed) { $>-- COMPLETED<$ } $></b>
+    <div class="row drawing-row <$= drawing.status $> <$= drawing.completedTime ? 'completed' : '' $>" data-uuid="<$= drawing.uuid $>">
+        <div class="col-xs-5 text-left">
+            <b><$= drawing.uuid $> -- <$= drawing.status $> <$ if (drawing.completedTime) { $>-- COMPLETED<$ } $></b>
+        </div>
+        <div class="col-xs-3 text-center">
+            <b><$= drawing.dimensions.width $> x <$= drawing.dimensions.height $></b>
+        </div>
+        <div class="col-xs-4 text-right">
+            <b><$= new Date(drawing.meta.updated).toLocaleString() $></b>
         </div>
         <div class="col-xs-3 col-md-3">
             <button class="btn btn-warning primary-button <$= drawing.status == 'ignored' ? 'hidden' : '' $>" onclick="get('/drawing/<$= drawing.uuid $>/ignore/true', update)">Ignore</button>
@@ -24,7 +38,9 @@
         </div>
         <div class="col-xs-6 col-md-6 text-center">
             <div class="col-xs-12">
-                <img src="<$= dirApproved $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
+                <$ if (drawing.status == 'updated') { $>
+                    <img src="<$= dirApproved $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
+                <$ } $>
                 <img src="<$= dirNew $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
             </div>
         </div>
@@ -44,21 +60,43 @@ var drawingTemplate = document.querySelector('#drawing-template').innerHTML.trim
 var globalAutoApproveEnable = document.querySelector('.global-aa-enable')
 var globalAutoApproveDisable = document.querySelector('.global-aa-disable')
 
-const dirNew = '<%= dirNew %>'
-const dirApproved = '<%= dirApproved %>'
+var dirNew = '<%= dirNew %>'
+var dirApproved = '<%= dirApproved %>'
+
+var drawings = []
 
 function renderDrawing(drawing) {
     var html = ejs.render(drawingTemplate, {drawing, dirNew, dirApproved}, {delimiter: '$'})
     var div = document.createElement('div')
     div.innerHTML = html
     var newNode = div.firstChild
+    return newNode
+}
 
-    var existingNode = document.querySelector('[data-uuid="' + drawing.uuid + '"]')
-    if (existingNode) {
-        drawingContainer.replaceChild(newNode, existingNode)
-    } else {
-        drawingContainer.appendChild(newNode)
-    }
+function renderDrawings() {
+    // filter and sort
+    var filteredDrawings = drawings.filter(filter)
+    filteredDrawings.sort(sort)
+    // render nodes
+    var nodes = filteredDrawings.map(drawing => {
+        var existingNode = document.querySelector('[data-uuid="' + drawing.uuid + '"]')
+        if (drawing.dirty) {
+            if (existingNode) {
+                existingNode.remove()
+            }
+            existingNode = null
+            drawing.dirty = false
+        }
+        return existingNode || renderDrawing(drawing)
+    })
+    // hide old nodes
+    Array.from(drawingContainer.children).forEach(node => node.style.display = 'none')
+    // add new nodes
+    nodes.forEach(node => {
+        node.style.display = 'block'
+        node.remove()
+        drawingContainer.append(node)
+    })
 }
 
 function updateDrawing(uuid) {
@@ -77,12 +115,73 @@ function updateGlobalAutoApprove(toggle) {
     }
 }
 
+var filter = (item) => true
+var sort = (item1, item2) => 0
+function changeFilterMode(filterPicker) {
+    // set buttons
+    filterPickers.forEach(picker => { picker.style.opacity = 0.5; picker.style.flexGrow = 1 })
+    filterPicker.style.opacity = 1
+    filterPicker.style.flexGrow = 2
+    // set funcs
+    switch(filterPicker.dataset.filter) {
+        case 'queue':
+            // new and updated, completed only, sorted by longest waiting for status update
+            filter = (item) => item.completedTime && (item.status == 'new' || item.status == 'updated')
+            sort = (item1, item2) => ((item1.completedTime || 0) - (item2.completedTime || 0)) || (item1.meta.updated - item2.meta.updated)
+            break;
+        case 'fresh':
+            // new and updated, not completed, sorted by last updated
+            filter = (item) => !item.completedTime && !item.empty && (item.status == 'new' || item.status == 'updated')
+            sort = (item1, item2) => item1.meta.updated - item2.meta.updated
+            break;
+        case 'approved':
+            // approved only, sorted by earliest updated
+            filter = (item) => item.status == 'approved'
+            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
+            break;
+        case 'autoapproved':
+            // auto approved only, sorted by earliest updated
+            filter = (item) => item.autoapprove
+            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
+            break;
+        case 'ignored':
+            // ignored only, sorted by earliest updated
+            filter = (item) => item.status == 'ignored'
+            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
+            break;
+        case 'deleted':
+            // deleted only, sorted by earliest updated
+            filter = (item) => item.status == 'deleted'
+            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
+            break;
+    }
+    // rerender
+    renderDrawings()
+}
+var filterPickers = Array.from(document.querySelectorAll('[data-filter]'))
+filterPickers.forEach(picker => picker.style.backgroundColor = picker.dataset.color)
+changeFilterMode(filterPickers[0])
+
 var lastUpdateTime = 0
 function update() {
     get('/drawingupdates/' + lastUpdateTime, xhr => {
         var response = JSON.parse(xhr.responseText)
         lastUpdateTime = response.time
-        response.drawings.map(renderDrawing)
+        // apply updates to collection
+        response.drawings.forEach(drawing => {
+            drawing.dirty = true
+            for (var i = 0; i < drawings.length; i++) {
+                if (drawings[i].uuid == drawing.uuid) {
+                    drawings[i] = drawing
+                    return
+                }
+            }
+            drawings.push(drawing)
+        })
+        // render
+        if (response.drawings.length) {
+            renderDrawings()
+        }
     })
     get('/globalautoapprove', xhr => {
         updateGlobalAutoApprove(xhr.responseText == 'true')

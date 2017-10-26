@@ -27,6 +27,9 @@ header {
     font-weight: bold;
     font-size: 30px;
 }
+.title a {
+    color: white;
+}
 .login {
     color: #5254ff;
     font-weight: bold;
@@ -54,6 +57,9 @@ footer {
 }
 
 /* drawings */
+.drawings {
+    width: 100%;
+}
 .drawings .drawing-row {
     background-color: #ececec;
     padding: 10px 0px;
@@ -61,7 +67,7 @@ footer {
     margin-bottom: 10px;
 }
 .drawings .drawing-row.completed {
-    border: 8px solid #ffeb3b;
+    border: 8px solid #ff3bcc;
 }
 .drawings .drawing-row.new {
     background-color: #ececec;
@@ -81,7 +87,7 @@ footer {
     opacity: 0.7;
 }
 .drawings .drawing-row img {
-    max-width: 100%;
+    max-width: 49%;
     max-height: 250px;
     min-width: 50px;
     min-height: 50px;
@@ -101,4 +107,22 @@ footer {
 .drawings .secondary-button {
     height: 60px;
     margin-bottom: 0px;
+}
+
+.drawings .filter-container {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+.drawings .filter-container > div {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: 52px;
+    margin: 0px 8px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.3em;
+    line-height: 2;
+    transition: flex-grow 0.2s;
 }
