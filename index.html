@@ -16,6 +16,9 @@
             margin: 0;
             transition: background-color 0.4s;
         }
+        .hidden {
+            display: none !important;
+        }
 
         .prompt {
             background-color: white;
@@ -27,6 +30,21 @@
             letter-spacing: 3px;
             -webkit-text-stroke: 2px black;
             text-transform: uppercase;
+            cursor: pointer;
+        }
+        .text-plant { color: #c3f10e; }
+        .text-animal { color: #fd9a00; }
+        .text-finish { color: #ff3d00; }
+        .text-praise { color: #f452fd; }
+        @media (max-width : 675px) {
+            .prompt {
+                font-size: 1.6rem;
+            }
+        }
+        @media (max-width : 535px) {
+            .prompt {
+                font-size: 1.38rem;
+            }
         }
 
         .canvas-container {
@@ -126,13 +144,36 @@
         .img-button.clear {
             background-image: url('img/clear.png');
         }
+
+        @media (max-width : 535px) {
+            .prompt {
+                font-size: 1.38rem;
+            }
+            .border-button {
+                width: 4.3vh;
+            }
+            .img-button {
+                width: 4.3vh;
+                height: 2.69vh;
+                margin-top: 0.8vh;
+            }
+        }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
 <body>
     <div class="prompt">
-        <span>hey draw a "tree" or something</span>
-        <input class="button done" type="button" value="I'm done, new drawing!" onclick="localStorage.clear(); location.href = location.href;">
+        <span class="instructions" data-type="plant">Draw a nice <span class="text-plant">PLANT</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
+        <span class="instructions" data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
+        <span class="time-error" data-type="plant">Shouldn't you spend some more<br>time drawing your <span class="text-plant">PLANT</span>..?</span>
+        <span class="time-error" data-type="animal">Shouldn't you spend some more<br>time drawing your <span class="text-animal">ANIMAL</span>..?</span>
+        <span class="empty-error" data-type="plant">Hey I said draw a <span class="text-plant">PLANT</span>,<br>not a blank page!</span>
+        <span class="empty-error" data-type="animal">Hey I said draw an <span class="text-animal">ANIMAL</span>,<br>not a blank page!</span>
+        <span class="okay-message" data-type="*">Okay that's better, tap here to<br> <span class="text-finish">FINISH</span> when you're ready!</span>
+        <span class="submit-message" data-type="plant">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-plant">PLANT</span> drawing</span>
+        <span class="submit-message" data-type="animal">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-animal">ANIMAL</span> drawing</span>
+        <span class="dots" data-type="*"></span>
+        <span class="done-message" data-type="*"> DONE!</span>
     </div>
     <div class="top-border">
         <div class="colors">

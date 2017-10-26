@@ -61,22 +61,21 @@ var RATE_LIMIT = 1000
 var DRAWING_MIN_TIME = 10000
 
 var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
-var colorsToLoad = null
-var jsonToLoad = null
+var readyToSetup = false
 get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
     var obj = JSON.parse(res.responseText)
     if (drawingObj.uuid != obj.uuid) {
         // read
         drawingObj.uuid = obj.uuid
         drawingObj.uuidTime = new Date().getTime()
-        drawingObj.prompt = Math.random() < 0.5 ? 'tree' : 'animal'
+        drawingObj.prompt = Math.random() < 0.5 ? 'plant' : 'animal'
         drawingObj.colors = ['red', 'blue', '#0f0', '#a48012', '#404040']
         // save
         localStorage.setItem('drawing', JSON.stringify(drawingObj))
     }
     // setup
-    colorsToLoad = drawingObj.colors
-    jsonToLoad = obj.json
+    drawingObj.json = obj.json
+    readyToSetup = true
     console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
 })
 
@@ -170,15 +169,99 @@ window.onload = function() {
         }
         history.push(e.target)
         historyIndex++
-        undoButton.classList.toggle('disabled', false)
-        redoButton.classList.toggle('disabled', true)
-        clearButton.classList.toggle('disabled', false)
 
         // push new drawings to server
         if (!window.loadingJSON) {
             push(canvas)
         }
     })
+
+    // prompt text and animation
+    function setupPrompt(prompt) {
+        var promptDiv = document.querySelector('.prompt')
+
+        var instructions = Array.from(document.querySelectorAll('.prompt .instructions'))
+        var timeErrors = Array.from(document.querySelectorAll('.prompt .time-error'))
+        var emptyErrors = Array.from(document.querySelectorAll('.prompt .empty-error'))
+        var okayMessages = Array.from(document.querySelectorAll('.prompt .okay-message'))
+        var submitMessages = Array.from(document.querySelectorAll('.prompt .submit-message'))
+        var doneMessages = Array.from(document.querySelectorAll('.prompt .done-message'))
+        var dots = Array.from(document.querySelectorAll('.prompt .dots'))
+        var allMessages = [].concat([instructions, timeErrors, emptyErrors, okayMessages, submitMessages, doneMessages, dots])
+
+        var SUBMIT_PRAISES = ['BRILLIANT', 'AMAZING', 'MAGNIFICENT', 'MARVELOUS', 'SPLENDID', 'AWESOME', 'BEAUTIFUL', 'FANTASTIC', 'UNIQUE', 'PHENOMENAL', 'GORGEOUS']
+        var praiseTexts = Array.from(document.querySelectorAll('.prompt .praise-text'))
+
+        function disableAll() {
+            allMessages.forEach(list => list.forEach(item => item.classList.add('hidden')))
+        }
+        function enableByPrompt(list) {
+            list.forEach(item => {
+                item.classList.toggle('hidden', item.dataset.type != prompt && item.dataset.type != '*')
+            })
+        }
+        function showOnly(list) {
+            disableAll()
+            enableByPrompt(list)
+        }
+        function chainTimeouts(funcsAndTimes) {
+            function doFunc(i) {
+                if (i < funcsAndTimes.length) {
+                    setTimeout(() => { funcsAndTimes[i + 1](); doFunc(i + 2); }, funcsAndTimes[i])
+                }
+            }
+            doFunc(0)
+        }
+
+        // show instructions
+        showOnly(instructions)
+
+        // try to submit on click
+        var hadError = false
+        var submitted = false
+        promptDiv.onclick = e => {
+            if (submitted) {
+                return
+            }
+
+            if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME) {
+                showOnly(timeErrors)
+                hadError = true
+            } else if (canvas._objects.length == 0) {
+                showOnly(emptyErrors)
+                hadError = true
+            } else {
+                // submit
+                submitted = true
+                document.body.style.pointerEvents = 'none' // hard freeze all input on screen
+
+                praiseTexts.forEach(t => t.textContent = SUBMIT_PRAISES[Math.floor(Math.random() * SUBMIT_PRAISES.length)])
+                dots.forEach(t => t.textContent = '')
+                showOnly(submitMessages)
+                enableByPrompt(dots)
+
+                chainTimeouts([
+                    200, () => dots.forEach(t => t.textContent = '.'),
+                    200, () => dots.forEach(t => t.textContent = '..'),
+                    200, () => dots.forEach(t => t.textContent = '...'),
+                    400, () => dots.forEach(t => t.textContent = '.....'),
+                    400, () => dots.forEach(t => t.textContent = '.......'),
+                    400, () => enableByPrompt(doneMessages),
+                    1600, () => { localStorage.clear(); location.href = location.href; },
+                ])
+            }
+        }
+
+        // check for error being resolved
+        setInterval(() => {
+            if (hadError) {
+                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME && canvas._objects.length == 0) {
+                    return
+                }
+                hadError = false
+            }
+        }, 500)
+    }
 
     // color controls
     function setColor(colorPicker, colorButtons) {
@@ -260,44 +343,49 @@ window.onload = function() {
     }
     window.addEventListener('resize', debounce(handleResize, 100))
     handleResize()
+    setTimeout(handleResize, 80)
+    setTimeout(handleResize, 160)
+    setTimeout(handleResize, 250)
 
     // update
     var d = new Date().getTime()
     function update() {
         // dt
         var dt = d - (d = new Date().getTime())
-        // load colors
-        if (colorsToLoad && canvas) {
-            setupColors(colorsToLoad)
-            colorsToLoad = null
-        }
-        // load json
-        if (jsonToLoad && canvas) {
-            window.loadingJSON = true
-            canvas.loadFromJSON(jsonToLoad, () => {
-                // shift objects to original position
-                var shiftLeft = parseInt(localStorage.getItem('objectShiftLeft'))
-                var shiftTop = parseInt(localStorage.getItem('objectShiftTop'))
-                canvas._objects.forEach(obj => {
-                    obj.setLeft(obj.left + shiftLeft)
-                    obj.setTop(obj.top + shiftTop)
-                    obj.setCoords()
+        if (readyToSetup && canvas) {
+            // load colors
+            setupColors(drawingObj.colors)
+
+            // load prompt
+            setupPrompt(drawingObj.prompt)
+
+            // load json
+            if (drawingObj.json) {
+                window.loadingJSON = true
+                canvas.loadFromJSON(drawingObj.json, () => {
+                    // shift objects to original position
+                    var shiftLeft = parseInt(localStorage.getItem('objectShiftLeft'))
+                    var shiftTop = parseInt(localStorage.getItem('objectShiftTop'))
+                    canvas._objects.forEach(obj => {
+                        obj.setLeft(obj.left + shiftLeft)
+                        obj.setTop(obj.top + shiftTop)
+                        obj.setCoords()
+                    })
+                    // render
+                    canvas.renderAll()
+                    // save
+                    push(canvas)
+                    // clear loading flag
+                    window.loadingJSON = false
                 })
-                // render
-                canvas.renderAll()
-                // save
-                push(canvas)
-                // clear loading flags
-                jsonToLoad = null
-                window.loadingJSON = false
-            })
+            }
+
+            readyToSetup = false
         }
-        // toggle done button based on min drawing time
-        doneButton.disabled = (d - drawingObj.uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0
         // toggle canvas buttons
-        undoButton.classList.toggle('disabled', historyIndex <= 0)
-        redoButton.classList.toggle('disabled', historyIndex >= history.length)
-        clearButton.classList.toggle('disabled', canvas._objects.length == 0)
+        undoButton.classList.toggle('disabled', historyIndex <= 0 && canvas.isDrawingMode)
+        redoButton.classList.toggle('disabled', historyIndex >= history.length && canvas.isDrawingMode)
+        clearButton.classList.toggle('disabled', canvas._objects.length == 0 && canvas.isDrawingMode)
         // loop
         requestAnimationFrame(update)
     }
