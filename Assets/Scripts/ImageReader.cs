@@ -9,10 +9,15 @@ using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
+public enum ImageType {
+    Animal, Plant, Tree, Bush, Grass
+}
+
 [Serializable]
 public class ImageRecord {
     public string Name;
     public string Path;
+    public ImageType Type;
     public Vector2 Dimensions;
     public DateTime LastUpdated;
     public Color MainColor;
@@ -33,6 +38,15 @@ public class ImageReader : Manager<ImageReader> {
     string indexPath;
     DateTime lastIndexWrite;
     List<string> files = new List<string>(1000);
+    List<ImageType> types = new List<ImageType>(1000);
+
+    readonly Dictionary<char, ImageType> CHAR_TO_TYPE = new Dictionary<char, ImageType> {
+        {'a', ImageType.Animal },
+        {'p', ImageType.Plant },
+        {'t', ImageType.Tree },
+        {'b', ImageType.Bush },
+        {'g', ImageType.Grass },
+    };
 
     public List<ImageRecord> Records = new List<ImageRecord>(100);
     public AnimationCurve RecordAgeWeighting;
@@ -60,15 +74,20 @@ public class ImageReader : Manager<ImageReader> {
             if (File.GetLastWriteTime(indexPath) > lastIndexWrite) {
                 lastIndexWrite = File.GetLastWriteTime(indexPath);
                 files.Clear();
+                types.Clear();
                 using (var fileReader = File.OpenText(indexPath)) {
                     while (!fileReader.EndOfStream) {
-                        files.Add(fileReader.ReadLine());
+                        var line = fileReader.ReadLine() ?? "";
+                        files.Add(line.Substring(0, 36)); // 36 char uuid
+                        types.Add(CHAR_TO_TYPE[line[line.Length - 1]]);
                     }
                 }
             }
             yield return null;
             // loop files
-            foreach (var file in files) {
+            for (var i = 0; i < files.Count; i++) {
+                var file = files[i];
+                var type = types[i];
                 var path = root + file + ".png";
                 var record = Records.Find(path, (r, p) => r.Path == p);
                 // create if new file in directory
@@ -76,6 +95,7 @@ public class ImageReader : Manager<ImageReader> {
                     record = new ImageRecord {
                         Name = file,
                         Path = root + file + ".png",
+                        Type = type,
                         Texture = new Texture2D(2, 2),
                     };
                     Records.Add(record);
