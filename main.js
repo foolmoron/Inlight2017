@@ -178,6 +178,14 @@ window.onload = function() {
         }
     })
 
+    // intro
+    var intro = document.querySelector('.intro')
+    var intros = Array.from(document.querySelectorAll('.intro > span'))
+    intro.onclick = (e) => {
+        intro.classList.add('fade')
+        setTimeout(() => intro.classList.add('hidden'), 700)
+    }
+
     // prompt text and animation
     function setupPrompt(prompt) {
         var promptDiv = document.querySelector('.prompt')
@@ -214,6 +222,9 @@ window.onload = function() {
             }
             doFunc(0)
         }
+
+        // show intro
+        showOnly(intros)
 
         // show instructions
         showOnly(instructions)
@@ -380,6 +391,9 @@ window.onload = function() {
                     // clear loading flag
                     window.loadingJSON = false
                 })
+
+                // disable intro instantly
+                intro.classList.add('hidden')
             }
 
             readyToSetup = false
