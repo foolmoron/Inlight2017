@@ -59,7 +59,6 @@ public class Spawner : MonoBehaviour {
         objects.Add(obj.GetComponent<SpawnedObject>());
 
         obj.GetComponent<SpawnedObject>().Record = record;
-        obj.GetComponentInSelfOrChildren<Renderer>().material.mainTexture = record.Texture;
 
         var startPosition =
             TargetTransform.position +

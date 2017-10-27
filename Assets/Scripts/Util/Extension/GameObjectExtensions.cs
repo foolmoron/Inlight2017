@@ -11,4 +11,12 @@ public static class GameObjectExtensions {
         }
         return t;
     }
+
+    public static T GetComponentInSelfOrChildren<T>(this Component component) where T : Component {
+        var t = component.GetComponent<T>();
+        if (!t) {
+            t = component.GetComponentInChildren<T>();
+        }
+        return t;
+    }
 }
