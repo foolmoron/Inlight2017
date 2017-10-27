@@ -125,8 +125,11 @@ const STATUS = {
     DELETED: 'deleted',
 }
 
+const TYPES = ['a', 'p', 't', 'b', 'g']
+
 const Drawing = (init) => Object.assign({
     uuid: uuid(),
+    type: 'a',
     json: '',
     status: STATUS.NEW,
     empty: true,
@@ -147,6 +150,7 @@ function checkDrawing(req, res, next) {
 
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
+    newDrawing.type = TYPES[Math.floor(Math.random() * TYPES.length)]
     newDrawing.colors = getNewColorPalette()
     newDrawing.prompt = Math.random() < 0.5 ? 'plant' : 'animal'
     data.drawings.insert(newDrawing)
@@ -169,6 +173,7 @@ app.get('/drawingindex/:sinceTime', (req, res, next) => {
     var drawings = data.drawings.where(drawing => drawing.meta.updated >= sinceTime)
     var changes = drawings.map(drawing => ({
         uuid: drawing.uuid,
+        type: drawing.type,
         deleted: drawing.status == STATUS.DELETED,
     }))
     res.json({time: new Date().getTime(), changes})

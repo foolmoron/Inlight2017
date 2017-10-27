@@ -67,7 +67,11 @@ footer {
     margin-bottom: 10px;
 }
 .drawings .drawing-row.completed {
-    border: 8px solid #ff3bcc;
+    box-shadow: 
+        inset 6px 0px 0px 0px #ff3bcc, 
+        inset 0px 6px 0px 0px #ff3bcc, 
+        inset -6px 0px 0px 0px #ff3bcc, 
+        inset 0px -6px 0px 0px #ff3bcc;
 }
 .drawings .drawing-row.new {
     background-color: #ececec;
