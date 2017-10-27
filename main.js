@@ -183,6 +183,7 @@ window.onload = function() {
     var intros = Array.from(document.querySelectorAll('.intro > span'))
     intro.onclick = (e) => {
         intro.classList.add('fade')
+        drawingObj.uuidTime = new Date().getTime()
         setTimeout(() => intro.classList.add('hidden'), 700)
     }
 
@@ -238,6 +239,7 @@ window.onload = function() {
             }
 
             if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME) {
+                drawingObj.uuidTime = Math.max(drawingObj.uuidTime, new Date().getTime() - (DRAWING_MIN_TIME - 5000))
                 showOnly(timeErrors)
                 hadError = true
             } else if (canvas._objects.length == 0) {
@@ -268,10 +270,11 @@ window.onload = function() {
         // check for error being resolved
         setInterval(() => {
             if (hadError) {
-                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME && canvas._objects.length == 0) {
+                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0) {
                     return
                 }
                 hadError = false
+                showOnly(okayMessages)
             }
         }, 500)
     }
