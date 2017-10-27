@@ -9,6 +9,13 @@ public class Egg : MonoBehaviour
     [Range(0, 5)]
     public int Health = 3;
 
+    [Range(0, 10)]
+    public float AnimalOriginalScale = 0.2f;
+    [Range(0, 10)]
+    public float AnimalFinalScale = 2f;
+    [Range(0, 1)]
+    public float AnimalScaleSpeed = 0.2f;
+
     ImageRecord record;
     GameObject solid;
     List<GameObject> shards;
@@ -28,6 +35,7 @@ public class Egg : MonoBehaviour
 
     void Start() {
         animal = AnimalPrefab.GetObjectPool().Obtain<SpawnedObject>();
+        animal.ScaleFactor = animal.TargetScale = AnimalOriginalScale;
         animal.transform.parent = transform.parent;
         animal.transform.localPosition = Vector3.zero;
         animal.GetComponentInChildren<Animation>().enabled = false;
@@ -68,6 +76,8 @@ public class Egg : MonoBehaviour
 
          Health--;
         if (Health <= 0) {
+            animal.TargetScale = AnimalFinalScale;
+            animal.ScaleSpeed = AnimalScaleSpeed;
             animal.transform.parent = null;
             animal.GetComponentInChildren<Animation>().enabled = true;
 

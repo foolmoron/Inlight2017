@@ -8,12 +8,20 @@ public class SpawnedObject : MonoBehaviour {
     public float ScaleFactor = 1;
     public bool ZAligned;
 
+    public float TargetScale = 1;
+    [Range(0, 1)]
+    public float ScaleSpeed = 0.9f;
+
     Vector2 originalScale;
     new Renderer renderer;
 
     void Awake() {
         originalScale = transform.localScale;
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
+    }
+
+    void FixedUpdate() {
+        ScaleFactor = Mathf.Lerp(ScaleFactor, TargetScale, ScaleSpeed);
     }
 
     void Update() {
