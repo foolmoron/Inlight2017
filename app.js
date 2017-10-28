@@ -152,7 +152,7 @@ app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
     newDrawing.type = TYPES[Math.floor(Math.random() * TYPES.length)]
     newDrawing.colors = getNewColorPalette()
-    newDrawing.prompt = Math.random() < 0.5 ? 'plant' : 'animal'
+    newDrawing.prompt = newDrawing.type == 'a' ? 'animal' : 'plant'
     data.drawings.insert(newDrawing)
 
     var drawing = data.drawings.findOne({uuid: newDrawing.uuid})
