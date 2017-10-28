@@ -73,12 +73,12 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
         // read
         drawingObj.uuid = obj.uuid
         drawingObj.uuidTime = new Date().getTime()
-        drawingObj.prompt = obj.prompt
         drawingObj.colors = obj.colors
         // save
         localStorage.setItem('drawing', JSON.stringify(drawingObj))
     }
     // setup
+    drawingObj.prompt = obj.type == 'a' ? 'animal' : 'plant'
     drawingObj.json = obj.json
     readyToSetup = true
     console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
