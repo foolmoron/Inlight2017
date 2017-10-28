@@ -278,6 +278,14 @@ app.get('/drawing/:uuid/delete', checkDrawing, (req, res, next) => {
     // return
     res.sendStatus(200)
 })
+app.get('/drawing/:uuid/type/:type', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
+    // update
+    drawing.type = req.params.type
+    data.drawings.update(drawing)
+    // return
+    res.sendStatus(200)
+})
 
 app.get('/globalautoapprove', (req, res, next) => {
     res.send(GLOBAL.autoapprove)

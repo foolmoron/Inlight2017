@@ -28,6 +28,13 @@
             </div>
             <div class="col-xs-3 text-center">
                 <b><$= drawing.dimensions.width $> x <$= drawing.dimensions.height $></b>
+                <select onchange="get('/drawing/<$= drawing.uuid $>/type/' + this.value)">
+                    <option value="a" <$= drawing.type == 'a' ? 'selected' : '' $>>ANIMAL</option>
+                    <option value="p" <$= drawing.type == 'p' ? 'selected' : '' $>>PLANT</option>
+                    <option value="t" <$= drawing.type == 't' ? 'selected' : '' $>>TREE</option>
+                    <option value="b" <$= drawing.type == 'b' ? 'selected' : '' $>>BUSH</option>
+                    <option value="g" <$= drawing.type == 'g' ? 'selected' : '' $>>GRASS</option>
+                </select>
             </div>
             <div class="col-xs-4 text-right">
                 <b><$= new Date(drawing.meta.updated).toLocaleString() $></b>
