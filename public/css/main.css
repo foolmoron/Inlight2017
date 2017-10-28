@@ -115,6 +115,7 @@ footer {
 
 .drawings .filter-container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-evenly;
     margin-top: 10px;
     margin-bottom: 20px;
@@ -126,7 +127,7 @@ footer {
     margin: 0px 8px;
     color: white;
     font-weight: bold;
-    font-size: 1.3em;
+    font-size: 1.2em;
     line-height: 2;
     transition: flex-grow 0.2s;
 }

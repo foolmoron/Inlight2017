@@ -9,12 +9,12 @@
         </div>
     </div>
     <div class="filter-container">
-        <div class="btn" data-filter="queue" data-color="rgb(228, 8, 211)" onclick="changeFilterMode(this)">Priority Queue</div>
-        <div class="btn" data-filter="fresh" data-color="rgb(0, 189, 219)" onclick="changeFilterMode(this)">Fresh</div>
-        <div class="btn" data-filter="approved" data-color="rgb(0, 67, 219)" onclick="changeFilterMode(this)">Approved</div>
-        <div class="btn" data-filter="autoapproved" data-color="rgb(13, 219, 0)" onclick="changeFilterMode(this)">Auto-Approved</div>
-        <div class="btn" data-filter="ignored" data-color="rgb(219, 142, 0)" onclick="changeFilterMode(this)">Ignored</div>
-        <div class="btn" data-filter="deleted" data-color="rgb(219, 40, 0)" onclick="changeFilterMode(this)">Deleted</div>
+        <div class="btn" data-filter="queue" data-color="rgb(228, 8, 211)" onclick="changeFilterMode(this)">Priority Queue (<span id="queueCount">999</span>)</div>
+        <div class="btn" data-filter="fresh" data-color="rgb(0, 189, 219)" onclick="changeFilterMode(this)">Fresh (<span id="freshCount">999</span>)</div>
+        <div class="btn" data-filter="approved" data-color="rgb(0, 67, 219)" onclick="changeFilterMode(this)">Approved (<span id="approvedCount">999</span>)</div>
+        <div class="btn" data-filter="autoapproved" data-color="rgb(13, 219, 0)" onclick="changeFilterMode(this)">Auto-Approved (<span id="autoapprovedCount">999</span>)</div>
+        <div class="btn" data-filter="ignored" data-color="rgb(219, 142, 0)" onclick="changeFilterMode(this)">Ignored (<span id="ignoredCount">999</span>)</div>
+        <div class="btn" data-filter="deleted" data-color="rgb(219, 40, 0)" onclick="changeFilterMode(this)">Deleted (<span id="deletedCount">999</span>)</div>
     </div>
     <div class="drawing-container">
     </div>
@@ -22,14 +22,16 @@
 
 <script id="drawing-template" type="text/template">
     <div class="row drawing-row <$= drawing.status $> <$= drawing.completedTime ? 'completed' : '' $>" data-uuid="<$= drawing.uuid $>">
-        <div class="col-xs-5 text-left">
-            <b><$= drawing.uuid $> -- <$= drawing.status $> <$ if (drawing.completedTime) { $>-- COMPLETED<$ } $></b>
-        </div>
-        <div class="col-xs-3 text-center">
-            <b><$= drawing.dimensions.width $> x <$= drawing.dimensions.height $></b>
-        </div>
-        <div class="col-xs-4 text-right">
-            <b><$= new Date(drawing.meta.updated).toLocaleString() $></b>
+        <div class="row" style="padding: 0px 10px;">
+            <div class="col-xs-5 text-left">
+                <b><$= drawing.uuid $> -- <$= drawing.status $> <$ if (drawing.completedTime) { $>-- COMPLETED<$ } $></b>
+            </div>
+            <div class="col-xs-3 text-center">
+                <b><$= drawing.dimensions.width $> x <$= drawing.dimensions.height $></b>
+            </div>
+            <div class="col-xs-4 text-right">
+                <b><$= new Date(drawing.meta.updated).toLocaleString() $></b>
+            </div>
         </div>
         <div class="col-xs-3 col-md-3">
             <button class="btn btn-warning primary-button <$= drawing.status == 'ignored' ? 'hidden' : '' $>" onclick="get('/drawing/<$= drawing.uuid $>/ignore/true', update)">Ignore</button>
@@ -75,8 +77,7 @@ function renderDrawing(drawing) {
 
 function renderDrawings() {
     // filter and sort
-    var filteredDrawings = drawings.filter(filter)
-    filteredDrawings.sort(sort)
+    var filteredDrawings = filters[currentFilter].items
     // render nodes
     var nodes = filteredDrawings.map(drawing => {
         var existingNode = document.querySelector('[data-uuid="' + drawing.uuid + '"]')
@@ -115,46 +116,68 @@ function updateGlobalAutoApprove(toggle) {
     }
 }
 
-var filter = (item) => true
-var sort = (item1, item2) => 0
+// filter setup
+var filters = {
+    // new and updated, completed only, sorted by longest waiting for status update
+    queue: {
+        countEl: document.querySelector('#queueCount'),
+        filter: (item) => item.completedTime && (item.status == 'new' || item.status == 'updated'),
+        sort: (item1, item2) => ((item1.completedTime || 0) - (item2.completedTime || 0)) || (item1.meta.updated - item2.meta.updated),
+        items: [],
+    },
+    // new and updated, not completed, sorted by last updated
+    fresh: {
+        countEl: document.querySelector('#freshCount'),
+        filter: (item) => !item.completedTime && !item.empty && (item.status == 'new' || item.status == 'updated'),
+        sort: (item1, item2) => item1.meta.updated - item2.meta.updated,
+        items: [],
+    },
+    // approved only, sorted by earliest updated
+    approved: {
+        countEl: document.querySelector('#approvedCount'),
+        filter: (item) => item.status == 'approved',
+        sort: (item1, item2) => item2.meta.updated - item1.meta.updated,
+        items: [],
+    },
+    // auto approved only, sorted by earliest updated
+    autoapproved: {
+        countEl: document.querySelector('#autoapprovedCount'),
+        filter: (item) => item.autoapprove,
+        sort: (item1, item2) => item2.meta.updated - item1.meta.updated,
+        items: [],
+    },
+    // ignored only, sorted by earliest updated
+    ignored: {
+        countEl: document.querySelector('#ignoredCount'),
+        filter: (item) => item.status == 'ignored',
+        sort: (item1, item2) => item2.meta.updated - item1.meta.updated,
+        items: [],
+    },
+    // deleted only, sorted by earliest updated
+    deleted: {
+        countEl: document.querySelector('#deletedCount'),
+        filter: (item) => item.status == 'deleted',
+        sort: (item1, item2) => item2.meta.updated - item1.meta.updated,
+        items: [],
+    },
+}
+var currentFilter = 'queue'
+
+function updateLists() {
+    for (var filterType in filters) {
+        var filterObj = filters[filterType]
+        filterObj.items = drawings.filter(filterObj.filter)
+        filterObj.items.sort(filterObj.sort)
+        filterObj.countEl.textContent = filterObj.items.length
+    }
+}
+
 function changeFilterMode(filterPicker) {
+    currentFilter = filterPicker.dataset.filter
     // set buttons
     filterPickers.forEach(picker => { picker.style.opacity = 0.5; picker.style.flexGrow = 1 })
     filterPicker.style.opacity = 1
     filterPicker.style.flexGrow = 2
-    // set funcs
-    switch(filterPicker.dataset.filter) {
-        case 'queue':
-            // new and updated, completed only, sorted by longest waiting for status update
-            filter = (item) => item.completedTime && (item.status == 'new' || item.status == 'updated')
-            sort = (item1, item2) => ((item1.completedTime || 0) - (item2.completedTime || 0)) || (item1.meta.updated - item2.meta.updated)
-            break;
-        case 'fresh':
-            // new and updated, not completed, sorted by last updated
-            filter = (item) => !item.completedTime && !item.empty && (item.status == 'new' || item.status == 'updated')
-            sort = (item1, item2) => item1.meta.updated - item2.meta.updated
-            break;
-        case 'approved':
-            // approved only, sorted by earliest updated
-            filter = (item) => item.status == 'approved'
-            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
-            break;
-        case 'autoapproved':
-            // auto approved only, sorted by earliest updated
-            filter = (item) => item.autoapprove
-            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
-            break;
-        case 'ignored':
-            // ignored only, sorted by earliest updated
-            filter = (item) => item.status == 'ignored'
-            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
-            break;
-        case 'deleted':
-            // deleted only, sorted by earliest updated
-            filter = (item) => item.status == 'deleted'
-            sort = (item1, item2) => item2.meta.updated - item1.meta.updated
-            break;
-    }
     // rerender
     renderDrawings()
 }
@@ -178,6 +201,8 @@ function update() {
             }
             drawings.push(drawing)
         })
+        // update lists
+        updateLists()
         // render
         if (response.drawings.length) {
             renderDrawings()
