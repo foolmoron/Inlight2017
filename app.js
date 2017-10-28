@@ -136,7 +136,6 @@ const Drawing = (init) => Object.assign({
     completedTime: null,
     autoapprove: false,
     colors: [],
-    prompt: '',
 }, init)
 
 function checkDrawing(req, res, next) {
@@ -152,7 +151,6 @@ app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
     newDrawing.type = TYPES[Math.floor(Math.random() * TYPES.length)]
     newDrawing.colors = getNewColorPalette()
-    newDrawing.prompt = newDrawing.type == 'a' ? 'animal' : 'plant'
     data.drawings.insert(newDrawing)
 
     var drawing = data.drawings.findOne({uuid: newDrawing.uuid})
