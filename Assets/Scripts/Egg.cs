@@ -17,7 +17,7 @@ public class Egg : MonoBehaviour
     [Range(0, 1)]
     public float AnimalScaleSpeed = 0.2f;
 
-    ImageRecord record;
+    public ImageRecord Record;
     GameObject solid;
     List<GameObject> shards;
 
@@ -44,14 +44,14 @@ public class Egg : MonoBehaviour
     }
 
     void Update() {
-        if (record == null) {
-            record = ImageReader.Inst.GetWeightedRandomRecord();
+        if (Record == null) {
+            Record = ImageReader.Inst.GetWeightedRandomRecord();
         }
-        if (record != null) {
-            animal.Record = record;
-            solid.GetComponent<Renderer>().material.color = record.MainColor;
+        if (Record != null) {
+            animal.Record = Record;
+            solid.GetComponent<Renderer>().material.color = Record.MainColor;
             foreach (var shard in shards) {
-                shard.GetComponent<Renderer>().material.color = record.MainColor;
+                shard.GetComponent<Renderer>().material.color = Record.MainColor;
             }
         }
         // animal stays up right
@@ -68,6 +68,9 @@ public class Egg : MonoBehaviour
     }
     
     void OnTriggerEnter(Collider other) {
+
+        Debug.Log(other.name);
+
         solid.SetActive(false);
         var shard = shards.Random();
         shards.Remove(shard);

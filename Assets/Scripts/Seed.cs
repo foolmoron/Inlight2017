@@ -8,8 +8,9 @@ public class Seed : MonoBehaviour
     ObjectPool plantPool;
 
     public LayerMask CollisionMask;
+    public bool WillGrowPlant;
 
-    ImageRecord record;
+    public ImageRecord Record;
     Renderer seedRenderer;
 
     void Awake() {
@@ -21,15 +22,18 @@ public class Seed : MonoBehaviour
     }
 
     void Update() {
-        if (record == null) {
-            record = ImageReader.Inst.GetWeightedRandomRecord();
+        if (Record == null) {
+            Record = ImageReader.Inst.GetWeightedRandomRecord();
         }
-        if (record != null) {
-            seedRenderer.material.color = record.MainColor;
+        if (Record != null) {
+            seedRenderer.material.color = Record.MainColor;
         }
     }
 
     void OnCollisionEnter(Collision collision) {
+        if (!WillGrowPlant) {
+            return;
+        }
         if (((1 << collision.gameObject.layer) & CollisionMask.value) != 0) {
             RaycastHit hit;
             if (Physics.Raycast(new Ray(transform.position.withY(200), Vector3.down), out hit, 500, CollisionMask.value)) {

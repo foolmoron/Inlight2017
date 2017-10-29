@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 public class Spawner : MonoBehaviour {
 
-    public GameObject TreePrefab;
-    ObjectPool treePool;
+    public GameObject SeedPrefab;
+    ObjectPool seedPool;
 
-    public GameObject AnimalPrefab;
-    ObjectPool animalPool;
+    public GameObject EggPrefab;
+    ObjectPool eggPool;
 
     List<SpawnedObject> objects = new List<SpawnedObject>(100);
 
@@ -28,8 +28,8 @@ public class Spawner : MonoBehaviour {
     public float SpawnIntervalRandomness = 2;
 
     void Start() {
-        treePool = TreePrefab.GetObjectPool(20);
-        animalPool = AnimalPrefab.GetObjectPool(20);
+        seedPool = SeedPrefab.GetObjectPool(20);
+        eggPool = EggPrefab.GetObjectPool(20);
 
         // kill objects on image removed
         ImageReader.Inst.OnRemoved += record => {
@@ -55,10 +55,17 @@ public class Spawner : MonoBehaviour {
     }
     
     void Spawn(ImageRecord record) {
-        var obj = (record.Dimensions.aspect() > 1 ? animalPool : treePool).Obtain();
+        var obj = (record.Type == ImageType.Animal ? eggPool : seedPool).Obtain();
         objects.Add(obj.GetComponent<SpawnedObject>());
 
-        obj.GetComponent<SpawnedObject>().Record = record;
+        var egg = obj.GetComponentInSelfOrChildren<Egg>();
+        if (egg) {
+            egg.Record = record;
+        }
+        var seed = obj.GetComponentInSelfOrChildren<Seed>();
+        if (seed) {
+            seed.Record = record;
+        }
 
         var startPosition =
             TargetTransform.position +
