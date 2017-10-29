@@ -5,6 +5,7 @@ using UnityEngine;
 public class Egg : MonoBehaviour
 {
     public GameObject AnimalPrefab;
+    ObjectPool animalPool;
 
     [Range(0, 5)]
     public int Health = 3;
@@ -34,7 +35,8 @@ public class Egg : MonoBehaviour
     }
 
     void Start() {
-        animal = AnimalPrefab.GetObjectPool().Obtain<SpawnedObject>();
+        animalPool = AnimalPrefab.GetObjectPool(100);
+        animal = animalPool.Obtain<SpawnedObject>();
         animal.ScaleFactor = animal.TargetScale = AnimalOriginalScale;
         animal.transform.parent = transform.parent;
         animal.transform.localPosition = Vector3.zero;

@@ -4,10 +4,11 @@ using System.Collections;
 public class SpawnedObject : MonoBehaviour {
 
     public ImageRecord Record;
-    [Range(0, 10)]
-    public float ScaleFactor = 1;
     public bool ZAligned;
 
+    [Range(0, 10)]
+    public float ScaleFactor = 1;
+    [Range(0, 10)]
     public float TargetScale = 1;
     [Range(0, 1)]
     public float ScaleSpeed = 0.9f;
@@ -32,6 +33,9 @@ public class SpawnedObject : MonoBehaviour {
                 transform.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Dimensions.aspect()) * ScaleFactor;
             if (Record.Texture)
                 renderer.material.mainTexture = Record.Texture;
+        }
+        if (Record == null || Record.Dimensions == Vector2.zero) {
+            transform.localScale = Vector3.one * ScaleFactor;
         }
     }
 }
