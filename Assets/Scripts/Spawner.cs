@@ -17,9 +17,7 @@ public class Spawner : MonoBehaviour {
     public float HeightOffsetFromGround;
 
     public Transform TargetTransform;
-    public Vector3 PositionOffset;
     public Vector3 PositionRandomness;
-    public Vector3 RotationRandomness;
 
     [Range(0, 20)]
     public float SpawnTimer;
@@ -76,19 +74,15 @@ public class Spawner : MonoBehaviour {
             seed.Record = record;
         }
 
-        var randomStart = Random.insideUnitCircle.normalized.scaledWith(new Vector2(PositionRandomness.x, PositionRandomness.z));
-        var randomOffset = new Vector3(randomStart.x, 0, randomStart.y) + new Vector3((Random.value - 0.5f) * PositionRandomness.x, (Random.value - 0.5f) * PositionRandomness.y, (Random.value - 0.5f) * PositionRandomness.z);
+        var dir = Random.insideUnitCircle.normalized;
+        var randomStart = dir.scaledWith(new Vector2(PositionRandomness.x, PositionRandomness.z));
+        var randomOffset = new Vector3(randomStart.x, 0, randomStart.y) + new Vector3(dir.x, 0, dir.y).scaledWith(new Vector3(Random.value * PositionRandomness.x, Random.value * PositionRandomness.y, Random.value * PositionRandomness.z));
         var startPosition =
             TargetTransform.position +
-            PositionOffset +
             randomOffset
             ;
         RaycastHit hit;
         Physics.Raycast(startPosition, Vector3.down, out hit, 100, CollisionLayers.value);
         obj.transform.position = hit.point.plusY(HeightOffsetFromGround);
-
-        obj.transform.rotation =
-            Quaternion.Euler((Random.value - 0.5f) * RotationRandomness.x, (Random.value - 0.5f) * RotationRandomness.y, (Random.value - 0.5f) * RotationRandomness.z)
-            ;
     }
 }
