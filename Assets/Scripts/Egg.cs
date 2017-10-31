@@ -21,8 +21,6 @@ public class Egg : MonoBehaviour
     GameObject solid;
     List<GameObject> shards;
 
-    SpawnedObject animal;
-
     void Awake() {
         solid = transform.parent.Find("pSolid1").gameObject;
         shards = new List<GameObject> {
@@ -36,12 +34,6 @@ public class Egg : MonoBehaviour
 
     void Start() {
         animalPool = AnimalPrefab.GetObjectPool(100);
-        animal = animalPool.Obtain<SpawnedObject>();
-        animal.ScaleFactor = animal.TargetScale = AnimalOriginalScale;
-        animal.transform.parent = transform.parent;
-        animal.transform.localPosition = Vector3.zero;
-        animal.GetComponentInSelfOrChildren<Wander>().enabled = false;
-        animal.GetComponentInChildren<Animation>().enabled = false;
     }
 
     void Update() {
@@ -49,15 +41,10 @@ public class Egg : MonoBehaviour
             Record = ImageReader.Inst.GetWeightedRandomRecord();
         }
         if (Record != null) {
-            animal.Record = Record;
             solid.GetComponent<Renderer>().material.color = Record.MainColor;
             foreach (var shard in shards) {
                 shard.GetComponent<Renderer>().material.color = Record.MainColor;
             }
-        }
-        // animal stays up right
-        {
-            animal.transform.rotation = Quaternion.identity;
         }
     }
 
@@ -69,9 +56,6 @@ public class Egg : MonoBehaviour
     }
     
     void OnTriggerEnter(Collider other) {
-
-        Debug.Log(other.name);
-
         solid.SetActive(false);
 
         var i = 3 - Health;
@@ -81,9 +65,10 @@ public class Egg : MonoBehaviour
 
          Health--;
         if (Health <= 0) {
+            var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
+            animal.ScaleFactor = AnimalOriginalScale;
             animal.TargetScale = AnimalFinalScale;
             animal.ScaleSpeed = AnimalScaleSpeed;
-            animal.transform.parent = null;
             animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
             animal.GetComponentInChildren<Animation>().enabled = true;
 
@@ -91,6 +76,7 @@ public class Egg : MonoBehaviour
                 BreakShard(s);
             }
             Destroy(gameObject);
+            Destroy(transform.parent.gameObject);
         }
     }
 }

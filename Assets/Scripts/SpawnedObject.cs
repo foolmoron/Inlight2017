@@ -12,13 +12,18 @@ public class SpawnedObject : MonoBehaviour {
     public float TargetScale = 1;
     [Range(0, 1)]
     public float ScaleSpeed = 0.9f;
+    public Transform ScaleTarget;
 
     Vector2 originalScale;
     new Renderer renderer;
 
     void Awake() {
-        originalScale = transform.localScale;
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
+    }
+
+    void Start() {
+        ScaleTarget = ScaleTarget != null ? ScaleTarget : transform;
+        originalScale = ScaleTarget.localScale;
     }
 
     void FixedUpdate() {
@@ -28,14 +33,14 @@ public class SpawnedObject : MonoBehaviour {
     void Update() {
         if (Record != null) {
             if (Record.Dimensions != Vector2.zero && !ZAligned)
-                transform.localScale = new Vector3(originalScale.x * Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
+                ScaleTarget.localScale = new Vector3(originalScale.x * Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
             if (Record.Dimensions != Vector2.zero && ZAligned)
-                transform.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Dimensions.aspect()) * ScaleFactor;
+                ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Dimensions.aspect()) * ScaleFactor;
             if (Record.Texture)
                 renderer.material.mainTexture = Record.Texture;
         }
         if (Record == null || Record.Dimensions == Vector2.zero) {
-            transform.localScale = Vector3.one * ScaleFactor;
+            ScaleTarget.localScale = Vector3.one * ScaleFactor;
         }
     }
 }

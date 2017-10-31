@@ -10,7 +10,8 @@ public class Spawner : MonoBehaviour {
     public GameObject EggPrefab;
     ObjectPool eggPool;
 
-    List<SpawnedObject> objects = new List<SpawnedObject>(100);
+    List<Egg> eggs = new List<Egg>(100);
+    List<Seed> seeds = new List<Seed>(100);
 
     public LayerMask CollisionLayers;
     public float HeightOffsetFromGround;
@@ -33,10 +34,17 @@ public class Spawner : MonoBehaviour {
 
         // kill objects on image removed
         ImageReader.Inst.OnRemoved += record => {
-            for (int i = 0; i < objects.Count; i++) {
-                if (objects[i].Record == record) {
-                    objects[i].gameObject.Release();
-                    objects.RemoveAt(i);
+            for (int i = 0; i < eggs.Count; i++) {
+                if (eggs[i].Record == record) {
+                    eggs[i].gameObject.Release();
+                    eggs.RemoveAt(i);
+                    i--;
+                }
+            }
+            for (int i = 0; i < seeds.Count; i++) {
+                if (seeds[i].Record == record) {
+                    seeds[i].gameObject.Release();
+                    seeds.RemoveAt(i);
                     i--;
                 }
             }
@@ -56,14 +64,15 @@ public class Spawner : MonoBehaviour {
     
     void Spawn(ImageRecord record) {
         var obj = (record.Type == ImageType.Animal ? eggPool : seedPool).Obtain();
-        objects.Add(obj.GetComponent<SpawnedObject>());
 
         var egg = obj.GetComponentInSelfOrChildren<Egg>();
         if (egg) {
+            eggs.Add(egg);
             egg.Record = record;
         }
         var seed = obj.GetComponentInSelfOrChildren<Seed>();
         if (seed) {
+            seeds.Add(seed);
             seed.Record = record;
         }
 
