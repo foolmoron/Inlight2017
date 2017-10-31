@@ -56,14 +56,14 @@ public class Egg : MonoBehaviour
     }
     
     void OnTriggerEnter(Collider other) {
-        solid.SetActive(false);
-
-        var i = 3 - Health;
-        if (shards.Count > i) {
-            shards[i].GetComponent<Animator>().enabled = true;
+        var shard = shards.Random();
+        shards.Remove(shard);
+        foreach (var s in shards) {
+            s.GetComponent<Animator>().enabled = true;
         }
+        BreakShard(shard);
 
-         Health--;
+        Health--; 
         if (Health <= 0) {
             var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
             animal.Record = Record;
