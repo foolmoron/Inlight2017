@@ -76,10 +76,12 @@ public class Spawner : MonoBehaviour {
             seed.Record = record;
         }
 
+        var randomStart = Random.insideUnitCircle.normalized.scaledWith(new Vector2(PositionRandomness.x, PositionRandomness.z));
+        var randomOffset = new Vector3(randomStart.x, 0, randomStart.y) + new Vector3((Random.value - 0.5f) * PositionRandomness.x, (Random.value - 0.5f) * PositionRandomness.y, (Random.value - 0.5f) * PositionRandomness.z);
         var startPosition =
             TargetTransform.position +
             PositionOffset +
-            new Vector3((Random.value - 0.5f) * PositionRandomness.x, (Random.value - 0.5f) * PositionRandomness.y, (Random.value - 0.5f) * PositionRandomness.z)
+            randomOffset
             ;
         RaycastHit hit;
         Physics.Raycast(startPosition, Vector3.down, out hit, 100, CollisionLayers.value);
