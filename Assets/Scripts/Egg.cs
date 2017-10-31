@@ -74,12 +74,9 @@ public class Egg : MonoBehaviour
 
         solid.SetActive(false);
 
-        var shard = shards[0];
-        shards.Remove(shard);
-        BreakShard(shard);
-
-        if (shards.Count > 0) {
-            shards[0].GetComponent<Animator>().enabled = true;
+        var i = 3 - Health;
+        if (shards.Count > i) {
+            shards[i].GetComponent<Animator>().enabled = true;
         }
 
          Health--;
