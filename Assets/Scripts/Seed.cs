@@ -40,6 +40,7 @@ public class Seed : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(new Ray(transform.position.withY(200), Vector3.down), out hit, 500, CollisionMask.value)) {
                 var plant = plantPool.Obtain<SpawnedObject>(hit.point);
+                plant.Record = Record;
                 plant.TargetScale = Mathf.Lerp(0.2f, 3f, Random.value);
                 plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
             }

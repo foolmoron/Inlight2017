@@ -66,6 +66,7 @@ public class Egg : MonoBehaviour
          Health--;
         if (Health <= 0) {
             var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
+            animal.Record = Record;
             animal.ScaleFactor = AnimalOriginalScale;
             animal.TargetScale = AnimalFinalScale;
             animal.ScaleSpeed = AnimalScaleSpeed;
