@@ -1,12 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using VRTK;
+using Random = UnityEngine.Random;
 
 public class Seed : MonoBehaviour
 {
-    public GameObject PlantPrefab;
-    ObjectPool plantPool;
+    public GameObject PlanterPrefab;
+    ObjectPool planterPool;
 
     public LayerMask CollisionMask;
     public bool WillGrowPlant;
@@ -14,13 +16,17 @@ public class Seed : MonoBehaviour
     public ImageRecord Record;
     Renderer seedRenderer;
 
+    public PlanterParams TreeParams;
+    public PlanterParams BushParams;
+    public PlanterParams GrassParams;
+
     void Awake() {
         seedRenderer = GetComponent<Renderer>();
         GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += (sender, args) => WillGrowPlant = true;
     }
 
     void Start() {
-        plantPool = PlantPrefab.GetObjectPool(1000);
+        planterPool = PlanterPrefab.GetObjectPool(100);
     }
 
     void Update() {
@@ -39,10 +45,24 @@ public class Seed : MonoBehaviour
         if (((1 << collision.gameObject.layer) & CollisionMask.value) != 0) {
             RaycastHit hit;
             if (Physics.Raycast(new Ray(transform.position.withY(200), Vector3.down), out hit, 500, CollisionMask.value)) {
-                var plant = plantPool.Obtain<SpawnedObject>(hit.point);
-                plant.Record = Record;
-                plant.TargetScale = Mathf.Lerp(0.2f, 3f, Random.value);
-                plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
+                var planter = planterPool.Obtain<Planter>(hit.point);
+                planter.Record = Record;
+                switch (Record.Type) {
+                    case ImageType.Tree:
+                        planter.Params = TreeParams;
+                        break;
+                    case ImageType.Bush:
+                        planter.Params = BushParams;
+                        break;
+                    case ImageType.Grass:
+                        planter.Params = GrassParams;
+                        break;
+                    default:
+                        var r = Random.value;
+                        planter.Params = r <= 0.33f ? TreeParams : r <= 0.66f ? BushParams : GrassParams;
+                        break;
+                }
+                planter.DoPlanting();
             }
 
             Destroy(gameObject);
