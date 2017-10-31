@@ -22,6 +22,7 @@ Assets/UnityVS/
 ProjectSettings/ProjectVersion.txt
 Images/index.txt
 Images/*.png
+Images/*.jpg
 !/Assets/*.obj
 !/Assets/*/*.obj
 !/Assets/*/*/*.obj
