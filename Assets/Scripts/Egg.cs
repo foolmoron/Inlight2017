@@ -40,6 +40,7 @@ public class Egg : MonoBehaviour
         animal.ScaleFactor = animal.TargetScale = AnimalOriginalScale;
         animal.transform.parent = transform.parent;
         animal.transform.localPosition = Vector3.zero;
+        animal.GetComponentInSelfOrChildren<Wander>().enabled = false;
         animal.GetComponentInChildren<Animation>().enabled = false;
     }
 
@@ -72,18 +73,21 @@ public class Egg : MonoBehaviour
         Debug.Log(other.name);
 
         solid.SetActive(false);
-        var shard = shards.Random();
+
+        var shard = shards[0];
         shards.Remove(shard);
-        foreach (var s in shards) {
-            s.GetComponent<Animator>().enabled = true;
-        }
         BreakShard(shard);
+
+        if (shards.Count > 0) {
+            shards[0].GetComponent<Animator>().enabled = true;
+        }
 
          Health--;
         if (Health <= 0) {
             animal.TargetScale = AnimalFinalScale;
             animal.ScaleSpeed = AnimalScaleSpeed;
             animal.transform.parent = null;
+            animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
             animal.GetComponentInChildren<Animation>().enabled = true;
 
             foreach (var s in shards) {
