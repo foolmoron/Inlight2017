@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VRTK;
 
 public class Seed : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class Seed : MonoBehaviour
 
     void Awake() {
         seedRenderer = GetComponent<Renderer>();
+        GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += (sender, args) => WillGrowPlant = true;
     }
 
     void Start() {
