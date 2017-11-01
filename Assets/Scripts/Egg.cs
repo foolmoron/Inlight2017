@@ -53,6 +53,7 @@ public class Egg : MonoBehaviour
         shard.GetComponent<Collider>().enabled = true;
         shard.GetComponent<Rigidbody>().isKinematic = false;
         shard.GetComponent<Animator>().enabled = false;
+        shard.GetComponent<DieOverTime>().enabled = true;
     }
     
     void OnTriggerEnter(Collider other) {
@@ -76,7 +77,6 @@ public class Egg : MonoBehaviour
             foreach (var s in shards) {
                 BreakShard(s);
             }
-            Destroy(gameObject);
             Destroy(transform.parent.gameObject);
         }
     }

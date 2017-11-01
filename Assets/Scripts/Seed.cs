@@ -65,7 +65,7 @@ public class Seed : MonoBehaviour
                 planter.DoPlanting();
             }
 
-            Destroy(gameObject);
+            gameObject.Release();
         }
     }
 }

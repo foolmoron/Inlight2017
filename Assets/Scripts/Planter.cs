@@ -66,6 +66,6 @@ public class Planter : MonoBehaviour {
                 yield return wait;
             }
         }
-        Destroy(gameObject);
+        gameObject.Release();
     }
 }

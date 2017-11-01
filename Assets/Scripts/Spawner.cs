@@ -34,7 +34,7 @@ public class Spawner : MonoBehaviour {
         ImageReader.Inst.OnRemoved += record => {
             for (int i = 0; i < eggs.Count; i++) {
                 if (eggs[i].Record == record) {
-                    eggs[i].gameObject.Release();
+                    Destroy(eggs[i].gameObject);
                     eggs.RemoveAt(i);
                     i--;
                 }
