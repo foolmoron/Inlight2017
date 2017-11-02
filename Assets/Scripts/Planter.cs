@@ -54,6 +54,7 @@ public class Planter : MonoBehaviour {
                     RaycastHit hit;
                     if (Physics.Raycast(new Ray(pos, Vector3.down), out hit, 500, CollisionMask.value)) {
                         var plant = plantPool.Obtain<SpawnedObject>(hit.point);
+                        plant.transform.localRotation = Quaternion.AngleAxis(Random.value * 360, Vector3.up);
                         plant.Record = Record;
                         plant.TargetScale = Mathf.Lerp(Params.SizeMin, Params.SizeMax, Random.value);
                         plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
