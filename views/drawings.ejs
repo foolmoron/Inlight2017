@@ -3,6 +3,16 @@
 
 <div class="container-fluid drawings">
     <div class="row">
+        <div class="col-xs-12 col-sm-6 color-picker" data-type='animal'>
+            <div>Animal Color</div>
+            <input type="range" min=0 max=360 step=1 onchange="get('/color/animal/' + this.value); setColorPicker('animal', this.value);" oninput="setColorPicker('animal', this.value);"></input>
+        </div>
+        <div class="col-xs-12 col-sm-6 color-picker" data-type='plant'>
+            <div>Plant Color</div>
+            <input type="range" min=0 max=360 step=1 onchange="get('/color/plant/' + this.value); setColorPicker('plant', this.value);" oninput="setColorPicker('plant', this.value);"></input>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-xs-12">
             <button class="btn btn-success global-aa-enable hidden" onclick="get('/globalautoapprove/true', update)" style="padding: 16px 10px; font-size: 1.7em;">Enable Global Auto-Approve</button>
             <button class="btn btn-warning global-aa-disable hidden" onclick="get('/globalautoapprove/false', update)" style="padding: 16px 10px; font-size: 1.7em;">Disable Global Auto-Approve</button>
@@ -192,6 +202,18 @@ var filterPickers = Array.from(document.querySelectorAll('[data-filter]'))
 filterPickers.forEach(picker => picker.style.backgroundColor = picker.dataset.color)
 changeFilterMode(filterPickers[0])
 
+// color inputs
+var colorPickers = {
+    animal: document.querySelector('.color-picker[data-type="animal"]'),
+    plant: document.querySelector('.color-picker[data-type="plant"]'),
+}
+
+function setColorPicker(type, hue) {
+    colorPickers[type].style.backgroundColor = "hsl(" + hue + ", 100%, 50%)"
+    colorPickers[type].querySelector('input').value = hue
+}
+
+// update
 var lastUpdateTime = 0
 function update() {
     get('/drawingupdates/' + lastUpdateTime, xhr => {
@@ -218,6 +240,11 @@ function update() {
     get('/globalautoapprove', xhr => {
         updateGlobalAutoApprove(xhr.responseText == 'true')
     })
+    for (let type in colorPickers) {
+        get('/color/' + type, xhr => {
+            setColorPicker(type, xhr.responseText)
+        })
+    }
 }
 
 // initial pull

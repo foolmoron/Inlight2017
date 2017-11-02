@@ -20,6 +20,10 @@ body {
     width: 18em;
 }
 
+.btn {
+    text-shadow: 1px 1px black;
+}
+
 /* header */
 header {
     display: flex;
@@ -135,4 +139,26 @@ footer {
     font-size: 1.2em;
     line-height: 2;
     transition: flex-grow 0.2s;
+}
+
+.drawings .color-picker {
+    display: flex;
+    background: hsl(0, 100%, 50%);
+    padding: 8px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+}
+.drawings .color-picker:first-of-type {
+    margin-right: 2%;
+}
+.drawings .color-picker div {
+    font-weight: bold;
+    color: white;
+    font-size: 1.1em;
+    text-shadow: 1px 1px black;
+}
+@media (min-width: 768px) {
+    .drawings .color-picker {
+        width: 49%;
+    }
 }
