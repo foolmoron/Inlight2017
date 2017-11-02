@@ -79,10 +79,11 @@ public class Spawner : MonoBehaviour {
         var randomOffset = new Vector3(randomStart.x, 0, randomStart.y) + new Vector3(dir.x, 0, dir.y).scaledWith(new Vector3(Random.value * PositionRandomness.x, Random.value * PositionRandomness.y, Random.value * PositionRandomness.z));
         var startPosition =
             TargetTransform.position +
-            randomOffset
+            randomOffset +
+            new Vector3(0, 200, 0)
             ;
         RaycastHit hit;
-        Physics.Raycast(startPosition, Vector3.down, out hit, 100, CollisionLayers.value);
+        Physics.Raycast(startPosition, Vector3.down, out hit, 500, CollisionLayers.value);
         obj.transform.position = hit.point.plusY(HeightOffsetFromGround);
     }
 }
