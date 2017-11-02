@@ -51,7 +51,11 @@ db.loadDatabase({}, () => {
 })
 
 const GLOBAL = {
-    autoapprove: false,    
+    autoapprove: false,
+    colors: {
+        animal: 36,
+        plant: 96,
+    }
 }
 
 // auth
@@ -293,6 +297,16 @@ app.get('/globalautoapprove/:toggle', (req, res, next) => {
     GLOBAL.autoapprove = req.params.toggle == 'true'
     // return
     res.sendStatus(200)
+})
+
+app.get('/color/:type', (req, res, next) => {
+    res.json(GLOBAL.colors[req.params.type] || 0)
+})
+app.get('/color/:type/:hue', (req, res, next) => {
+    // update
+    GLOBAL.colors[req.params.type] = parseInt(req.params.hue)
+    // return
+    res.json(GLOBAL.colors[req.params.type] || 0)
 })
 
 // catch 404 and forward to error handler
