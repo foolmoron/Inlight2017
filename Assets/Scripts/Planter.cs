@@ -33,11 +33,14 @@ public class Planter : MonoBehaviour {
     }
     
     public void DoPlanting() {
-        StopAllCoroutines();
         StartCoroutine(Plant());
     }
 
-    WaitForFixedUpdate wait = new WaitForFixedUpdate();
+    void OnRelease() {
+        StopAllCoroutines();
+    }
+
+    readonly WaitForFixedUpdate wait = new WaitForFixedUpdate();
     IEnumerator Plant() {
         if (Params != null) {
             var i = 0;

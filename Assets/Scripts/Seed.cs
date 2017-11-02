@@ -15,6 +15,7 @@ public class Seed : MonoBehaviour
 
     public ImageRecord Record;
     Renderer seedRenderer;
+    new Collider collider;
 
     public PlanterParams TreeParams;
     public PlanterParams BushParams;
@@ -22,7 +23,21 @@ public class Seed : MonoBehaviour
 
     void Awake() {
         seedRenderer = GetComponent<Renderer>();
-        GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += (sender, args) => WillGrowPlant = true;
+        collider = GetComponent<Collider>();
+
+        var interactable = GetComponent<VRTK_InteractableObject>();
+        interactable.InteractableObjectGrabbed += (sender, args) => {
+            collider.enabled = false;
+        };
+        GetComponent<VRTK_InteractableObject>().InteractableObjectUngrabbed += (sender, args) => {
+            collider.enabled = true;
+            WillGrowPlant = true;
+        };
+    }
+    
+    void OnObtain() {
+        collider.enabled = true;
+        WillGrowPlant = false;
     }
 
     void Start() {
