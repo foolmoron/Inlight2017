@@ -73,12 +73,12 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
         // read
         drawingObj.uuid = obj.uuid
         drawingObj.uuidTime = new Date().getTime()
-        drawingObj.prompt = obj.prompt
         drawingObj.colors = obj.colors
         // save
         localStorage.setItem('drawing', JSON.stringify(drawingObj))
     }
     // setup
+    drawingObj.prompt = obj.type == 'a' ? 'animal' : 'plant'
     drawingObj.json = obj.json
     readyToSetup = true
     console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
@@ -178,6 +178,15 @@ window.onload = function() {
         }
     })
 
+    // intro
+    var intro = document.querySelector('.intro')
+    var intros = Array.from(document.querySelectorAll('.intro > span'))
+    intro.onclick = (e) => {
+        intro.classList.add('fade')
+        drawingObj.uuidTime = new Date().getTime()
+        setTimeout(() => intro.classList.add('hidden'), 700)
+    }
+
     // prompt text and animation
     function setupPrompt(prompt) {
         var promptDiv = document.querySelector('.prompt')
@@ -215,6 +224,9 @@ window.onload = function() {
             doFunc(0)
         }
 
+        // show intro
+        showOnly(intros)
+
         // show instructions
         showOnly(instructions)
 
@@ -227,6 +239,7 @@ window.onload = function() {
             }
 
             if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME) {
+                drawingObj.uuidTime = Math.max(drawingObj.uuidTime, new Date().getTime() - (DRAWING_MIN_TIME - 5000))
                 showOnly(timeErrors)
                 hadError = true
             } else if (canvas._objects.length == 0) {
@@ -257,10 +270,11 @@ window.onload = function() {
         // check for error being resolved
         setInterval(() => {
             if (hadError) {
-                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME && canvas._objects.length == 0) {
+                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0) {
                     return
                 }
                 hadError = false
+                showOnly(okayMessages)
             }
         }, 500)
     }
@@ -380,6 +394,9 @@ window.onload = function() {
                     // clear loading flag
                     window.loadingJSON = false
                 })
+
+                // disable intro instantly
+                intro.classList.add('hidden')
             }
 
             readyToSetup = false
