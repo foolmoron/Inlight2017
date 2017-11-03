@@ -12,12 +12,16 @@ using Random = UnityEngine.Random;
 public enum ImageType {
     Animal, Plant, Tree, Bush, Grass
 }
+public enum ImageFacing {
+    Left, Right
+}
 
 [Serializable]
 public class ImageRecord {
     public string Name;
     public string Path;
     public ImageType Type;
+    public ImageFacing Facing;
     public Vector2 Dimensions;
     public DateTime LastUpdated;
     public Color MainColor;
@@ -39,6 +43,7 @@ public class ImageReader : Manager<ImageReader> {
     DateTime lastIndexWrite;
     List<string> files = new List<string>(1000);
     List<ImageType> types = new List<ImageType>(1000);
+    List<ImageFacing> facings = new List<ImageFacing>(1000);
 
     readonly Dictionary<char, ImageType> CHAR_TO_TYPE = new Dictionary<char, ImageType> {
         {'a', ImageType.Animal },
@@ -46,6 +51,10 @@ public class ImageReader : Manager<ImageReader> {
         {'t', ImageType.Tree },
         {'b', ImageType.Bush },
         {'g', ImageType.Grass },
+    };
+    readonly Dictionary<char, ImageFacing> CHAR_TO_FACING = new Dictionary<char, ImageFacing> {
+        {'l', ImageFacing.Left },
+        {'r', ImageFacing.Right },
     };
 
     public List<ImageRecord> Records = new List<ImageRecord>(100);
@@ -75,11 +84,13 @@ public class ImageReader : Manager<ImageReader> {
                 lastIndexWrite = File.GetLastWriteTime(indexPath);
                 files.Clear();
                 types.Clear();
+                facings.Clear();
                 using (var fileReader = File.OpenText(indexPath)) {
                     while (!fileReader.EndOfStream) {
                         var line = fileReader.ReadLine() ?? "";
                         files.Add(line.Substring(0, 36)); // 36 char uuid
-                        types.Add(CHAR_TO_TYPE[line[line.Length - 1]]);
+                        types.Add(CHAR_TO_TYPE[line[line.Length - 3]]); // type
+                        facings.Add(CHAR_TO_FACING[line[line.Length - 1]]); // facing
                     }
                 }
             }
@@ -88,6 +99,7 @@ public class ImageReader : Manager<ImageReader> {
             for (var i = 0; i < files.Count; i++) {
                 var file = files[i];
                 var type = types[i];
+                var facing = facings[i];
                 var path = root + file + ".png";
                 var record = Records.Find(path, (r, p) => r.Path == p);
                 // create if new file in directory
@@ -96,6 +108,7 @@ public class ImageReader : Manager<ImageReader> {
                         Name = file,
                         Path = root + file + ".png",
                         Type = type,
+                        Facing = facing,
                         Texture = new Texture2D(2, 2),
                     };
                     Records.Add(record);

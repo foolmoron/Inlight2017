@@ -36,8 +36,10 @@ public class SpawnedObject : MonoBehaviour {
                 ScaleTarget.localScale = new Vector3(originalScale.x * Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
             if (Record.Dimensions != Vector2.zero && ZAligned)
                 ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Dimensions.aspect()) * ScaleFactor;
-            if (Record.Texture)
+            if (Record.Texture) {
                 renderer.material.mainTexture = Record.Texture;
+                renderer.material.mainTextureScale = Record.Facing == ImageFacing.Left ? Vector2.one : new Vector2(-1, 1);
+            }
         }
         if (Record == null || Record.Dimensions == Vector2.zero) {
             ScaleTarget.localScale = Vector3.one * ScaleFactor;
