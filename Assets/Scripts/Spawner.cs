@@ -54,8 +54,11 @@ public class Spawner : MonoBehaviour {
         {
             SpawnTimer += Time.deltaTime;
             if (SpawnTimer >= SpawnInterval) {
-                Spawn(ImageReader.Inst.GetWeightedRandomRecord());
-                SpawnTimer = Random.value * SpawnIntervalRandomness;
+                var record = ImageReader.Inst.GetWeightedRandomRecord();
+                if (record != null) {
+                    Spawn(record);
+                    SpawnTimer = Random.value * SpawnIntervalRandomness;
+                }
             }
         }
     }
