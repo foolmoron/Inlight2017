@@ -1,0 +1,62 @@
+fileFormatVersion: 2
+guid: 455ad2e444eb3f24c80b736567f6a43e
+timeCreated: 1509660482
+licenseType: Free
+VideoClipImporter:
+  serializedVersion: 2
+  useLegacyImporter: 0
+  quality: 0.5
+  isColorLinear: 0
+  originalWidth: 800
+  originalHeight: 1000
+  frameRange: 0
+  startFrame: -1
+  endFrame: -1
+  frameCount: 750
+  frameRate: 29.970029830932617
+  colorSpace: 0
+  deinterlace: 0
+  sourceFileSize: 24910077
+  encodeAlpha: 0
+  sourceHasAlpha: 0
+  flipVertical: 0
+  flipHorizontal: 0
+  importAudio: 0
+  sourceAudioChannelCount: 
+  sourceAudioSampleRate: 
+  targetSettings:
+    0:
+      enableTranscoding: 1
+      codec: 0
+      resizeFormat: 0
+      aspectRatio: 0
+      customWidth: 800
+      customHeight: 1000
+      bitrateMode: 2
+      spatialQuality: 2
+  output:
+    format: 1
+    settings:
+      enableTranscoding: 1
+      codec: 0
+      resizeFormat: 0
+      aspectRatio: 0
+      customWidth: 800
+      customHeight: 1000
+      bitrateMode: 2
+      spatialQuality: 2
+    encodedWidth: 800
+    encodedHeight: 1000
+    encodedStartFrame: 0
+    encodedEndFrame: 750
+    streamedResource:
+      source: library/metadata/45/455ad2e444eb3f24c80b736567f6a43e.resource
+      offset: 0
+<<<<<<< HEAD:Assets/Video/handdraw_website.mov.meta
+      size: 4645209
+=======
+      size: 2219945
+>>>>>>> 0a4de570a7e4e09bea4a64f97704b75fb53f5dd1:Assets/Video/handdraw_website3.mov.meta
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
