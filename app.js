@@ -121,6 +121,7 @@ function getNewColorPalette(colorType) {
 }
 
 // drawing
+var canvas = fabric.createCanvasForNode(11, 13) // 1 canvas for whole app
 const drawingDirs = ['/public','/img','/drawings/']
 const drawingDirectory = drawingDirs.reduce((acc, dir) => {
     acc += dir
@@ -220,7 +221,7 @@ app.post('/drawing', (req, res, next) => {
     }
     data.drawings.update(drawing)
     // save to png using minimally cropped dimensions provided by client
-    var canvas = fabric.createCanvasForNode(drawing.dimensions.width, drawing.dimensions.height)
+    canvas.setDimensions({ width: drawing.dimensions.width, height: drawing.dimensions.height })
     canvas.loadFromJSON(drawing.json, () => {
         // render objects
         canvas.renderAll()
