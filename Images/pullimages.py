@@ -38,6 +38,7 @@ def pullIndex():
                 print(change)
                 uuid = change[u'uuid']
                 drawingType = change[u'type']
+                drawingFacing = change[u'facing']
                 if change[u'deleted']:
                     # remove from index
                     uuidsToRemove.append(uuid)
@@ -55,9 +56,10 @@ def pullIndex():
                         for pair in index:
                             if pair[0] == uuid:
                                 pair[1] = drawingType
+                                pair[2] = drawingFacing
                                 updated = True
                         if not updated:
-                            index.append([uuid, drawingType])
+                            index.append([uuid, drawingType, drawingFacing])
                         print(URL_IMG + str(uuid) + '.png')
                         # save
                         with open('./' + uuid + '.png', 'wb+') as imgFile:
@@ -66,7 +68,7 @@ def pullIndex():
             index = [t for t in index if t[0] not in uuidsToRemove]
             # save index
             with open('./index.txt', 'w') as indexFile:
-                indexFile.write('\n'.join(map(lambda pair: pair[0] + ' ' + str(pair[1]), index)))
+                indexFile.write('\n'.join(map(lambda pair: str(pair[0]) + ' ' + str(pair[1]) + ' ' + str(pair[2]), index)))
     else:
         print('ERROR: ' + str(res.status_code) + ': at ' + str(lastUpdateTime))
 
