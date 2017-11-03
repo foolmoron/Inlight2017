@@ -87,7 +87,7 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
     if (!parseInt(localStorage.getItem('clearStorageFixAttempt')) && (error.responseText || '').indexOf('invalid drawing uuid') >= 0) {
         localStorage.clear()
         localStorage.setItem('clearStorageFixAttempt', 1)
-        location.href = location.href
+        location.reload(true)
     }
 })
 
@@ -271,7 +271,7 @@ window.onload = function() {
                     400, () => dots.forEach(t => t.textContent = '.....'),
                     400, () => dots.forEach(t => t.textContent = '.......'),
                     400, () => { enableByPrompt(doneMessages); complete(); },
-                    1600, () => { localStorage.clear(); location.href = location.href; },
+                    1600, () => { localStorage.clear(); location.reload(); },
                 ])
             }
         }
