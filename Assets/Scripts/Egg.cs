@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Egg : MonoBehaviour
 {
@@ -13,9 +15,15 @@ public class Egg : MonoBehaviour
     [Range(0, 10)]
     public float AnimalOriginalScale = 0.2f;
     [Range(0, 10)]
-    public float AnimalFinalScale = 2f;
+    public float AnimalFinalScaleMin = 1f;
+    [Range(0, 10)]
+    public float AnimalFinalScaleMax = 4f;
     [Range(0, 1)]
     public float AnimalScaleSpeed = 0.2f;
+
+    [Range(0, 300)]
+    public float DeathTime = 180;
+    float deathTime;
 
     public ImageRecord Record;
     GameObject solid;
@@ -38,13 +46,17 @@ public class Egg : MonoBehaviour
 
     void Update() {
         if (Record == null) {
-            Record = ImageReader.Inst.GetWeightedRandomRecord();
+            Record = ImageReader.Inst.GetWeightedRandomAnimal();
         }
         if (Record != null) {
             solid.GetComponent<Renderer>().material.color = Record.MainColor;
             foreach (var shard in shards) {
                 shard.GetComponent<Renderer>().material.color = Record.MainColor;
             }
+        }
+        deathTime += Time.deltaTime;
+        if (deathTime >= DeathTime) {
+            Destroy(transform.parent.gameObject);
         }
     }
 
@@ -69,7 +81,7 @@ public class Egg : MonoBehaviour
             var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
             animal.Record = Record;
             animal.ScaleFactor = AnimalOriginalScale;
-            animal.TargetScale = AnimalFinalScale;
+            animal.TargetScale = Mathf.Lerp(AnimalFinalScaleMin, Single.MaxValue, Random.value);
             animal.ScaleSpeed = AnimalScaleSpeed;
             animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
             animal.GetComponentInChildren<Animation>().enabled = true;

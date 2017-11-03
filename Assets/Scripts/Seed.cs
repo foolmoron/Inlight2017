@@ -13,6 +13,10 @@ public class Seed : MonoBehaviour
     public LayerMask CollisionMask;
     public bool WillGrowPlant;
 
+    [Range(0, 300)]
+    public float DeathTime = 180;
+    float deathTime;
+
     public ImageRecord Record;
     Renderer seedRenderer;
     new Collider collider;
@@ -46,10 +50,14 @@ public class Seed : MonoBehaviour
 
     void Update() {
         if (Record == null) {
-            Record = ImageReader.Inst.GetWeightedRandomRecord();
+            Record = ImageReader.Inst.GetWeightedRandomPlant();
         }
         if (Record != null) {
             seedRenderer.material.color = Record.MainColor;
+        }
+        deathTime += Time.deltaTime;
+        if (deathTime >= DeathTime) {
+            gameObject.Release();
         }
     }
 

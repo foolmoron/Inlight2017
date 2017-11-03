@@ -192,17 +192,24 @@ public class ImageReader : Manager<ImageReader> {
         return hsbColor.ToColor();
     }
 
-    public ImageRecord GetWeightedRandomRecord() {
+    public ImageRecord GetWeightedRandomRecord(bool animal, bool plant) {
         var bestRecord = Records.Count > 0 ? Records[0] : null;
         var bestRecordScore = 0f;
         for (var i = 0; i < Records.Count; i++) {
             var weight = RecordAgeWeighting.Evaluate((float)i / Records.Count);
             var score = Random.value * weight;
-            if (score > bestRecordScore) {
+            if (score > bestRecordScore && ((animal && Records[i].Type == ImageType.Animal) || (plant && Records[i].Type != ImageType.Animal))) {
                 bestRecord = Records[i];
                 bestRecordScore = score;
             }
         }
         return bestRecord;
+    }
+
+    public ImageRecord GetWeightedRandomAnimal() {
+        return GetWeightedRandomRecord(true, false);
+    }
+    public ImageRecord GetWeightedRandomPlant() {
+        return GetWeightedRandomRecord(false, true);
     }
 }

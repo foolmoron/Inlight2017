@@ -26,6 +26,11 @@ public class Spawner : MonoBehaviour {
     [Range(0, 20)]
     public float SpawnIntervalRandomness = 2;
 
+    [Range(0, 1)]
+    public float EggSpawnChance = 0.33f;
+    [Range(0, 1)]
+    public float SeedSpawnChance = 0.66f;
+
     void Start() {
         seedPool = SeedPrefab.GetObjectPool(20);
         eggPool = EggPrefab.GetObjectPool(20);
@@ -54,7 +59,8 @@ public class Spawner : MonoBehaviour {
         {
             SpawnTimer += Time.deltaTime;
             if (SpawnTimer >= SpawnInterval) {
-                var record = ImageReader.Inst.GetWeightedRandomRecord();
+                var spawnEgg = Random.value < (EggSpawnChance / (EggSpawnChance + SeedSpawnChance));
+                var record = ImageReader.Inst.GetWeightedRandomRecord(spawnEgg, !spawnEgg);
                 if (record != null) {
                     Spawn(record);
                     SpawnTimer = Random.value * SpawnIntervalRandomness;
