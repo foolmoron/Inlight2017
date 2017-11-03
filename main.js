@@ -357,21 +357,23 @@ window.onload = function() {
     var offsettingElements = ['.prompt', '.colors', '.controls']
         .map(function(s) { return Array.from(document.querySelectorAll(s)) })
         .reduce(function(acc, arr) { return acc.concat(arr) }, [])
-    function handleResize() {
-        // canvas
+    var prevElementOffset = 0
+    function resizerSentinel() {
         var elementOffset = offsettingElements.reduce(function(acc, item) { return acc + item.offsetHeight }, 0)
-        var extraOffset = 0
-        canvas.wrapperEl.style.top = (extraOffset + padding) + 'px'
-        canvas.wrapperEl.style.left = padding + 'px'
-        canvas.setHeight(window.innerHeight - (elementOffset + extraOffset + 2*padding))
-        canvas.setWidth(window.innerWidth - 2*padding)
-        canvas.renderAll()
+        if (elementOffset != prevElementOffset) {
+            var extraOffset = 0
+            canvas.wrapperEl.style.top = (extraOffset + padding) + 'px'
+            canvas.wrapperEl.style.left = padding + 'px'
+            canvas.setHeight(window.innerHeight - (elementOffset + extraOffset + 2*padding))
+            canvas.setWidth(window.innerWidth - 2*padding)
+            canvas.renderAll()
+            prevElementOffset = elementOffset
+            console.log(elementOffset)
+        }
+        requestAnimationFrame(resizerSentinel)
     }
-    window.addEventListener('resize', debounce(handleResize, 100))
-    handleResize()
-    setTimeout(handleResize, 80)
-    setTimeout(handleResize, 160)
-    setTimeout(handleResize, 250)
+    requestAnimationFrame(resizerSentinel)
+    window.addEventListener('resize', debounce(function() { prevElementOffset = 0 }, 100))
 
     // update
     var d = new Date().getTime()
