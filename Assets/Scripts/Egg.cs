@@ -53,8 +53,6 @@ public class Egg : MonoBehaviour
 
     void Start() {
         animalPool = AnimalPrefab.GetObjectPool(100);
-        Health = 0;
-        OnTriggerEnter(GetComponent<Collider>());
     }
 
     void Update() {
