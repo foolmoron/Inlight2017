@@ -29,7 +29,10 @@ public class Egg : MonoBehaviour
     GameObject solid;
     List<GameObject> shards;
 
+    SemiDrag drag;
+
     void Awake() {
+        drag = transform.parent.GetComponent<SemiDrag>();
         solid = transform.parent.Find("pSolid1").gameObject;
         shards = new List<GameObject> {
             transform.parent.Find("shard1_surfaceShatter").gameObject,
@@ -75,6 +78,8 @@ public class Egg : MonoBehaviour
             s.GetComponent<Animator>().enabled = true;
         }
         BreakShard(shard);
+
+        drag.GetTouched(other.transform.position, other.transform.forward);
 
         Health--; 
         if (Health <= 0) {
