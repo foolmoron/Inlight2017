@@ -21,21 +21,22 @@ function throttleBounce(func, interval) {
     var firedThisInterval = false
     var timeoutId = null
     return function() { // use explicit function syntax to get wrapped arguments context
+        var args = arguments
         if (!firedThisInterval) {
             // throttle
-            func.apply(null, arguments)
+            func.apply(null, args)
             firedThisInterval = true
-            setTimeout(() => { firedThisInterval = false }, interval)
+            setTimeout(function() { firedThisInterval = false }, interval)
         } else {
             // debounce
             clearTimeout(timeoutId)
-            timeoutId = setTimeout(() => { func.apply(null, arguments) }, interval)
+            timeoutId = setTimeout(function() { func.apply(null, args) }, interval)
         }
     }
 }
 function ajax(method, sync, url, form, callback, error) {
     var xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = () => { 
+    xhr.onreadystatechange = function() { 
         if (xhr.readyState === 4) {
             if (xhr.status < 300 && callback) {
                 callback(xhr)
@@ -62,7 +63,7 @@ var DRAWING_MIN_TIME = 10000
 
 var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
 var readyToSetup = false
-get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
+get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) {
     if (!res.responseText) {
         return
     }
@@ -83,11 +84,11 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
     readyToSetup = true
     console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
     localStorage.setItem('clearStorageFixAttempt', 0)
-}, error => {
+}, function(error) {
     if (!parseInt(localStorage.getItem('clearStorageFixAttempt')) && (error.responseText || '').indexOf('invalid drawing uuid') >= 0) {
         localStorage.clear()
         localStorage.setItem('clearStorageFixAttempt', 1)
-        location.href = location.href
+        location.reload(true)
     }
 })
 
@@ -98,7 +99,7 @@ var push = throttleBounce(function(canvas) {
     group._calcBounds()
     // get data and shift objects to top-left
     var data = JSON.parse(JSON.stringify(canvas.toObject()))
-    data.objects.forEach(obj => {
+    data.objects.forEach(function(obj) {
         obj.left = obj.left - group.left
         obj.top = obj.top - group.top
     })
@@ -150,19 +151,19 @@ window.onload = function() {
     var undoButton = document.querySelector('.undo')
     var redoButton = document.querySelector('.redo')
     var clearButton = document.querySelector('.clear')
-    undoButton.onclick = e => {
+    undoButton.onclick = function(e) {
         if (historyIndex > 0) {
             historyIndex = Math.max(historyIndex - 1, 0)
             doHistory(historyIndex, true)
         }
     }
-    redoButton.onclick = e => {
+    redoButton.onclick = function(e) {
         if (historyIndex < history.length) {
             historyIndex = Math.min(historyIndex + 1, history.length)
             doHistory(historyIndex, true)
         }
     }
-    clearButton.onclick = e => {
+    clearButton.onclick = function(e) {
         if (historyIndex > 0) {
             historyIndex = 0
             doHistory(historyIndex, true)
@@ -170,7 +171,7 @@ window.onload = function() {
     }
 
     // new path drawn
-    canvas.on('object:added', e => {
+    canvas.on('object:added', function(e) {
         if (doingHistory) return
 
         if (historyIndex < history.length) {
@@ -188,10 +189,10 @@ window.onload = function() {
     // intro
     var intro = document.querySelector('.intro')
     var intros = Array.from(document.querySelectorAll('.intro > span'))
-    var fadeIntro = (e) => {
+    var fadeIntro = function(e) {
         intro.classList.add('fade')
         drawingObj.uuidTime = new Date().getTime()
-        setTimeout(() => intro.classList.add('hidden'), 700)
+        setTimeout(function() { intro.classList.add('hidden') }, 700)
     }
     intro.addEventListener('mousedown', fadeIntro)
     intro.addEventListener('touchstart', fadeIntro)
@@ -213,10 +214,10 @@ window.onload = function() {
         var praiseTexts = Array.from(document.querySelectorAll('.prompt .praise-text'))
 
         function disableAll() {
-            allMessages.forEach(list => list.forEach(item => item.classList.add('hidden')))
+            allMessages.forEach(function(list) { list.forEach(function(item) { item.classList.add('hidden') }) })
         }
         function enableByPrompt(list) {
-            list.forEach(item => {
+            list.forEach(function(item) {
                 item.classList.toggle('hidden', item.dataset.type != prompt && item.dataset.type != '*')
             })
         }
@@ -227,7 +228,7 @@ window.onload = function() {
         function chainTimeouts(funcsAndTimes) {
             function doFunc(i) {
                 if (i < funcsAndTimes.length) {
-                    setTimeout(() => { funcsAndTimes[i + 1](); doFunc(i + 2); }, funcsAndTimes[i])
+                    setTimeout(function() { funcsAndTimes[i + 1](); doFunc(i + 2); }, funcsAndTimes[i])
                 }
             }
             doFunc(0)
@@ -242,7 +243,7 @@ window.onload = function() {
         // try to submit on click
         var hadError = false
         var submitted = false
-        promptDiv.onclick = e => {
+        promptDiv.onclick = function(e) {
             if (submitted) {
                 return
             }
@@ -259,25 +260,25 @@ window.onload = function() {
                 submitted = true
                 document.body.style.pointerEvents = 'none' // hard freeze all input on screen
 
-                praiseTexts.forEach(t => t.textContent = SUBMIT_PRAISES[Math.floor(Math.random() * SUBMIT_PRAISES.length)])
-                dots.forEach(t => t.textContent = '')
+                praiseTexts.forEach(function(t) { t.textContent = SUBMIT_PRAISES[Math.floor(Math.random() * SUBMIT_PRAISES.length)] })
+                dots.forEach(function(t) { t.textContent = '' })
                 showOnly(submitMessages)
                 enableByPrompt(dots)
 
                 chainTimeouts([
-                    200, () => dots.forEach(t => t.textContent = '.'),
-                    200, () => dots.forEach(t => t.textContent = '..'),
-                    200, () => dots.forEach(t => t.textContent = '...'),
-                    400, () => dots.forEach(t => t.textContent = '.....'),
-                    400, () => dots.forEach(t => t.textContent = '.......'),
-                    400, () => { enableByPrompt(doneMessages); complete(); },
-                    1600, () => { localStorage.clear(); location.href = location.href; },
+                    200, function() { dots.forEach(function(t) { t.textContent = '.' }) },
+                    200, function() { dots.forEach(function(t) { t.textContent = '..' }) },
+                    200, function() { dots.forEach(function(t) { t.textContent = '...' }) },
+                    400, function() { dots.forEach(function(t) { t.textContent = '.....' }) },
+                    400, function() { dots.forEach(function(t) { t.textContent = '.......' }) },
+                    400, function() { enableByPrompt(doneMessages); complete(); },
+                    1600, function() { localStorage.clear(); location.reload(); },
                 ])
             }
         }
 
         // check for error being resolved
-        setInterval(() => {
+        setInterval(function() {
             if (hadError) {
                 if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0) {
                     return
@@ -325,7 +326,7 @@ window.onload = function() {
             var button = document.createElement('div')
             button.dataset.color = colors[i]
             button.style.backgroundColor = colors[i]
-            button.onclick = e => setColor(e.target, colorButtons)
+            button.onclick = function(e) { setColor(e.target, colorButtons) }
 
             colorContainer.appendChild(button)
             colorButtons.push(button)
@@ -348,17 +349,17 @@ window.onload = function() {
     }
 
     for (var i = 0; i < widthButtons.length; i++) {
-        widthButtons[i].onclick = e => setWidth(e.target)
+        widthButtons[i].onclick = function(e) { setWidth(e.target) }
     }
     setWidth(widthButtons[1])
 
     // resizing
     var offsettingElements = ['.prompt', '.colors', '.controls']
-        .map(s => Array.from(document.querySelectorAll(s)))
-        .reduce((acc, arr) => acc.concat(arr), [])
+        .map(function(s) { return Array.from(document.querySelectorAll(s)) })
+        .reduce(function(acc, arr) { return acc.concat(arr) }, [])
     function handleResize() {
         // canvas
-        var elementOffset = offsettingElements.reduce((acc, item) => acc + item.offsetHeight, 0)
+        var elementOffset = offsettingElements.reduce(function(acc, item) { return acc + item.offsetHeight }, 0)
         var extraOffset = 0
         canvas.wrapperEl.style.top = (extraOffset + padding) + 'px'
         canvas.wrapperEl.style.left = padding + 'px'
@@ -387,11 +388,11 @@ window.onload = function() {
             // load json
             if (drawingObj.json) {
                 window.loadingJSON = true
-                canvas.loadFromJSON(drawingObj.json, () => {
+                canvas.loadFromJSON(drawingObj.json, function() {
                     // shift objects to original position
                     var shiftLeft = parseInt(localStorage.getItem('objectShiftLeft'))
                     var shiftTop = parseInt(localStorage.getItem('objectShiftTop'))
-                    canvas._objects.forEach(obj => {
+                    canvas._objects.forEach(function(obj) {
                         obj.setLeft(obj.left + shiftLeft)
                         obj.setTop(obj.top + shiftTop)
                         obj.setCoords()
