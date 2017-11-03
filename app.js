@@ -55,7 +55,8 @@ const GLOBAL = {
     colors: {
         animal: 36,
         plant: 96,
-    }
+    },
+    hueshiftspeed: 1,
 }
 
 // auth
@@ -129,7 +130,7 @@ const STATUS = {
     DELETED: 'deleted',
 }
 
-const TYPES = ['a', 'p', 't', 'b', 'g']
+const INITIAL_TYPES = ['a', 'p']
 
 const Drawing = (init) => Object.assign({
     uuid: uuid(),
@@ -153,9 +154,12 @@ function checkDrawing(req, res, next) {
 
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
-    newDrawing.type = TYPES[Math.floor(Math.random() * TYPES.length)]
+    newDrawing.type = INITIAL_TYPES[Math.floor(Math.random() * INITIAL_TYPES.length)]
     newDrawing.colors = getNewColorPalette()
     data.drawings.insert(newDrawing)
+
+    var colorType = newDrawing.type == 'a' ? 'animal' : 'plant'
+    GLOBAL.colors[colorType] = (GLOBAL.colors[colorType] + GLOBAL.hueshiftspeed) % 360
 
     var drawing = data.drawings.findOne({uuid: newDrawing.uuid})
     data.drawings.update(drawing)
@@ -297,6 +301,16 @@ app.get('/globalautoapprove/:toggle', (req, res, next) => {
     GLOBAL.autoapprove = req.params.toggle == 'true'
     // return
     res.sendStatus(200)
+})
+
+app.get('/hueshiftspeed', (req, res, next) => {
+    res.json(GLOBAL.hueshiftspeed)
+})
+app.get('/hueshiftspeed/:val', (req, res, next) => {
+    // update
+    GLOBAL.hueshiftspeed = parseFloat(req.params.val)
+    // return
+    res.json(GLOBAL.hueshiftspeed)
 })
 
 app.get('/color/:type', (req, res, next) => {

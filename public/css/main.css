@@ -141,24 +141,25 @@ footer {
     transition: flex-grow 0.2s;
 }
 
-.drawings .color-picker {
+.drawings .picker {
     display: flex;
-    background: hsl(0, 100%, 50%);
+    background: hsl(0, 0%, 33%);
     padding: 8px;
     margin-bottom: 18px;
+    margin-right: 2%;
     border-radius: 8px;
 }
-.drawings .color-picker:first-of-type {
-    margin-right: 2%;
+.drawings .picker:last-of-type {
+    margin-right: 0;
 }
-.drawings .color-picker div {
+.drawings .picker div {
     font-weight: bold;
     color: white;
     font-size: 1.1em;
     text-shadow: 1px 1px black;
 }
 @media (min-width: 768px) {
-    .drawings .color-picker {
-        width: 49%;
+    .drawings .picker {
+        width: 32%;
     }
 }

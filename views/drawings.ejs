@@ -3,13 +3,17 @@
 
 <div class="container-fluid drawings">
     <div class="row">
-        <div class="col-xs-12 col-sm-6 color-picker" data-type='animal'>
-            <div>Animal Color</div>
-            <input type="range" min=0 max=360 step=1 onchange="get('/color/animal/' + this.value); setColorPicker('animal', this.value);" oninput="setColorPicker('animal', this.value);"></input>
+        <div class="col-xs-12 col-sm-4 picker hue-shift-speed">
+            <div>Hue Shift <span></span></div>
+            <input type="range" min=0 max=10 step=0.5 onchange="get('/hueshiftspeed/' + this.value); setHueShiftSpeed(this.value);" oninput="setHueShiftSpeed(this.value)"></input>
         </div>
-        <div class="col-xs-12 col-sm-6 color-picker" data-type='plant'>
+        <div class="col-xs-12 col-sm-4 picker" data-type='animal'>
+            <div>Animal Color</div>
+            <input type="range" min=0 max=360 step=1 onchange="get('/color/animal/' + this.value); setColorPicker('animal', this.value);" oninput="setColorPicker('animal', this.value)"></input>
+        </div>
+        <div class="col-xs-12 col-sm-4 picker" data-type='plant'>
             <div>Plant Color</div>
-            <input type="range" min=0 max=360 step=1 onchange="get('/color/plant/' + this.value); setColorPicker('plant', this.value);" oninput="setColorPicker('plant', this.value);"></input>
+            <input type="range" min=0 max=360 step=1 onchange="get('/color/plant/' + this.value); setColorPicker('plant', this.value);" oninput="setColorPicker('plant', this.value)"></input>
         </div>
     </div>
     <div class="row">
@@ -204,10 +208,16 @@ changeFilterMode(filterPickers[0])
 
 // color inputs
 var colorPickers = {
-    animal: document.querySelector('.color-picker[data-type="animal"]'),
-    plant: document.querySelector('.color-picker[data-type="plant"]'),
+    animal: document.querySelector('.picker[data-type="animal"]'),
+    plant: document.querySelector('.picker[data-type="plant"]'),
 }
+var hueShiftText = document.querySelector('.hue-shift-speed span')
+var hueShiftInput = document.querySelector('.hue-shift-speed input')
 
+function setHueShiftSpeed(speed) {
+    hueShiftText.textContent = speed
+    hueShiftInput.value = speed
+}
 function setColorPicker(type, hue) {
     colorPickers[type].style.backgroundColor = "hsl(" + hue + ", 100%, 50%)"
     colorPickers[type].querySelector('input').value = hue
@@ -239,6 +249,9 @@ function update() {
     })
     get('/globalautoapprove', xhr => {
         updateGlobalAutoApprove(xhr.responseText == 'true')
+    })
+    get('/hueshiftspeed', xhr => {
+        setHueShiftSpeed(parseFloat(xhr.responseText))
     })
     for (let type in colorPickers) {
         get('/color/' + type, xhr => {
