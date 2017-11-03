@@ -100,8 +100,24 @@ app.get('/drawings', adminAuth, (req, res, next) => {
 })
 
 // colors
-function getNewColorPalette() {
-    return ['red', 'blue', '#0f0', '#a48012', '#404040']
+function getNewColorPalette(colorType) {
+    var colors = []
+    var hue = GLOBAL.colors[colorType] || 0
+    var sat = 100
+    var lit = 50
+
+    // base color
+    colors.push("hsl(" + hue + ", " + sat + "%, " + lit + "%)")
+    // shifted colors
+    for (var i = 0; i < 3; i++) {
+        hue = (hue + 10 + Math.random() * 20) % 360
+        lit = 35 + Math.random() * 30
+        colors.push("hsl(" + hue + ", " + sat + "%, " + lit + "%)")
+    }
+    // random color
+    colors.push("hsl(" + (hue + 90 + Math.random() * 180) + ", " + sat + "%, " + lit + "%)")
+
+    return colors
 }
 
 // drawing
@@ -155,10 +171,10 @@ function checkDrawing(req, res, next) {
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
     newDrawing.type = INITIAL_TYPES[Math.floor(Math.random() * INITIAL_TYPES.length)]
-    newDrawing.colors = getNewColorPalette()
+    var colorType = newDrawing.type == 'a' ? 'animal' : 'plant'
+    newDrawing.colors = getNewColorPalette(colorType)
     data.drawings.insert(newDrawing)
 
-    var colorType = newDrawing.type == 'a' ? 'animal' : 'plant'
     GLOBAL.colors[colorType] = (GLOBAL.colors[colorType] + GLOBAL.hueshiftspeed) % 360
 
     var drawing = data.drawings.findOne({uuid: newDrawing.uuid})
