@@ -82,6 +82,13 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
     drawingObj.json = obj.json
     readyToSetup = true
     console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
+    localStorage.setItem('clearStorageFixAttempt', 0)
+}, error => {
+    if (!parseInt(localStorage.getItem('clearStorageFixAttempt')) && (error.responseText || '').indexOf('invalid drawing uuid') >= 0) {
+        localStorage.clear()
+        localStorage.setItem('clearStorageFixAttempt', 1)
+        location.href = location.href
+    }
 })
 
 var push = throttleBounce(function(canvas) {
@@ -181,11 +188,13 @@ window.onload = function() {
     // intro
     var intro = document.querySelector('.intro')
     var intros = Array.from(document.querySelectorAll('.intro > span'))
-    intro.onclick = (e) => {
+    var fadeIntro = (e) => {
         intro.classList.add('fade')
         drawingObj.uuidTime = new Date().getTime()
         setTimeout(() => intro.classList.add('hidden'), 700)
     }
+    intro.addEventListener('mousedown', fadeIntro)
+    intro.addEventListener('touchstart', fadeIntro)
 
     // prompt text and animation
     function setupPrompt(prompt) {
