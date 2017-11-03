@@ -49,6 +49,10 @@
                     <option value="b" <$= drawing.type == 'b' ? 'selected' : '' $>>BUSH</option>
                     <option value="g" <$= drawing.type == 'g' ? 'selected' : '' $>>GRASS</option>
                 </select>
+                <select onchange="get('/drawing/<$= drawing.uuid $>/facing/' + this.value)">
+                    <option value="l" <$= drawing.facing == 'l' ? 'selected' : '' $>>LEFT-FACE</option>
+                    <option value="r" <$= drawing.facing == 'r' ? 'selected' : '' $>>RIGHT-FACE</option>
+                </select>
             </div>
             <div class="col-xs-4 text-right">
                 <b><$= new Date(drawing.meta.updated).toLocaleString() $></b>

@@ -152,6 +152,7 @@ const INITIAL_TYPES = ['a', 'p']
 const Drawing = (init) => Object.assign({
     uuid: uuid(),
     type: 'a',
+    facing: 'l',
     json: '',
     status: STATUS.NEW,
     empty: true,
@@ -197,6 +198,7 @@ app.get('/drawingindex/:sinceTime', (req, res, next) => {
     var changes = drawings.map(drawing => ({
         uuid: drawing.uuid,
         type: drawing.type,
+        facing: drawing.facing,
         deleted: drawing.status == STATUS.DELETED,
     }))
     res.json({time: new Date().getTime(), changes})
@@ -305,6 +307,14 @@ app.get('/drawing/:uuid/type/:type', checkDrawing, (req, res, next) => {
     var drawing = req.drawing
     // update
     drawing.type = req.params.type
+    data.drawings.update(drawing)
+    // return
+    res.sendStatus(200)
+})
+app.get('/drawing/:uuid/facing/:facing', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
+    // update
+    drawing.facing = req.params.facing
     data.drawings.update(drawing)
     // return
     res.sendStatus(200)
