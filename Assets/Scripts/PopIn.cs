@@ -6,6 +6,7 @@ using UnityEngine.Video;
 public class PopIn : MonoBehaviour {
 
     public AnimationCurve XCurve;
+    public float AnimTime;
 
     RectTransform rect;
 
@@ -14,6 +15,7 @@ public class PopIn : MonoBehaviour {
     }
     
     void Update() {
-        rect.anchoredPosition = rect.anchoredPosition.withX(XCurve.Evaluate(Time.time));
+        AnimTime += Time.deltaTime;
+        rect.anchoredPosition = rect.anchoredPosition.withX(XCurve.Evaluate(AnimTime));
     }
 }
