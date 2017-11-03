@@ -17,7 +17,15 @@ public class Egg : MonoBehaviour
     [Range(0, 10)]
     public float AnimalFinalScaleMin = 1f;
     [Range(0, 10)]
-    public float AnimalFinalScaleMax = 4f;
+    public float AnimalFinalScaleMax = 5f;
+    [Range(0, 3)]
+    public float AnimalAnimSpeedForSmallest = 3f;
+    [Range(0, 3)]
+    public float AnimalAnimSpeedForBiggest = 0.25f;
+    [Range(0, 5)]
+    public float AnimalWanderSpeedForSmallest = 4f;
+    [Range(0, 5)]
+    public float AnimalWanderSpeedForBiggest = 0.4f;
     [Range(0, 1)]
     public float AnimalScaleSpeed = 0.2f;
 
@@ -45,6 +53,8 @@ public class Egg : MonoBehaviour
 
     void Start() {
         animalPool = AnimalPrefab.GetObjectPool(100);
+        Health = 0;
+        OnTriggerEnter(GetComponent<Collider>());
     }
 
     void Update() {
@@ -83,13 +93,16 @@ public class Egg : MonoBehaviour
 
         Health--; 
         if (Health <= 0) {
+            var scaleLerp = Random.value;
             var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
             animal.Record = Record;
             animal.ScaleFactor = AnimalOriginalScale;
-            animal.TargetScale = Mathf.Lerp(AnimalFinalScaleMin, Single.MaxValue, Random.value);
+            animal.TargetScale = Mathf.Lerp(AnimalFinalScaleMin, AnimalFinalScaleMax, scaleLerp);
             animal.ScaleSpeed = AnimalScaleSpeed;
             animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
+            animal.GetComponentInSelfOrChildren<Wander>().speed = Mathf.Lerp(AnimalWanderSpeedForSmallest, AnimalWanderSpeedForBiggest, scaleLerp);
             animal.GetComponentInChildren<Animation>().enabled = true;
+            animal.GetComponentInChildren<Animation>()["Take 001"].speed = Mathf.Lerp(AnimalAnimSpeedForSmallest, AnimalWanderSpeedForBiggest, scaleLerp);
 
             foreach (var s in shards) {
                 BreakShard(s);
