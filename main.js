@@ -181,11 +181,13 @@ window.onload = function() {
     // intro
     var intro = document.querySelector('.intro')
     var intros = Array.from(document.querySelectorAll('.intro > span'))
-    intro.onclick = (e) => {
+    var fadeIntro = (e) => {
         intro.classList.add('fade')
         drawingObj.uuidTime = new Date().getTime()
         setTimeout(() => intro.classList.add('hidden'), 700)
     }
+    intro.addEventListener('mousedown', fadeIntro)
+    intro.addEventListener('touchstart', fadeIntro)
 
     // prompt text and animation
     function setupPrompt(prompt) {
