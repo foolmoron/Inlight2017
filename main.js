@@ -82,6 +82,13 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), res => {
     drawingObj.json = obj.json
     readyToSetup = true
     console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
+    localStorage.setItem('clearStorageFixAttempt', 0)
+}, error => {
+    if (!parseInt(localStorage.getItem('clearStorageFixAttempt')) && (error.responseText || '').indexOf('invalid drawing uuid') >= 0) {
+        localStorage.clear()
+        localStorage.setItem('clearStorageFixAttempt', 1)
+        location.href = location.href
+    }
 })
 
 var push = throttleBounce(function(canvas) {
