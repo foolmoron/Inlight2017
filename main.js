@@ -368,7 +368,6 @@ window.onload = function() {
             canvas.setWidth(window.innerWidth - 2*padding)
             canvas.renderAll()
             prevElementOffset = elementOffset
-            console.log(elementOffset)
         }
         requestAnimationFrame(resizerSentinel)
     }
