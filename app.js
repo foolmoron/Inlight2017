@@ -52,6 +52,7 @@ db.loadDatabase({}, () => {
 
 const GLOBAL = {
     autoapprove: false,
+    prevDrawingType: 'a',
     colors: {
         animal: 36,
         plant: 96,
@@ -147,8 +148,6 @@ const STATUS = {
     DELETED: 'deleted',
 }
 
-const INITIAL_TYPES = ['a', 'p']
-
 const Drawing = (init) => Object.assign({
     uuid: uuid(),
     type: 'a',
@@ -172,7 +171,8 @@ function checkDrawing(req, res, next) {
 
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
-    newDrawing.type = INITIAL_TYPES[Math.floor(Math.random() * INITIAL_TYPES.length)]
+    newDrawing.type = GLOBAL.prevDrawingType == 'a' ? 'p' : Math.random() < 0.333 ? 'p' : 'a'
+    GLOBAL.prevDrawingType = newDrawing.type
     var colorType = newDrawing.type == 'a' ? 'animal' : 'plant'
     newDrawing.colors = getNewColorPalette(colorType)
     data.drawings.insert(newDrawing)
