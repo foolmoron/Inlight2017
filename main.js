@@ -57,7 +57,7 @@ function getSync(url, callback, error) { return ajax('GET', true, url, null, cal
 function postSync(url, form, callback, error) { return ajax('POST', true, url, JSON.stringify(form), callback, error) }
 
 // server
-var URL = 'http://34.233.84.254:8000/drawing'
+var URL = 'http://34.238.175.143:8000/drawing'
 var RATE_LIMIT = 1000
 var DRAWING_MIN_TIME = 10000
 
