@@ -12,6 +12,7 @@ public class SpawnedObject : MonoBehaviour {
     public float TargetScale = 1;
     [Range(0, 1)]
     public float ScaleSpeed = 0.9f;
+    public bool UseScaleSpeed = true;
     public Transform ScaleTarget;
 
     Vector2 originalScale;
@@ -27,7 +28,9 @@ public class SpawnedObject : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        ScaleFactor = Mathf.Lerp(ScaleFactor, TargetScale, ScaleSpeed);
+        if (UseScaleSpeed) {
+            ScaleFactor = Mathf.Lerp(ScaleFactor, TargetScale, ScaleSpeed);
+        }
     }
 
     void Update() {

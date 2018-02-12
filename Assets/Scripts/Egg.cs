@@ -4,6 +4,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[Serializable]
+public class AnimalParams {
+    [Range(1, 25)]
+    public int MinCount = 1;
+    [Range(1, 25)]
+    public int MaxCount = 1;
+    [Range(0, 10)]
+    public float MinScaleStart;
+    [Range(0, 10)]
+    public float MaxScaleStart;
+    [Range(0, 10)]
+    public float MinScaleEnd;
+    [Range(0, 10)]
+    public float MaxScaleEnd;
+    [Range(0, 30)]
+    public float MinScaleDuration;
+    [Range(0, 30)]
+    public float MaxScaleDuration;
+    [Range(0, 10)]
+    public float MinSpeed;
+    [Range(0, 10)]
+    public float MaxSpeed;
+    [Range(0, 5)]
+    public float MinAnimSpeed;
+    [Range(0, 5)]
+    public float MaxAnimSpeed;
+}
+
 public class Egg : MonoBehaviour
 {
     public GameObject AnimalPrefab;
@@ -11,27 +39,13 @@ public class Egg : MonoBehaviour
 
     [Range(0, 5)]
     public int Health = 3;
-
-    [Range(0, 10)]
-    public float AnimalOriginalScale = 0.2f;
-    [Range(0, 10)]
-    public float AnimalFinalScaleMin = 1f;
-    [Range(0, 10)]
-    public float AnimalFinalScaleMax = 5f;
-    [Range(0, 3)]
-    public float AnimalAnimSpeedForSmallest = 3f;
-    [Range(0, 3)]
-    public float AnimalAnimSpeedForBiggest = 0.25f;
-    [Range(0, 5)]
-    public float AnimalWanderSpeedForSmallest = 4f;
-    [Range(0, 5)]
-    public float AnimalWanderSpeedForBiggest = 0.4f;
-    [Range(0, 1)]
-    public float AnimalScaleSpeed = 0.2f;
-
     [Range(0, 300)]
     public float DeathTime = 180;
     float deathTime;
+
+    public AnimalParams SwarmParams;
+    public AnimalParams GroupParams;
+    public AnimalParams MonsterParams;
 
     public ImageRecord Record;
     GameObject solid;
@@ -53,6 +67,9 @@ public class Egg : MonoBehaviour
 
     void Start() {
         animalPool = AnimalPrefab.GetObjectPool(100);
+
+        Health = 0;
+        OnTriggerEnter(null);
     }
 
     void Update() {
@@ -78,7 +95,7 @@ public class Egg : MonoBehaviour
         shard.GetComponent<Animator>().enabled = false;
         shard.GetComponent<DieOverTime>().enabled = true;
     }
-    
+
     void OnTriggerEnter(Collider other) {
         var shard = shards.Random();
         shards.Remove(shard);
@@ -87,20 +104,35 @@ public class Egg : MonoBehaviour
         }
         BreakShard(shard);
 
-        drag.GetTouched(other.transform.position, other.transform.forward);
+        if (other) {
+            drag.GetTouched(other.transform.position, other.transform.forward);
+        }
 
         Health--; 
         if (Health <= 0) {
-            var scaleLerp = Random.value;
-            var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
-            animal.Record = Record;
-            animal.ScaleFactor = AnimalOriginalScale;
-            animal.TargetScale = Mathf.Lerp(AnimalFinalScaleMin, AnimalFinalScaleMax, scaleLerp);
-            animal.ScaleSpeed = AnimalScaleSpeed;
-            animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
-            animal.GetComponentInSelfOrChildren<Wander>().speed = Mathf.Lerp(AnimalWanderSpeedForSmallest, AnimalWanderSpeedForBiggest, scaleLerp);
-            animal.GetComponentInChildren<Animation>().enabled = true;
-            animal.GetComponentInChildren<Animation>()["Take 001"].speed = Mathf.Lerp(AnimalAnimSpeedForSmallest, AnimalWanderSpeedForBiggest, scaleLerp);
+            var r = Random.value;
+            var animalParams =
+                r < 0.15f ? MonsterParams :
+                r < 0.5f ? GroupParams :
+                SwarmParams
+                ;
+
+            var count = Mathf.FloorToInt(Mathf.Lerp(animalParams.MinCount, animalParams.MaxCount, Random.value));
+            for (int i = 0; i < count; i++) {
+                var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
+                animal.Record = Record;
+                animal.UseScaleSpeed = false;
+
+                var animalScaled = animal.GetComponent<SmoothScaler>();
+                var scaleLerp = Random.value;
+                animalScaled.OriginalScale = Mathf.Lerp(animalParams.MinScaleStart, animalParams.MaxScaleStart, scaleLerp);
+                animalScaled.TargetScale = Mathf.Lerp(animalParams.MinScaleEnd, animalParams.MaxScaleEnd, scaleLerp);
+                animalScaled.ScaleDuration = Mathf.Lerp(animalParams.MinScaleDuration, animalParams.MaxScaleDuration, scaleLerp);
+                animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
+                animal.GetComponentInSelfOrChildren<Wander>().speed = Mathf.Lerp(animalParams.MinSpeed, animalParams.MaxSpeed, scaleLerp);
+                animal.GetComponentInChildren<Animation>().enabled = true;
+                animal.GetComponentInChildren<Animation>()["Take 001"].speed = Mathf.Lerp(animalParams.MinAnimSpeed, animalParams.MaxAnimSpeed, scaleLerp);
+            }
 
             foreach (var s in shards) {
                 BreakShard(s);
