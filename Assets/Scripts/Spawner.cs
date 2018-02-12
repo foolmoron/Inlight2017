@@ -5,10 +5,7 @@ using System.Collections.Generic;
 public class Spawner : MonoBehaviour {
 
     public GameObject SeedPrefab;
-    ObjectPool seedPool;
-
     public GameObject EggPrefab;
-    ObjectPool eggPool;
 
     List<Egg> eggs = new List<Egg>(100);
     List<Seed> seeds = new List<Seed>(100);
@@ -32,9 +29,6 @@ public class Spawner : MonoBehaviour {
     public float SeedSpawnChance = 0.66f;
 
     void Start() {
-        seedPool = SeedPrefab.GetObjectPool(20);
-        eggPool = EggPrefab.GetObjectPool(20);
-
         // kill objects on image removed
         ImageReader.Inst.OnRemoved += record => {
             for (int i = 0; i < eggs.Count; i++) {
@@ -70,7 +64,7 @@ public class Spawner : MonoBehaviour {
     }
     
     void Spawn(ImageRecord record) {
-        var obj = (record.Type == ImageType.Animal ? eggPool : seedPool).Obtain();
+        var obj = Instantiate(record.Type == ImageType.Animal ? EggPrefab : SeedPrefab);
 
         var egg = obj.GetComponentInSelfOrChildren<Egg>();
         if (egg) {

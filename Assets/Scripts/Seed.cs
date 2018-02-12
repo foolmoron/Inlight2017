@@ -57,7 +57,7 @@ public class Seed : MonoBehaviour
         }
         deathTime += Time.deltaTime;
         if (deathTime >= DeathTime) {
-            gameObject.Release();
+            Destroy(gameObject);
         }
     }
 
@@ -88,7 +88,7 @@ public class Seed : MonoBehaviour
                 planter.DoPlanting();
             }
 
-            gameObject.Release();
+            Destroy(gameObject);
         }
     }
 }
