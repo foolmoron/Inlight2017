@@ -371,16 +371,16 @@ app.use((err, req, res, next) => {
 })
 
 // start listening on http and https
-http.createServer(app).listen(config.PORT_HTTP, function () {
+http.createServer(app).listen(config.HTTP_PORT, function () {
     console.log(`
 ************************************
-** Started listening on port ${config.PORT_HTTP} **
+** Started listening on port ${config.HTTP_PORT} **
 ************************************`)
 });
-https.createServer({ key: fs.readFileSync(config.KEY_PATH), cert: fs.readFileSync(config.CERT_PATH) }, app).listen(config.PORT_HTTPS, function () {
+https.createServer({ key: fs.readFileSync(config.KEY_PATH), cert: fs.readFileSync(config.CERT_PATH) }, app).listen(config.HTTPS_PORT, function () {
     console.log(`
 ++++++++++++++++++++++++++++++++++++
-++ Started listening on port ${config.PORT_HTTPS} ++
+++ Started listening on port ${config.HTTPS_PORT} ++
 ++++++++++++++++++++++++++++++++++++`)
 });
 
