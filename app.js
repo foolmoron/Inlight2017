@@ -374,7 +374,7 @@ app.use((err, req, res, next) => {
 http.createServer(app).listen(config.PORT_HTTP, function () {
     console.log(`
 ************************************
-** Started listening on port ${config.PORT_*TTP} **
+** Started listening on port ${config.PORT_HTTP} **
 ************************************`)
 });
 https.createServer({ key: fs.readFileSync(config.KEY_PATH), cert: fs.readFileSync(config.CERT_PATH) }, app).listen(config.PORT_HTTPS, function () {
