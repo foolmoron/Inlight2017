@@ -1,4 +1,6 @@
 const express = require('express')
+const http = require('http')
+const https = require('https')
 const cors = require('cors')
 const path = require('path')
 const fs = require('fs')
@@ -368,11 +370,18 @@ app.use((err, req, res, next) => {
     res.render('error')
 })
 
-// start listening
-app.listen(config.PORT, function () {
+// start listening on http and https
+http.createServer(app).listen(config.PORT_HTTP, function () {
     console.log(`
 ************************************
-** Started listening on port ${config.PORT} **
+** Started listening on port ${config.PORT_*TTP} **
 ************************************`)
-})
+});
+https.createServer({ key: fs.readFileSync(config.KEY_PATH), cert: fs.readFileSync(config.CERT_PATH) }, app).listen(config.PORT_HTTPS, function () {
+    console.log(`
+++++++++++++++++++++++++++++++++++++
+++ Started listening on port ${config.PORT_HTTPS} ++
+++++++++++++++++++++++++++++++++++++`)
+});
+
 module.exports = app

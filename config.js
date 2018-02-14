@@ -2,5 +2,8 @@ module.exports = {
     SECRET: '[replace these config strings when installing the app]',
     PASSWORD: 'test',
     HOST: 'http://localhost',
-    PORT: 8000
+    HTTP_PORT: 8000,
+    HTTPS_PORT: 8443,
+    KEY_PATH: '/etc/letsencrypt/live/inlight.fool.games/privkey.pem',
+    CERT_PATH: '/etc/letsencrypt/live/inlight.fool.games/cert.pem',
 }
