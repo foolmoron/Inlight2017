@@ -97,8 +97,8 @@ app.get('/drawings', adminAuth, (req, res, next) => {
     res.render('drawings', { 
         drawings: data.drawings.data, 
         globalAutoApprove: GLOBAL.autoapprove, 
-        dirNew: `${config.HOST}:${config.PORT}/img/drawings/new/`,
-        dirApproved: `${config.HOST}:${config.PORT}/img/drawings/approved/`
+        dirNew: `${config.HOST}:${config.HTTPS_PORT}/img/drawings/new/`,
+        dirApproved: `${config.HOST}:${config.HTTPS_PORT}/img/drawings/approved/`
     })
 })
 
