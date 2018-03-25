@@ -28,3 +28,5 @@ Images/*.jpg
 !/Assets/*/*/*.obj
 !/Assets/*/*/*/*.obj
 !/Assets/*/*/*/*/*.obj
+Assets/PostProcessing/
+Assets/PostProcessing.meta

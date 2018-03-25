@@ -46,6 +46,8 @@ public class Seed : MonoBehaviour
 
     void Start() {
         planterPool = PlanterPrefab.GetObjectPool(100);
+
+        seedRenderer.material.EnableKeyword("_EMISSION");
     }
 
     void Update() {
@@ -54,6 +56,7 @@ public class Seed : MonoBehaviour
         }
         if (Record != null) {
             seedRenderer.material.color = Record.MainColor;
+            seedRenderer.material.SetColor("_EmissionColor", Record.MainColor);
         }
         deathTime += Time.deltaTime;
         if (deathTime >= DeathTime) {

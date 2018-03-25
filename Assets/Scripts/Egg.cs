@@ -67,6 +67,10 @@ public class Egg : MonoBehaviour
 
     void Start() {
         animalPool = AnimalPrefab.GetObjectPool(100);
+        solid.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
+        foreach (var shard in shards) {
+            shard.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
+        }
     }
 
     void Update() {
@@ -75,8 +79,10 @@ public class Egg : MonoBehaviour
         }
         if (Record != null) {
             solid.GetComponent<Renderer>().material.color = Record.MainColor;
+            solid.GetComponent<Renderer>().material.SetColor("_EmissionColor", Record.MainColor);
             foreach (var shard in shards) {
                 shard.GetComponent<Renderer>().material.color = Record.MainColor;
+                shard.GetComponent<Renderer>().material.SetColor("_EmissionColor", Record.MainColor);
             }
         }
         deathTime += Time.deltaTime;

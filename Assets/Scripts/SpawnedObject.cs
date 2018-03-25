@@ -25,6 +25,7 @@ public class SpawnedObject : MonoBehaviour {
     void Start() {
         ScaleTarget = ScaleTarget != null ? ScaleTarget : transform;
         originalScale = ScaleTarget.localScale;
+        renderer.material.EnableKeyword("_EMISSION");
     }
 
     void FixedUpdate() {
@@ -42,6 +43,8 @@ public class SpawnedObject : MonoBehaviour {
             if (Record.Texture) {
                 renderer.material.mainTexture = Record.Texture;
                 renderer.material.mainTextureScale = Record.Facing == ImageFacing.Left ? Vector2.one : new Vector2(-1, 1);
+                renderer.material.SetTexture("_EmissionMap", Record.Texture);
+                renderer.material.SetColor("_EmissionColor", Color.white);
             }
         }
         if (Record == null || Record.Dimensions == Vector2.zero) {
