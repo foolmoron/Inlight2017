@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 [Serializable]
 public class PlanterParams {
-    [Range(0, 200)]
+    [Range(0, 500)]
     public int Count = 1;
     [Range(0, 20)]
     public float SpawnRadius = 0f;
