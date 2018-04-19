@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class AnimationUtilities : MonoBehaviour {
 
@@ -11,10 +12,16 @@ public class AnimationUtilities : MonoBehaviour {
 
     public float[] Speeds;
 
+    public GameObject[] Objects;
+
+    public Sprite[] Sprites;
+    
     Animator animator;
+    SpriteRenderer spriteRenderer;
 
     void Start() {
         animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void FixedUpdate() {
@@ -29,6 +36,14 @@ public class AnimationUtilities : MonoBehaviour {
                 }
             }
         }
+    }
+
+    public void LoadScene(string scene) {
+        SceneManager.LoadScene(scene);
+    }
+
+    public void LoadSceneById(int scene) {
+        SceneManager.LoadScene(scene);
     }
 
     public void DelayByIndexOncePerPlay(int delayIndex) {
@@ -92,6 +107,22 @@ public class AnimationUtilities : MonoBehaviour {
         Instantiate(prefab);
     }
 
+    public void EnableGameObjectByIndex(int objIndex) {
+        if (objIndex >= 0 && objIndex < Objects.Length) {
+            Objects[objIndex].SetActive(true);
+        } else {
+            Debug.LogError("No object with index " + objIndex + " found on this AnimationUtilities component!");
+        }
+    }
+
+    public void DisableGameObjectByIndex(int objIndex) {
+        if (objIndex >= 0 && objIndex < Objects.Length) {
+            Objects[objIndex].SetActive(false);
+        } else {
+            Debug.LogError("No object with index " + objIndex + " found on this AnimationUtilities component!");
+        }
+    }
+
     public void DestroySelf() {
         Destroy(gameObject);
     }
@@ -112,5 +143,21 @@ public class AnimationUtilities : MonoBehaviour {
 
     public void PlayAnimationState(string state) {
         animator.Play(state);
+    }
+    
+    public void SetSpriteByIndex(int spriteIndex) {
+        if (spriteIndex >= 0 && spriteIndex < Sprites.Length) {
+            spriteRenderer.sprite = Sprites[spriteIndex];
+        } else {
+            Debug.LogError("No sprite with index " + spriteIndex + " found on this AnimationUtilities component!");
+        }
+    }
+
+    public void SetSpriteByName(string spritename) {
+        for (int i = 0; i < Sprites.Length; i++) {
+            if (Sprites[i].name == spritename) {
+                SetSpriteByIndex(i);
+            }
+        }
     }
 }
