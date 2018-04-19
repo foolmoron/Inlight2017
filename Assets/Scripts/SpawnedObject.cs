@@ -18,6 +18,8 @@ public class SpawnedObject : MonoBehaviour {
     Vector2 originalScale;
     new Renderer renderer;
 
+    Texture2D prevTex;
+
     void Awake() {
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
     }
@@ -40,11 +42,12 @@ public class SpawnedObject : MonoBehaviour {
                 ScaleTarget.localScale = new Vector3(originalScale.x * Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
             if (Record.Dimensions != Vector2.zero && ZAligned)
                 ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Dimensions.aspect()) * ScaleFactor;
-            if (Record.Texture) {
+            if (Record.Texture && Record.Texture != prevTex) {
                 renderer.material.mainTexture = Record.Texture;
                 renderer.material.mainTextureScale = Record.Facing == ImageFacing.Left ? Vector2.one : new Vector2(-1, 1);
                 renderer.material.SetTexture("_EmissionMap", Record.Texture);
                 renderer.material.SetColor("_EmissionColor", Color.white);
+                prevTex = Record.Texture;
             }
         }
         if (Record == null || Record.Dimensions == Vector2.zero) {

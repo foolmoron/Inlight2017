@@ -65,7 +65,7 @@ public class Seed : MonoBehaviour
     }
 
     void OnCollisionEnter(Collision collision) {
-        if (!WillGrowPlant) {
+        if (!WillGrowPlant && !Spawner.AUTO_SPAWN) {
             return;
         }
         if (((1 << collision.gameObject.layer) & CollisionMask.value) != 0) {

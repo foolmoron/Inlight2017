@@ -57,7 +57,7 @@ public class Planter : MonoBehaviour {
                         plant.transform.localRotation = Quaternion.AngleAxis(Random.value * 360, Vector3.up);
                         plant.Record = Record;
                         plant.TargetScale = Mathf.Lerp(Params.SizeMin, Params.SizeMax, Random.value);
-                        plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
+                        //plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
                     }
                     i++;
                 }

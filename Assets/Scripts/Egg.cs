@@ -71,6 +71,10 @@ public class Egg : MonoBehaviour
         foreach (var shard in shards) {
             shard.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
         }
+        if (Spawner.AUTO_SPAWN) {
+            Health = 0;
+            OnTriggerEnter(null);
+        }
     }
 
     void Update() {
@@ -133,8 +137,6 @@ public class Egg : MonoBehaviour
                 animalScaled.ScaleDuration = Mathf.Lerp(animalParams.MinScaleDuration, animalParams.MaxScaleDuration, scaleLerp);
                 animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
                 animal.GetComponentInSelfOrChildren<Wander>().speed = Mathf.Lerp(animalParams.MinSpeed, animalParams.MaxSpeed, scaleLerp);
-                //animal.GetComponentInChildren<Animation>().enabled = true;
-                //animal.GetComponentInChildren<Animation>()["Take 001"].speed = Mathf.Lerp(animalParams.MinAnimSpeed, animalParams.MaxAnimSpeed, scaleLerp);
             }
 
             foreach (var s in shards) {
