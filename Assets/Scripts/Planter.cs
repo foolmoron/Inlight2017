@@ -13,9 +13,9 @@ public class PlanterParams {
     public float SpawnRadius = 0f;
     [Range(0, 2)]
     public float SpawnInterval = 0.1f;
-    [Range(0, 5)]
+    [Range(0, 10)]
     public float SizeMin = 1f;
-    [Range(0, 5)]
+    [Range(0, 10)]
     public float SizeMax = 1f;
 }
 

@@ -28,6 +28,7 @@ public class SpawnedObject : MonoBehaviour {
         ScaleTarget = ScaleTarget != null ? ScaleTarget : transform;
         originalScale = ScaleTarget.localScale;
         renderer.material.EnableKeyword("_EMISSION");
+        Update();
     }
 
     void FixedUpdate() {

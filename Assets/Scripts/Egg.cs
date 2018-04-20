@@ -10,13 +10,13 @@ public class AnimalParams {
     public int MinCount = 1;
     [Range(1, 25)]
     public int MaxCount = 1;
-    [Range(0, 10)]
+    [Range(0, 25)]
     public float MinScaleStart;
-    [Range(0, 10)]
+    [Range(0, 25)]
     public float MaxScaleStart;
-    [Range(0, 10)]
+    [Range(0, 25)]
     public float MinScaleEnd;
-    [Range(0, 10)]
+    [Range(0, 25)]
     public float MaxScaleEnd;
     [Range(0, 30)]
     public float MinScaleDuration;

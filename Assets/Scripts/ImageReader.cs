@@ -111,6 +111,7 @@ public class ImageReader : Manager<ImageReader> {
                         Facing = facing,
                         Texture = new Texture2D(2, 2),
                     };
+                    record.Texture.wrapMode = TextureWrapMode.Clamp; // eliminate slight artifacts at edges of image
                     Records.Add(record);
                     OnAdded(record);
                     yield return null;
