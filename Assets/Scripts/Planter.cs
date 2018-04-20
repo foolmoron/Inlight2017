@@ -17,6 +17,10 @@ public class PlanterParams {
     public float SizeMin = 1f;
     [Range(0, 10)]
     public float SizeMax = 1f;
+    [Range(0, 5)]
+    public float MinAnimSpeed;
+    [Range(0, 5)]
+    public float MaxAnimSpeed;
 }
 
 public class Planter : MonoBehaviour {
@@ -56,8 +60,11 @@ public class Planter : MonoBehaviour {
                         var plant = plantPool.Obtain<SpawnedObject>(hit.point);
                         plant.transform.localRotation = Quaternion.AngleAxis(Random.value * 360, Vector3.up);
                         plant.Record = Record;
-                        plant.TargetScale = Mathf.Lerp(Params.SizeMin, Params.SizeMax, Random.value);
+                        var scaleLerp = Random.value;
+                        plant.TargetScale = Mathf.Lerp(Params.SizeMin, Params.SizeMax, scaleLerp);
                         //plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
+                        plant.GetComponentInChildren<Renderer>().material.SetFloat("_Timescale", Mathf.Lerp(Params.MaxAnimSpeed, Params.MinAnimSpeed, scaleLerp));
+                        plant.GetComponentInChildren<Renderer>().material.SetFloat("_TimeOffset", Random.value * 5);
                     }
                     i++;
                 }

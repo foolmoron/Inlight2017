@@ -137,6 +137,8 @@ public class Egg : MonoBehaviour
                 animalScaled.ScaleDuration = Mathf.Lerp(animalParams.MinScaleDuration, animalParams.MaxScaleDuration, scaleLerp);
                 animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
                 animal.GetComponentInSelfOrChildren<Wander>().speed = Mathf.Lerp(animalParams.MinSpeed, animalParams.MaxSpeed, scaleLerp);
+                animal.GetComponentInChildren<Renderer>().material.SetFloat("_Timescale", Mathf.Lerp(animalParams.MaxAnimSpeed, animalParams.MinAnimSpeed, scaleLerp));
+                animal.GetComponentInChildren<Renderer>().material.SetFloat("_TimeOffset", Random.value * 5);
             }
 
             foreach (var s in shards) {

@@ -3,6 +3,8 @@
 	    _Color("Main Color", Color) = (0.5, 0.5, 0.5, 1)
 	    _MainTex("Texture", 2D) = "white" {}
 	    _Cutoff("Alpha cutoff", Range(0, 1)) = 0.5
+	    _Timescale("Timescale", Range(0, 5)) = 1
+	    _TimeOffset("TimeOffset", float) = 0
 
         _EmissionMultiplier("Emission Multiplier", Range(0, 3)) = 1
         _EmissionLuminosityFactor("Emission Luminosity Factor", Range(0, 1)) = 0.25
@@ -39,6 +41,8 @@
 		    sampler2D _MainTex;
 		    float4 _Color;
             float _Cutoff;
+            float _Timescale;
+            float _TimeOffset;
 
 		    float _EmissionMultiplier;
             float _EmissionLuminosityFactor;
@@ -73,15 +77,16 @@
 
             VertexOutput vert(VertexInput v) {
                 VertexOutput o;
+                float time = _Time.x * _Timescale + _TimeOffset;
 
                 o.uv = v.uv;
                 //o.vertexColor = v.vertexColor * float4(_Color.rgb * _Color.a, _Color.a);
 
                 float4 pos = v.vertex;
 			    
-                float x = sin(pos.y / _XRigidness + (_Time.x * _XSpeed)) * (pos.y - _YOffset) * 5;// x axis movements
-			    float z = sin(pos.z / _YRigidness + (_Time.x * _YSpeed)) * (pos.y - _YOffset) * 1;// z axis movements
-			    float y = sin(pos.z / _ZRigidness + (_Time.x * _ZSpeed)) * (pos.y - _ZOffset) * 5;
+                float x = sin(pos.y / _XRigidness + (time * _XSpeed)) * (pos.y - _YOffset) * 5;// x axis movements
+			    float z = sin(pos.z / _YRigidness + (time * _YSpeed)) * (pos.y - _YOffset) * 1;// z axis movements
+			    float y = sin(pos.z / _ZRigidness + (time * _ZSpeed)) * (pos.y - _ZOffset) * 5;
 			    
                 pos.x += step(0, pos.y - _YOffset) * x * _XSway;// apply the movement if the vertex's y above the YOffset
 			    pos.z += step(0, pos.y + _YOffset) * z * _YSway;

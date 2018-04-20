@@ -19,6 +19,8 @@ public class SpawnedObject : MonoBehaviour {
     new Renderer renderer;
 
     Texture2D prevTex;
+    float prevScale;
+    int framesWithNoChange = 0;
 
     void Awake() {
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
@@ -35,6 +37,14 @@ public class SpawnedObject : MonoBehaviour {
         if (UseScaleSpeed) {
             ScaleFactor = Mathf.Lerp(ScaleFactor, TargetScale, ScaleSpeed);
         }
+        framesWithNoChange++;
+        if (Mathf.Abs(ScaleFactor - prevScale) > 0.0001f) {
+            framesWithNoChange = 0;
+        }
+        prevScale = ScaleFactor;
+        if (framesWithNoChange > 10) {
+            enabled = false;
+        }
     }
 
     void Update() {
@@ -46,8 +56,6 @@ public class SpawnedObject : MonoBehaviour {
             if (Record.Texture && Record.Texture != prevTex) {
                 renderer.material.mainTexture = Record.Texture;
                 renderer.material.mainTextureScale = Record.Facing == ImageFacing.Left ? Vector2.one : new Vector2(-1, 1);
-                renderer.material.SetTexture("_EmissionMap", Record.Texture);
-                renderer.material.SetColor("_EmissionColor", Color.white);
                 prevTex = Record.Texture;
             }
         }
