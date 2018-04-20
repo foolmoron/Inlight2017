@@ -1,10 +1,10 @@
 ﻿Shader "Animal & Plant Wobble" {
     Properties {
 	    _Color("Main Color", Color) = (0.5, 0.5, 0.5, 1)
-	    _MainTex("Texture", 2D) = "white" {}
+        _MainTex("Texture", 2D) = "white" {}
 	    _Cutoff("Alpha cutoff", Range(0, 1)) = 0.5
-	    _Timescale("Timescale", Range(0, 5)) = 1
-	    _TimeOffset("TimeOffset", float) = 0
+        _Timescale("Timescale", Range(0, 5)) = 1
+        _TimeOffset("TimeOffset", float) = 0
 
         _EmissionMultiplier("Emission Multiplier", Range(0, 3)) = 1
         _EmissionLuminosityFactor("Emission Luminosity Factor", Range(0, 1)) = 0.25
@@ -27,7 +27,8 @@
     }
 
     SubShader {
-	    Tags { "RenderType" = "Opaque" "DisableBatching" = "True" } // disable batching lets us keep object space
+	    Tags { "RenderType" = "Opaque" } // disable batching lets us keep object space
+        LOD 100
 	    Cull Off
 	    Blend SrcAlpha OneMinusSrcAlpha
 
@@ -36,13 +37,17 @@
 
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #include "UnityCG.cginc"
 
-		    sampler2D _MainTex;
+            UNITY_INSTANCING_BUFFER_START(Props)
+                UNITY_DEFINE_INSTANCED_PROP(float, _Timescale)
+                UNITY_DEFINE_INSTANCED_PROP(float, _TimeOffset)
+            UNITY_INSTANCING_BUFFER_END(Props)
+
+            sampler2D _MainTex;
 		    float4 _Color;
             float _Cutoff;
-            float _Timescale;
-            float _TimeOffset;
 
 		    float _EmissionMultiplier;
             float _EmissionLuminosityFactor;
@@ -67,17 +72,22 @@
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
                 //float4 vertexColor : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct VertexOutput {
                 float4 pos : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 //float4 vertexColor : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             VertexOutput vert(VertexInput v) {
                 VertexOutput o;
-                float time = _Time.x * _Timescale + _TimeOffset;
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+
+                float time = _Time.x * UNITY_ACCESS_INSTANCED_PROP(Props, _Timescale) + UNITY_ACCESS_INSTANCED_PROP(Props, _TimeOffset);
 
                 o.uv = v.uv;
                 //o.vertexColor = v.vertexColor * float4(_Color.rgb * _Color.a, _Color.a);
@@ -98,6 +108,8 @@
 		    }
 
             half4 frag(VertexOutput i) : COLOR {
+                UNITY_SETUP_INSTANCE_ID(i);
+
 			    half4 color = tex2D(_MainTex, i.uv);
                 
                 half4 albedo = color;
@@ -109,8 +121,6 @@
                 half4 finalColor = (albedo + emission) * _Color;
                 
                 if (finalColor.a < _Cutoff) discard;
-
-                //finalColor = half4(emissionLuminosityFactor, 0, 0, 1);
 
                 return finalColor;
 		    }

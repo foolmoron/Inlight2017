@@ -3,6 +3,8 @@ using System.Collections;
 
 public class SpawnedObject : MonoBehaviour {
 
+    public MaterialPropertyBlock Properties { get; private set; }
+
     public ImageRecord Record;
     public bool ZAligned;
 
@@ -24,12 +26,13 @@ public class SpawnedObject : MonoBehaviour {
 
     void Awake() {
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
+        Properties = new MaterialPropertyBlock();
+        renderer.GetPropertyBlock(Properties);
     }
 
     void Start() {
         ScaleTarget = ScaleTarget != null ? ScaleTarget : transform;
         originalScale = ScaleTarget.localScale;
-        renderer.material.EnableKeyword("_EMISSION");
         Update();
     }
 
@@ -54,8 +57,16 @@ public class SpawnedObject : MonoBehaviour {
             if (Record.Dimensions != Vector2.zero && ZAligned)
                 ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Dimensions.aspect()) * ScaleFactor;
             if (Record.Texture && Record.Texture != prevTex) {
-                renderer.material.mainTexture = Record.Texture;
-                renderer.material.mainTextureScale = Record.Facing == ImageFacing.Left ? Vector2.one : new Vector2(-1, 1);
+                var material = ImageReader.MaterialsCache.Get(Record.Texture);
+                if (material == null) {
+                    material = new Material(renderer.material) {
+                        mainTexture = Record.Texture,
+                        mainTextureScale = new Vector2(Record.Facing == ImageFacing.Left ? 1 : -1, 1)
+                    };
+                    ImageReader.MaterialsCache[Record.Texture] = material;
+                }
+                renderer.material = material;
+                renderer.SetPropertyBlock(Properties);
                 prevTex = Record.Texture;
             }
         }

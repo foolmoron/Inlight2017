@@ -63,8 +63,8 @@ public class Planter : MonoBehaviour {
                         var scaleLerp = Random.value;
                         plant.TargetScale = Mathf.Lerp(Params.SizeMin, Params.SizeMax, scaleLerp);
                         //plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
-                        plant.GetComponentInChildren<Renderer>().material.SetFloat("_Timescale", Mathf.Lerp(Params.MaxAnimSpeed, Params.MinAnimSpeed, scaleLerp));
-                        plant.GetComponentInChildren<Renderer>().material.SetFloat("_TimeOffset", Random.value * 5);
+                        plant.Properties.SetFloat("_Timescale", Mathf.Lerp(Params.MaxAnimSpeed, Params.MinAnimSpeed, scaleLerp));
+                        plant.Properties.SetFloat("_TimeOffset", Random.value * 5);
                     }
                     i++;
                 }

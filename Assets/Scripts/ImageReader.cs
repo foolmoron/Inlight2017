@@ -38,6 +38,8 @@ public class ImageReader : Manager<ImageReader> {
 
     public string RootPath = @"\..\Images\";
 
+    public static Dictionary<Texture2D, Material> MaterialsCache = new Dictionary<Texture2D, Material>();
+
     string root;
     string indexPath;
     DateTime lastIndexWrite;
