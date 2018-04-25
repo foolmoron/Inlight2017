@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public enum ImageType {
-    Animal, Plant, Tree, Bush, Grass
+    Animal, Plant, Tree, Bush, Grass, TinyPatch
 }
 public enum ImageFacing {
     Left, Right
@@ -67,10 +67,13 @@ public class ImageReader : Manager<ImageReader> {
     readonly WaitForEndOfFrame endOfFrame = new WaitForEndOfFrame();
     ProgressiveFunc reader;
 
-    void Start() {
+    List<ImageRecord> recordsJustAdded = new List<ImageRecord>(20);
+
+    IEnumerator Start() {
         root = Application.dataPath + RootPath;
         indexPath = root + "index.txt";
         reader = new ProgressiveFunc(MainReader());
+        yield return new WaitForSeconds(1f);
         StartCoroutine(reader);
     }
     
@@ -115,7 +118,7 @@ public class ImageReader : Manager<ImageReader> {
                     };
                     record.Texture.wrapMode = TextureWrapMode.Clamp; // eliminate slight artifacts at edges of image
                     Records.Add(record);
-                    OnAdded(record);
+                    recordsJustAdded.Add(record);
                     yield return null;
                 }
                 // update file if image was changed
@@ -145,6 +148,12 @@ public class ImageReader : Manager<ImageReader> {
             }
             // sort by age ascending
             Records.Sort((r1, r2) => -r1.LastUpdated.CompareTo(r2.LastUpdated));
+            yield return null;
+            // call added events
+            foreach (var record in recordsJustAdded) {
+                OnAdded(record);
+            }
+            recordsJustAdded.Clear();
             // wait until next frame
             yield return endOfFrame;
         }

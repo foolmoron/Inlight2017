@@ -4,8 +4,7 @@ using System.Collections;
 public class SpawnedObject : MonoBehaviour {
 
     public MaterialPropertyBlock Properties { get; private set; }
-
-    public ImageRecord Record;
+    
     public bool ZAligned;
 
     [Range(0, 10)]
@@ -18,6 +17,7 @@ public class SpawnedObject : MonoBehaviour {
     public Transform ScaleTarget;
 
     Vector2 originalScale;
+    HasImageRecord record;
     new Renderer renderer;
 
     Texture2D prevTex;
@@ -25,6 +25,7 @@ public class SpawnedObject : MonoBehaviour {
     int framesWithNoChange = 0;
 
     void Awake() {
+        record = GetComponent<HasImageRecord>();
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
         Properties = new MaterialPropertyBlock();
         renderer.GetPropertyBlock(Properties);
@@ -51,26 +52,26 @@ public class SpawnedObject : MonoBehaviour {
     }
 
     void Update() {
-        if (Record != null) {
-            if (Record.Dimensions != Vector2.zero && !ZAligned)
-                ScaleTarget.localScale = new Vector3(originalScale.x * Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
-            if (Record.Dimensions != Vector2.zero && ZAligned)
-                ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Dimensions.aspect()) * ScaleFactor;
-            if (Record.Texture && Record.Texture != prevTex) {
-                var material = ImageReader.MaterialsCache.Get(Record.Texture);
+        if (record.Record != null) {
+            if (record.Record.Dimensions != Vector2.zero && !ZAligned)
+                ScaleTarget.localScale = new Vector3(originalScale.x * record.Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
+            if (record.Record.Dimensions != Vector2.zero && ZAligned)
+                ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * record.Record.Dimensions.aspect()) * ScaleFactor;
+            if (record.Record.Texture && record.Record.Texture != prevTex) {
+                var material = ImageReader.MaterialsCache.Get(record.Record.Texture);
                 if (material == null) {
                     material = new Material(renderer.material) {
-                        mainTexture = Record.Texture,
-                        mainTextureScale = new Vector2(Record.Facing == ImageFacing.Left ? 1 : -1, 1)
+                        mainTexture = record.Record.Texture,
+                        mainTextureScale = new Vector2(record.Record.Facing == ImageFacing.Left ? 1 : -1, 1)
                     };
-                    ImageReader.MaterialsCache[Record.Texture] = material;
+                    ImageReader.MaterialsCache[record.Record.Texture] = material;
                 }
                 renderer.material = material;
                 renderer.SetPropertyBlock(Properties);
-                prevTex = Record.Texture;
+                prevTex = record.Record.Texture;
             }
         }
-        if (Record == null || Record.Dimensions == Vector2.zero) {
+        if (record.Record == null || record.Record.Dimensions == Vector2.zero) {
             ScaleTarget.localScale = Vector3.one * ScaleFactor;
         }
     }

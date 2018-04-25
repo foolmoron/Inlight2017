@@ -39,21 +39,20 @@ public class Egg : MonoBehaviour
 
     [Range(0, 5)]
     public int Health = 3;
-    [Range(0, 300)]
-    public float DeathTime = 180;
-    float deathTime;
+    public bool AutoBreak;
 
     public AnimalParams SwarmParams;
     public AnimalParams GroupParams;
     public AnimalParams MonsterParams;
 
-    public ImageRecord Record;
+    HasImageRecord record;
     GameObject solid;
     List<GameObject> shards;
 
     SemiDrag drag;
 
     void Awake() {
+        record = GetComponent<HasImageRecord>();
         drag = transform.parent.GetComponent<SemiDrag>();
         solid = transform.parent.Find("pSolid1").gameObject;
         shards = new List<GameObject> {
@@ -78,20 +77,21 @@ public class Egg : MonoBehaviour
     }
 
     void Update() {
-        if (Record == null) {
-            Record = ImageReader.Inst.GetWeightedRandomAnimal();
+        if (record.Record == null) {
+            record.Record = ImageReader.Inst.GetWeightedRandomAnimal();
         }
-        if (Record != null) {
-            solid.GetComponent<Renderer>().material.color = Record.MainColor;
-            solid.GetComponent<Renderer>().material.SetColor("_EmissionColor", Record.MainColor);
+        if (record.Record != null) {
+            solid.GetComponent<Renderer>().material.color = record.Record.MainColor;
+            solid.GetComponent<Renderer>().material.SetColor("_EmissionColor", record.Record.MainColor);
             foreach (var shard in shards) {
-                shard.GetComponent<Renderer>().material.color = Record.MainColor;
-                shard.GetComponent<Renderer>().material.SetColor("_EmissionColor", Record.MainColor);
+                shard.GetComponent<Renderer>().material.color = record.Record.MainColor;
+                shard.GetComponent<Renderer>().material.SetColor("_EmissionColor", record.Record.MainColor);
             }
         }
-        deathTime += Time.deltaTime;
-        if (deathTime >= DeathTime) {
-            Destroy(transform.parent.gameObject);
+        if (AutoBreak) {
+            Health = 0;
+            OnTriggerEnter(null);
+            AutoBreak = false;
         }
     }
 
@@ -127,7 +127,7 @@ public class Egg : MonoBehaviour
             var count = Mathf.FloorToInt(Mathf.Lerp(animalParams.MinCount, animalParams.MaxCount, Random.value));
             for (int i = 0; i < count; i++) {
                 var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
-                animal.Record = Record;
+                animal.GetComponent<HasImageRecord>().Record = record.Record;
                 animal.UseScaleSpeed = false;
 
                 var animalScaled = animal.GetComponent<SmoothScaler>();

@@ -34,7 +34,7 @@ public class PlanterParams {
 public class Planter : MonoBehaviour {
 
     public PlanterParams Params;
-    public ImageRecord Record;
+    HasImageRecord record;
 
     public GameObject PlantPrefab;
     ObjectPool plantPool;
@@ -45,6 +45,7 @@ public class Planter : MonoBehaviour {
 
     void Awake() {
         plantPool = PlantPrefab.GetObjectPool(1000);
+        record = GetComponent<HasImageRecord>();
     }
     
     public void DoPlanting() {
@@ -86,10 +87,9 @@ public class Planter : MonoBehaviour {
                     if (Physics.Raycast(new Ray(pos, Vector3.down), out hit, 500, CollisionMask.value)) {
                         var plant = plantPool.Obtain<SpawnedObject>(hit.point);
                         plant.transform.localRotation = Quaternion.AngleAxis(Random.value * 360, Vector3.up);
-                        plant.Record = Record;
+                        plant.GetComponent<HasImageRecord>().Record = record.Record;
                         var scaleLerp = Random.value;
                         plant.TargetScale = Mathf.Lerp(Params.SizeMin, Params.SizeMax, scaleLerp);
-                        //plant.GetComponentInChildren<Animator>().PlayFromBeginning("GrowUp");
                         plant.Properties.SetFloat("_Timescale", Mathf.Lerp(Params.MaxAnimSpeed, Params.MinAnimSpeed, scaleLerp));
                         plant.Properties.SetFloat("_TimeOffset", Random.value * 5);
                     }

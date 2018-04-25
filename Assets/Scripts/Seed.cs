@@ -17,17 +17,21 @@ public class Seed : MonoBehaviour
     public float DeathTime = 180;
     float deathTime;
 
-    public ImageRecord Record;
+    HasImageRecord record;
     Renderer seedRenderer;
     new Collider collider;
 
     public PlanterParams TreeParams;
     public PlanterParams BushParams;
     public PlanterParams GrassParams;
+    public PlanterParams TinyPatchParams;
+
+    public ImageType? ForcedType;
 
     void Awake() {
         seedRenderer = GetComponent<Renderer>();
         collider = GetComponent<Collider>();
+        record = GetComponent<HasImageRecord>();
 
         var interactable = GetComponent<VRTK_InteractableObject>();
         interactable.InteractableObjectGrabbed += (sender, args) => {
@@ -51,12 +55,12 @@ public class Seed : MonoBehaviour
     }
 
     void Update() {
-        if (Record == null) {
-            Record = ImageReader.Inst.GetWeightedRandomPlant();
+        if (record.Record == null) {
+            record.Record = ImageReader.Inst.GetWeightedRandomPlant();
         }
-        if (Record != null) {
-            seedRenderer.material.color = Record.MainColor;
-            seedRenderer.material.SetColor("_EmissionColor", Record.MainColor);
+        if (record.Record != null) {
+            seedRenderer.material.color = record.Record.MainColor;
+            seedRenderer.material.SetColor("_EmissionColor", record.Record.MainColor);
         }
         deathTime += Time.deltaTime;
         if (deathTime >= DeathTime) {
@@ -72,8 +76,8 @@ public class Seed : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(new Ray(transform.position.withY(200), Vector3.down), out hit, 500, CollisionMask.value)) {
                 var planter = planterPool.Obtain<Planter>(hit.point);
-                planter.Record = Record;
-                switch (Record.Type) {
+                planter.GetComponent<HasImageRecord>().Record = record.Record;
+                switch (ForcedType ?? record.Record.Type) {
                     case ImageType.Tree:
                         planter.Params = TreeParams;
                         break;
@@ -82,6 +86,9 @@ public class Seed : MonoBehaviour
                         break;
                     case ImageType.Grass:
                         planter.Params = GrassParams;
+                        break;
+                    case ImageType.TinyPatch:
+                        planter.Params = TinyPatchParams;
                         break;
                     default:
                         var r = Random.value;
