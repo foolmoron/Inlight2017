@@ -69,11 +69,10 @@ public class ImageReader : Manager<ImageReader> {
 
     List<ImageRecord> recordsJustAdded = new List<ImageRecord>(20);
 
-    IEnumerator Start() {
+    void Start() {
         root = Application.dataPath + RootPath;
         indexPath = root + "index.txt";
         reader = new ProgressiveFunc(MainReader());
-        yield return new WaitForSeconds(1f);
         StartCoroutine(reader);
     }
     

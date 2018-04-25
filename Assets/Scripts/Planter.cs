@@ -97,6 +97,7 @@ public class Planter : MonoBehaviour {
                         plant.transform.localRotation = Quaternion.AngleAxis(Random.value * 360, Vector3.up);
                         plant.GetComponent<HasImageRecord>().Record = record.Record;
                         var scaleLerp = Random.value;
+                        plant.ScaleFactor = 0;
                         plant.TargetScale = Mathf.Lerp(Params.SizeMin, Params.SizeMax, scaleLerp);
                         plant.Properties.SetFloat("_Timescale", Mathf.Lerp(Params.MaxAnimSpeed, Params.MinAnimSpeed, scaleLerp));
                         plant.Properties.SetFloat("_TimeOffset", Random.value * 5);
@@ -127,7 +128,8 @@ public class Planter : MonoBehaviour {
                     var seedObj = Instantiate(SeedPrefab);
                     seedObj.transform.position = hit.point.plusY(0.2f);
                     seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record.Record;
-                    seedObj.GetComponent<Rigidbody>().AddForce(new Vector3(forkDirections[forkIndex].x, 2f, forkDirections[forkIndex].y).normalized * SeedEjectForce, ForceMode.Impulse);
+                    var ejectDirection = new Vector3(forkDirections[forkIndex].x * Random.Range(0.9f, 1.1f), Random.Range(1.8f, 3.0f), forkDirections[forkIndex].y * Random.Range(0.9f, 1.1f)).normalized;
+                    seedObj.GetComponent<Rigidbody>().AddForce(ejectDirection * SeedEjectForce, ForceMode.Impulse);
                 }
             }
         }

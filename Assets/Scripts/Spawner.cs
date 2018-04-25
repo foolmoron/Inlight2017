@@ -17,41 +17,24 @@ public class Spawner : MonoBehaviour {
     public LayerMask CollisionLayers;
     public float HeightOffsetFromGround;
 
+    [Range(0, 40)]
+    public int MaxInitialRecords = 10;
+    [Range(0, 15)]
+    public float InitialRecordsPeriod = 2;
+    float initialRecordsTime;
+    [Range(0, 5)]
+    public float AutoSpawnInterval = 1;
+    float autoSpawnTime;
+    readonly Queue<ImageRecord> autoSpawnQueue = new Queue<ImageRecord>(10);
+    readonly Queue<ImageRecord> initialRecords = new Queue<ImageRecord>(10);
+
     void Start() {
         // spawn initial things when added
         ImageReader.Inst.OnAdded += record => {
-            var target = SpawnViewTargets.Find(possibleTarget => possibleTarget.gameObject.activeInHierarchy);
-            var forward = target.forward.withY(0).normalized; // spawn in player's view
-            var dir = Quaternion.AngleAxis(Mathf.Lerp(-AngleRange, AngleRange, Random.value), Vector3.up);
-            var startPos = dir * forward * Mathf.Lerp(MinDistance, MaxDistance, Random.value) + new Vector3(0, 200, 0);
-            RaycastHit hit;
-            Physics.Raycast(startPos, Vector3.down, out hit, 500, CollisionLayers.value);
-            var spawnPos = hit.point.plusY(HeightOffsetFromGround);
-
-            if (record.Type == ImageType.Animal) {
-                // small patch of grass
-                var plantRecord = ImageReader.Inst.GetWeightedRandomPlant();
-                var seedObj = Instantiate(SeedPrefab);
-                seedObj.transform.position = spawnPos;
-                seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = plantRecord;
-                seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
-                seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.TinyPatch;
-                // egg
-                var eggObj = Instantiate(EggPrefab);
-                eggObj.transform.position = spawnPos;
-                eggObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
-                eggObj.GetComponentInSelfOrChildren<Egg>().AutoBreak = true;
-                // nest that keeps spawning eggs
-                var nestObj = Instantiate(NestPrefab);
-                nestObj.transform.position = spawnPos;
-                nestObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+            if (initialRecordsTime < InitialRecordsPeriod) {
+                initialRecords.Enqueue(record);
             } else {
-                // grass (which also spawns some seeds)
-                var seedObj = Instantiate(SeedPrefab);
-                seedObj.transform.position = spawnPos;
-                seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
-                seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
-                seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.Grass;
+                autoSpawnQueue.Enqueue(record);
             }
         };
 
@@ -67,6 +50,53 @@ public class Spawner : MonoBehaviour {
     }
 
     void Update() {
+        if (initialRecordsTime < InitialRecordsPeriod) {
+            initialRecordsTime += Time.deltaTime;
+        } else {
+            autoSpawnTime -= Time.deltaTime;
+            if (autoSpawnTime <= 0) {
+                autoSpawnTime = AutoSpawnInterval;
+                // pick from next autospawn or if none are available, from initial records
+                var record = autoSpawnQueue.Count > 0 ? autoSpawnQueue.Dequeue() : initialRecords.Count > 0 ? initialRecords.Dequeue() : null;
+                if (record != null) {
+                    // spawn
+                    var target = SpawnViewTargets.Find(possibleTarget => possibleTarget.gameObject.activeInHierarchy);
+                    var forward = target.forward.withY(0).normalized; // spawn in player's view
+                    var dir = Quaternion.AngleAxis(Mathf.Lerp(-AngleRange, AngleRange, Random.value), Vector3.up);
+                    var startPos = dir * forward * Mathf.Lerp(MinDistance, MaxDistance, Random.value) + new Vector3(0, 200, 0);
+                    RaycastHit hit;
+                    Physics.Raycast(startPos, Vector3.down, out hit, 500, CollisionLayers.value);
+                    var spawnPos = hit.point.plusY(HeightOffsetFromGround);
+
+                    if (record.Type == ImageType.Animal) {
+                        // small patch of grass
+                        var plantRecord = ImageReader.Inst.GetWeightedRandomPlant();
+                        var seedObj = Instantiate(SeedPrefab);
+                        seedObj.transform.position = spawnPos;
+                        seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = plantRecord;
+                        seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
+                        seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.TinyPatch;
+                        // egg
+                        var eggObj = Instantiate(EggPrefab);
+                        eggObj.transform.position = spawnPos;
+                        eggObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+                        eggObj.GetComponentInSelfOrChildren<Egg>().AutoBreak = true;
+                        eggObj.GetComponentInSelfOrChildren<Egg>().ForceGroupParams = true;
+                        // nest that keeps spawning eggs
+                        var nestObj = Instantiate(NestPrefab);
+                        nestObj.transform.position = spawnPos;
+                        nestObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+                    } else {
+                        // grass (which also spawns some seeds)
+                        var seedObj = Instantiate(SeedPrefab);
+                        seedObj.transform.position = spawnPos;
+                        seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+                        seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
+                        seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.Grass;
+                    }
+                }
+            }
+        }
     }
     
     //void Spawn(ImageRecord record) {

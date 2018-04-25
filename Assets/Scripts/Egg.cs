@@ -44,6 +44,7 @@ public class Egg : MonoBehaviour
     public AnimalParams SwarmParams;
     public AnimalParams GroupParams;
     public AnimalParams MonsterParams;
+    public bool ForceGroupParams;
 
     HasImageRecord record;
     GameObject solid;
@@ -119,6 +120,9 @@ public class Egg : MonoBehaviour
                 r < 0.5f ? GroupParams :
                 SwarmParams
                 ;
+            if (ForceGroupParams) {
+                animalParams = GroupParams;
+            }
 
             var count = Mathf.FloorToInt(Mathf.Lerp(animalParams.MinCount, animalParams.MaxCount, Random.value));
             for (int i = 0; i < count; i++) {

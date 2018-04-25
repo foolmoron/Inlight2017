@@ -11,8 +11,8 @@ public class SpawnedObject : MonoBehaviour {
     public float ScaleFactor = 1;
     [Range(0, 10)]
     public float TargetScale = 1;
-    [Range(0, 1)]
-    public float ScaleSpeed = 0.9f;
+    [Range(0, 0.5f)]
+    public float ScaleSpeed = 0.2f;
     public bool UseScaleSpeed = true;
     public Transform ScaleTarget;
 
