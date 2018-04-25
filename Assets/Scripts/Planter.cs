@@ -29,6 +29,10 @@ public class PlanterParams {
     public float ForkSpeed;
     [Range(0, 30)]
     public float ForkRotation;
+    [Range(0, 10)]
+    public int MinSeedsToSpawn = 2;
+    [Range(0, 10)]
+    public int MaxSeedsToSpawn = 4;
 }
 
 public class Planter : MonoBehaviour {
@@ -42,6 +46,9 @@ public class Planter : MonoBehaviour {
     List<Vector2> forks = new List<Vector2>(10);
     List<Vector2> forkDirections = new List<Vector2>(10);
     List<float> forkRotations = new List<float>(10);
+
+    public GameObject SeedPrefab;
+    public float SeedEjectForce = 5f;
 
     void Awake() {
         plantPool = PlantPrefab.GetObjectPool(1000);
@@ -68,6 +75,7 @@ public class Planter : MonoBehaviour {
             }
 
             var i = 0;
+            var n = 0;
             var timer = 0f;
             var plantCount = Random.Range(Params.CountMin, Params.CountMax);
             while (true) {
@@ -101,7 +109,26 @@ public class Planter : MonoBehaviour {
                     break;
                 }
                 // yield
-                yield return null;
+                n++;
+                if (timer > 0 || n > 4) {
+                    n = 0;
+                    yield return null;
+                }
+            }
+
+            // toss seeds
+            var seedCount = Random.Range(Params.MinSeedsToSpawn, Params.MaxSeedsToSpawn);
+            for (int s = 0; s < seedCount; s++) {
+                var forkIndex = Mathf.FloorToInt(Random.value * forks.Count);
+                var fork = forks[forkIndex];
+                var pos = (transform.position + new Vector3(fork.x, 0, fork.y)).withY(200);
+                RaycastHit hit;
+                if (Physics.Raycast(new Ray(pos, Vector3.down), out hit, 500, CollisionMask.value)) {
+                    var seedObj = Instantiate(SeedPrefab);
+                    seedObj.transform.position = hit.point.plusY(0.2f);
+                    seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record.Record;
+                    seedObj.GetComponent<Rigidbody>().AddForce(new Vector3(forkDirections[forkIndex].x, 2f, forkDirections[forkIndex].y).normalized * SeedEjectForce, ForceMode.Impulse);
+                }
             }
         }
         gameObject.Release();

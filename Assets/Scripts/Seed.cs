@@ -19,6 +19,7 @@ public class Seed : MonoBehaviour
 
     HasImageRecord record;
     Renderer seedRenderer;
+    ParticleSystem particles;
     new Collider collider;
 
     public PlanterParams TreeParams;
@@ -32,6 +33,7 @@ public class Seed : MonoBehaviour
         seedRenderer = GetComponent<Renderer>();
         collider = GetComponent<Collider>();
         record = GetComponent<HasImageRecord>();
+        particles = GetComponentInChildren<ParticleSystem>();
 
         var interactable = GetComponent<VRTK_InteractableObject>();
         interactable.InteractableObjectGrabbed += (sender, args) => {
@@ -61,6 +63,7 @@ public class Seed : MonoBehaviour
         if (record.Record != null) {
             seedRenderer.material.color = record.Record.MainColor;
             seedRenderer.material.SetColor("_EmissionColor", record.Record.MainColor);
+            particles.setColor(record.Record.MainColor);
         }
         deathTime += Time.deltaTime;
         if (deathTime >= DeathTime) {
