@@ -70,10 +70,6 @@ public class Egg : MonoBehaviour
         foreach (var shard in shards) {
             shard.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
         }
-        if (Spawner.AUTO_SPAWN) {
-            Health = 0;
-            OnTriggerEnter(null);
-        }
     }
 
     void Update() {

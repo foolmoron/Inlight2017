@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 public class Spawner : MonoBehaviour {
 
-    public const bool AUTO_SPAWN = true;
-
     public GameObject SeedPrefab;
     public GameObject EggPrefab;
     public GameObject NestPrefab;
