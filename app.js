@@ -377,11 +377,15 @@ http.createServer(app).listen(config.HTTP_PORT, function () {
 ** Started listening on port ${config.HTTP_PORT} **
 ************************************`)
 });
-https.createServer({ key: fs.readFileSync(config.KEY_PATH), cert: fs.readFileSync(config.CERT_PATH) }, app).listen(config.HTTPS_PORT, function () {
-    console.log(`
-++++++++++++++++++++++++++++++++++++
-++ Started listening on port ${config.HTTPS_PORT} ++
-++++++++++++++++++++++++++++++++++++`)
-});
+try {
+    https.createServer({ key: fs.readFileSync(config.KEY_PATH), cert: fs.readFileSync(config.CERT_PATH) }, app).listen(config.HTTPS_PORT, function () {
+        console.log(`
+    ++++++++++++++++++++++++++++++++++++
+    ++ Started listening on port ${config.HTTPS_PORT} ++
+    ++++++++++++++++++++++++++++++++++++`)
+    });
+} catch (e) {
+
+}
 
 module.exports = app
