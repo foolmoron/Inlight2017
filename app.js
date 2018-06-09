@@ -365,6 +365,11 @@ app.use((err, req, res, next) => {
     res.locals.message = err.message
     res.locals.error = req.app.get('env') === 'development' ? err : {}
 
+    // never cache error pages
+    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate')
+    res.header('Expires', '-1')
+    res.header('Pragma', 'no-cache')
+
     // render the error page
     res.status(err.status || 500)
     res.render('error')
