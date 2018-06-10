@@ -46,6 +46,7 @@
             UNITY_INSTANCING_BUFFER_END(Props)
 
             sampler2D _MainTex;
+            float4 _MainTex_ST;
 		    float4 _Color;
             float _Cutoff;
 
@@ -90,6 +91,12 @@
                 float time = _Time.x * UNITY_ACCESS_INSTANCED_PROP(Props, _Timescale) + UNITY_ACCESS_INSTANCED_PROP(Props, _TimeOffset);
 
                 o.uv = v.uv;
+                if (_MainTex_ST.x < 0) {
+                    o.uv.x = 1 - o.uv.x;
+                }
+                if (_MainTex_ST.y < 0) {
+                    o.uv.y = 1 - o.uv.y;
+                }
                 //o.vertexColor = v.vertexColor * float4(_Color.rgb * _Color.a, _Color.a);
 
                 float4 pos = v.vertex;
