@@ -47,7 +47,7 @@ def pullIndex():
                         os.remove('./' + uuid + '.png')
                     except OSError:
                         pass
-                else:
+                elif change[u'completed']:
                     # download file
                     imgRes = requests.get(URL_IMG + str(uuid) + '.png')
                     if imgRes.status_code == 200:
