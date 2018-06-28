@@ -262,14 +262,26 @@
             opacity: 0.3;
         }
         .past-drawings .content {
-            padding: 0px 12px;
-            overflow: auto;
             height: 100%;
+            padding: 0px 12px;
+            text-align: center;
+            overflow: auto;
         }
         .past-drawings .title {
             color: white;
             text-align: center;
             font-size: 3em;
+        }
+        .past-drawings .past-canvas {
+            background-color: white;
+            margin-bottom: 12px;
+            padding: 6px;
+            border-radius: 12px;
+        }
+        .past-drawings .past-time {
+            color: white;
+            -webkit-text-stroke-width: 1px;
+            font-size: 1.4em;
         }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
@@ -283,9 +295,6 @@
         </div>
         <div class="content">
             <div class="title fancy-text">Past Drawings</div>
-            <div class="canvas-container" style="height: 50px;"></div>
-            <div class="canvas-container" style="height: 50px;"></div>
-            <div class="canvas-container" style="height: 50px;"></div>
         </div>
     </div>
     <div class="intro fancy-text">
