@@ -78,7 +78,7 @@
                     </button>
                 </div>
                 <div style="grid-area: 2 / 2 / span 1 / span 2;">
-                    <button class="btn" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/<$= drawing.completedTime ? 'incomplete' : 'complete' $>', update)" style="background-color: #ff3bcc; opacity: <$= drawing.completedTime ? 1 : 0.5 $>;">
+                    <button class="btn" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/<$= drawing.completedTime ? 'incomplete' : 'complete' $>', update)" style="background-color: #ff3bcc; margin: 4px 0px 0px 0px; opacity: <$= drawing.completedTime ? 1 : 0.5 $>;">
                         <$= drawing.completedTime ? 'COMPLETED' : 'incomplete' $>
                     </button>
                 </div>
