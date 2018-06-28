@@ -4,6 +4,7 @@
     <title>Lightfield VR - Interactive Input Zone</title>
     <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
     <meta name="viewport" content="user-scalable=no" />
+    <link rel="stylesheet" href="icons.css">
     <style>
         html {
             width: 100%;
@@ -222,10 +223,53 @@
                 margin-top: 0.8vh;
             }
         }
+
+        .history {
+            position: fixed;
+            z-index: 1000;
+            width: 80%;
+            height: 100%;
+            background-color: blueviolet;
+            transform: translateX(-100%);
+            transition: transform 0.25s;
+        }
+        .history.open {
+            transform: translateX(0%);
+        }
+        .history .open-button {
+            position: fixed;
+            width: 50px;
+            height: 3.5em;
+            right: -50px;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            background: blueviolet;
+        }
+        .history .close-on-click {
+            visibility: hidden;
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            right: -200%;
+            background-color: black;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .history.open .close-on-click {
+            visibility: visible;
+            opacity: 0.3;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
 <body class="loading">
+    <div class="history">
+        <div class="close-on-click" onclick="this.parentElement.classList.remove('open')">
+        </div>
+        <div class="open-button" onclick="this.parentElement.classList.toggle('open')">
+            <div class="menu icon" style="transform: translate3d(4px, 14px, 0);"></div>
+        </div>
+    </div>
     <div class="intro fancy-text">
         <span data-type="plant">Draw a nice <span class="text-plant">PLANT</span>!</span>
         <span data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span>!</span>
