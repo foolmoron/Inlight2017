@@ -56,6 +56,13 @@ function post(url, form, callback, error) { return ajax('POST', false, url, JSON
 function getSync(url, callback, error) { return ajax('GET', true, url, null, callback, error) }
 function postSync(url, form, callback, error) { return ajax('POST', true, url, JSON.stringify(form), callback, error) }
 
+function resetStorage() {
+    localStorage.removeItem('drawing')
+    localStorage.removeItem('clearStorageFixAttempt')
+    localStorage.removeItem('objectShiftLeft')
+    localStorage.removeItem('objectShiftTop')
+}
+
 // server
 var URL = 'https://inlight.fool.games/drawing'
 var RATE_LIMIT = 1000
@@ -86,7 +93,7 @@ get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) {
     localStorage.setItem('clearStorageFixAttempt', 0)
 }, function(error) {
     if (!parseInt(localStorage.getItem('clearStorageFixAttempt')) && (error.responseText || '').indexOf('invalid drawing uuid') >= 0) {
-        localStorage.clear()
+        resetStorage()
         localStorage.setItem('clearStorageFixAttempt', 1)
         location.reload(true)
     }
@@ -116,6 +123,54 @@ var push = throttleBounce(function(canvas) {
 
 function complete() {
     get(URL + '/' + drawingObj.uuid + '/complete')
+}
+
+// past drawings
+var PAST_DRAWING_MAX_HEIGHT = 250
+function updatePastDrawings(container) {
+    var pastDrawings = JSON.parse(localStorage.getItem('pastdrawings')) || []
+    container.classList.toggle('hidden', !pastDrawings.length)
+
+    for (var i = 0; i < pastDrawings.length; i++) {
+        // canvas el
+        var canvasEl = document.createElement('canvas')
+        canvasEl.classList.add('past-canvas')
+        // time el
+        var timeEl = document.createElement('div')
+        timeEl.textContent = new Date(pastDrawings[i].completionTime || 0).toLocaleString()
+        timeEl.classList.add('past-time')
+        timeEl.classList.add('fancy-text')
+        // layout
+        container.appendChild(timeEl)
+        container.appendChild(canvasEl)
+        container.appendChild(document.createElement('br'))
+        // canvas
+        var canvas = new fabric.StaticCanvas(canvasEl)
+        canvas.loadFromJSON(pastDrawings[i].json, function() {
+            // calculate bounds
+            var group = new fabric.Group(canvas._objects, null, true)
+            group._calcBounds()
+            var width = Math.ceil(group.width)
+            var height = Math.ceil(group.height)
+            var aspect = width / height
+            // canvas size
+            canvas.setWidth(width)
+            canvas.setHeight(height)
+            // div size
+            var h = Math.min(height, PAST_DRAWING_MAX_HEIGHT)
+            var w = h * aspect
+            canvasEl.style.width = w + 'px'
+            canvasEl.style.height = h + 'px'
+            console.log(width, height, w, h)
+            // shift to top right
+            canvas._objects.forEach(function(obj) {
+                obj.setLeft(obj.left - group.left)
+                obj.setTop(obj.top - group.top)
+                obj.setCoords()
+            })
+            canvas.renderAll()
+        })
+    }
 }
 
 // main
@@ -271,8 +326,23 @@ window.onload = function() {
                     200, function() { dots.forEach(function(t) { t.textContent = '...' }) },
                     400, function() { dots.forEach(function(t) { t.textContent = '.....' }) },
                     400, function() { dots.forEach(function(t) { t.textContent = '.......' }) },
-                    400, function() { enableByPrompt(doneMessages); complete(); },
-                    1600, function() { localStorage.clear(); location.reload(); },
+                    400, function() {
+                        // complete drawing and wait a while for request to go through
+                        enableByPrompt(doneMessages)
+                        complete()
+                    },
+                    1600, function() {
+                        // finish drawing and reload
+                        var pastDrawings = JSON.parse(localStorage.getItem('pastdrawings')) || []
+                        pastDrawings.unshift({
+                            uuid: drawingObj.uuid,
+                            json: JSON.parse(JSON.stringify(canvas.toObject())),
+                            completionTime: new Date().getTime(),
+                        })
+                        localStorage.setItem('pastdrawings', JSON.stringify(pastDrawings))
+                        resetStorage()
+                        location.reload()
+                    },
                 ])
             }
         }
@@ -423,4 +493,8 @@ window.onload = function() {
 
     // kickoff history
     doHistory(0)
+
+    // load past drawings
+    var pastDrawingContainer = document.querySelector('.past-drawings .content')
+    updatePastDrawings(pastDrawingContainer)
 }
