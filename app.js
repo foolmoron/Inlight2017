@@ -202,6 +202,7 @@ app.get('/drawingindex/:sinceTime', (req, res, next) => {
         type: drawing.type,
         facing: drawing.facing,
         deleted: drawing.status == STATUS.DELETED,
+        completed: drawing.completedTime != null,
     }))
     res.json({time: new Date().getTime(), changes})
 })
@@ -246,6 +247,14 @@ app.get('/drawing/:uuid/complete', checkDrawing, (req, res, next) => {
     var drawing = req.drawing
     // update
     drawing.completedTime = new Date().getTime()
+    data.drawings.update(drawing)
+    // return
+    res.sendStatus(200)
+})
+app.get('/drawing/:uuid/incomplete', checkDrawing, (req, res, next) => {
+    var drawing = req.drawing
+    // update
+    drawing.completedTime = null
     data.drawings.update(drawing)
     // return
     res.sendStatus(200)

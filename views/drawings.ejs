@@ -49,10 +49,6 @@
                     <option value="b" <$= drawing.type == 'b' ? 'selected' : '' $>>BUSH</option>
                     <option value="g" <$= drawing.type == 'g' ? 'selected' : '' $>>GRASS</option>
                 </select>
-                <select onchange="get('/drawing/<$= drawing.uuid $>/facing/' + this.value)">
-                    <option value="l" <$= drawing.facing == 'l' ? 'selected' : '' $>>LEFT-FACE</option>
-                    <option value="r" <$= drawing.facing == 'r' ? 'selected' : '' $>>RIGHT-FACE</option>
-                </select>
             </div>
             <div class="col-xs-4 text-right">
                 <b><$= new Date(drawing.meta.updated).toLocaleString() $></b>
@@ -63,12 +59,29 @@
             <button class="btn btn-info primary-button <$= drawing.status != 'ignored' ? 'hidden' : '' $>" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/ignore/false', update)">Disable Ignore</button>
             <button class="btn btn-danger secondary-button" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/delete', update)">Delete</button>
         </div>
-        <div class="col-xs-6 col-md-6 text-center">
-            <div class="col-xs-12">
-                <$ if (drawing.status == 'updated') { $>
-                    <img src="<$= dirApproved $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
-                <$ } $>
-                <img src="<$= dirNew $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
+        <div class="col-xs-6 col-md-6 text-center" style="padding: 0;">
+            <div class="drawing-grid">
+                <div style="grid-area: 1 / 1 / span 1 / span 1;">
+                    <button class="btn tall-button" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/facing/l', update)" style="background-color: #6d6d6d; opacity: <$= drawing.facing == 'l' ? 1 : 0.3 $>;">
+                        <<br><<br><<br><<br><<br>
+                    </button>
+                </div>
+                <div style="grid-area: 1 / 2 / span 1 / span 2;">
+                    <$ if (drawing.status == 'updated') { $>
+                        <img src="<$= dirApproved $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
+                    <$ } $>
+                    <img src="<$= dirNew $><$= drawing.uuid $>.png?cachebuster=<$= Math.random() $>" />
+                </div>
+                <div style="grid-area: 1 / 4 / span 1 / span 1;">
+                    <button class="btn tall-button" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/facing/r', update)" style="background-color: #6d6d6d; opacity: <$= drawing.facing == 'r' ? 1 : 0.3 $>;">
+                        ><br>><br>><br>><br>><br>
+                    </button>
+                </div>
+                <div style="grid-area: 2 / 2 / span 1 / span 2;">
+                    <button class="btn" type="submit" onclick="get('/drawing/<$= drawing.uuid $>/<$= drawing.completedTime ? 'incomplete' : 'complete' $>', update)" style="background-color: #ff3bcc; opacity: <$= drawing.completedTime ? 1 : 0.5 $>;">
+                        <$= drawing.completedTime ? 'COMPLETED' : 'incomplete' $>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="col-xs-3 col-md-3">
