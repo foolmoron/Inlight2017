@@ -247,6 +247,11 @@
             border-bottom-right-radius: 12px;
             background: blueviolet;
         }
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .open-button {
+                transform: scale(2) translate3d(25%, 25%, 0);
+            }
+        }
         .past-drawings .close-on-click {
             visibility: hidden;
             position: fixed;
