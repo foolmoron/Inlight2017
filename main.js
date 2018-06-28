@@ -129,7 +129,7 @@ function complete() {
 var PAST_DRAWING_MAX_HEIGHT = 250
 function updatePastDrawings(container) {
     var pastDrawings = JSON.parse(localStorage.getItem('pastdrawings')) || []
-    container.classList.toggle('hidden', !pastDrawings.length)
+    container.parentElement.classList.toggle('hidden', !pastDrawings.length)
 
     for (var i = 0; i < pastDrawings.length; i++) {
         // canvas el
