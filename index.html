@@ -269,10 +269,17 @@
         .past-drawings .content {
             height: 100%;
             padding: 0px 12px;
+            padding-top: 60px;
             text-align: center;
             overflow: auto;
         }
         .past-drawings .title {
+            position: fixed;
+            width: 100%;
+            width: calc(100% - 36px);
+            margin-left: calc(18px);
+            max-height: 60px;
+            background-color: blueviolet;
             color: white;
             text-align: center;
             font-size: 3em;
@@ -288,6 +295,61 @@
             -webkit-text-stroke-width: 1px;
             font-size: 1.4em;
         }
+
+        .past-drawing .commands {
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: space-around;
+            float: right;
+            height: 200px;
+            margin-left: -100%;
+            margin-top: 18px;
+        }
+        .past-drawing .commands .btn-wiggle {
+            width: 160px;
+            height: 80px;
+            background-color: transparent;
+            border: 10px dotted #39e4ff;
+            border-radius: 26px;
+            padding: 0px;
+            transition: 0.1s transform linear;
+            transform: scale3d(1, 1, 1);
+        }
+        .past-drawing .commands .btn-wiggle:hover {
+            transform: scale3d(1.25, 1.25, 1);
+        }
+        .past-drawing .commands .btn-wiggle:disabled {
+            opacity: 0.5;
+            transition: 0.3s transform cubic-bezier(0.85, -1.73, 0.34, 2.65);
+            transform: scale3d(1, 1, 1);
+        }
+        .past-drawing .commands .btn-wiggle .fancy-text {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background-color: #39e4ff;
+            font-size: 1.8em;
+            color: white;
+            border-radius: 18px;
+            border: 2px solid #39e4ff;
+            margin: -2px;
+        }
+        .past-drawing .commands .cooldown {
+            position: absolute;
+            width: calc(100% + 20px);
+            height: calc(100% + 20px);
+            top: -10px;
+            left: -10px;
+            background: blueviolet;
+            opacity: 0;
+            mix-blend-mode: color;
+        }
+        .past-drawing .commands .btn-wiggle:disabled .cooldown {
+            opacity: 1;
+            height: 0px;
+            transition: 2s height linear;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
@@ -298,8 +360,8 @@
         <div class="open-button" onclick="this.parentElement.classList.toggle('open')">
             <div class="menu icon" style="transform: translate3d(4px, 14px, 0);"></div>
         </div>
+        <div class="title fancy-text">Past Drawings</div>
         <div class="content">
-            <div class="title fancy-text">Past Drawings</div>
         </div>
     </div>
     <div class="intro fancy-text">
@@ -340,6 +402,20 @@
     </div>
     <canvas id="canvas"></canvas>
 </body>
+<template id="tpl-past-drawing">
+    <div class='past-drawing'>
+        <div class="past-time fancy-text"></div>
+        <canvas class="past-canvas"></canvas>
+        <div class="commands">
+            <button class="btn-wiggle" onclick="this.setAttribute('disabled', 'disabled'); setTimeout(() => this.removeAttribute('disabled'), 2*1000);">
+                <span class="fancy-text">Wiggle!</span>
+                <div class="cooldown"></div>
+            </button>
+            <!-- <button class="btn-spawn" onclick="">Spawn!</button> -->
+        </div>
+        <br>
+    </div>
+</template>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.16/fabric.min.js"></script>
 <script src="main.js"></script>
 </html>
