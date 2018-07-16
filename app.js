@@ -443,7 +443,7 @@ app.use((err, req, res, next) => {
     res.locals.error = req.app.get('env') === 'development' ? err : {}
 
     // never cache error pages
-    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate')
+    res.header('Cache-Control', 'private, no-cache, max-age=0')
     res.header('Expires', '-1')
     res.header('Pragma', 'no-cache')
 
