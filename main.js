@@ -65,7 +65,7 @@ function resetStorage() {
 
 // server
 var BASE_URL = 'http://localhost:8000'
-var DRAWING_URL = 'http://localhost:8000/drawing'
+var DRAWING_URL = BASE_URL + '/drawing'
 var RATE_LIMIT = 1000
 var DRAWING_MIN_TIME = 10000
 
