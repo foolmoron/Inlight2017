@@ -50,6 +50,7 @@ function initCollection(container, name, opts) {
 
 db.loadDatabase({}, () => {
     initCollection(data, 'drawings', { unique: ['uuid'] })
+    initCollection(data, 'commands', { unique: ['key'] })
 })
 
 const GLOBAL = {
@@ -331,6 +332,73 @@ app.get('/drawing/:uuid/facing/:facing', checkDrawing, (req, res, next) => {
     res.sendStatus(200)
 })
 
+const COMMAND_TYPE = {
+    WIGGLE: 'wiggle',
+    SPAWN: 'spawn',
+}
+
+const Command = (init) => Object.assign({
+    key: '',
+    uuid: '',
+    type: '',
+    num: 0,
+}, init)
+
+function checkCommand(req, res, next) {
+    var upperType = (req.params.type + '').toUpperCase()
+    if (!(upperType in COMMAND_TYPE)) {
+        return res.status(400).json({error : 'invalid command type'})
+    }
+    var key = req.params.uuid + ' ' + upperType
+    var command = data.commands.findOne({key})
+    if (!command) {
+        command = Command({key, uuid: req.params.uuid, type: upperType})
+        data.commands.insert(command)
+        command = data.commands.findOne({key})
+        data.commands.update(command)
+    }
+    req.command = command
+    next()
+}
+
+app.get('/command/:type/:uuid/add/:num', checkDrawing, checkCommand, (req, res, next) => {
+    var command = req.command
+    // update
+    var num = parseInt(req.params.num) || 0
+    if (num) {
+        command.num += num
+        data.commands.update(command)
+    }
+    // return
+    res.sendStatus(200)
+})
+app.get('/command/:type/:uuid/clear', checkDrawing, checkCommand, (req, res, next) => {
+    var command = req.command
+    // update
+    command.num = 0
+    data.commands.update(command)
+    // return
+    res.sendStatus(200)
+})
+app.get('/command/:type?/:uuid?/:sincetime', (req, res, next) => {
+    // pull
+    var sinceTime = parseInt(req.params.sincetime) || 0
+    var upperType = (req.params.type + '').toUpperCase()
+    var commands = data.commands
+        .where(command => 
+            (req.params.type == null || upperType === command.type) &&
+            (req.params.uuid == null || req.params.uuid === command.uuid) &&
+            (command.meta.updated >= sinceTime)
+        )
+        .map(command => ({
+            uuid: command.uuid,
+            type: command.type,
+            num: command.num,
+        }))
+    // return
+    res.json({time: new Date().getTime(), commands})
+})
+
 app.get('/globalautoapprove', (req, res, next) => {
     res.send(GLOBAL.autoapprove)
 })
@@ -390,14 +458,14 @@ http.createServer(app).listen(config.HTTP_PORT, function () {
 ************************************
 ** Started listening on port ${config.HTTP_PORT} **
 ************************************`)
-});
+})
 try {
     https.createServer({ key: fs.readFileSync(config.KEY_PATH), cert: fs.readFileSync(config.CERT_PATH) }, app).listen(config.HTTPS_PORT, function () {
         console.log(`
     ++++++++++++++++++++++++++++++++++++
     ++ Started listening on port ${config.HTTPS_PORT} ++
     ++++++++++++++++++++++++++++++++++++`)
-    });
+    })
 } catch (e) {
 
 }
