@@ -64,13 +64,14 @@ function resetStorage() {
 }
 
 // server
-var URL = 'http://localhost:8000/drawing'
+var BASE_URL = 'http://localhost:8000'
+var DRAWING_URL = 'http://localhost:8000/drawing'
 var RATE_LIMIT = 1000
 var DRAWING_MIN_TIME = 10000
 
 var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
 var readyToSetup = false
-get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) {
+get(DRAWING_URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) {
     if (!res.responseText) {
         return
     }
@@ -114,7 +115,7 @@ var push = throttleBounce(function(canvas) {
     localStorage.setItem('objectShiftLeft', group.left)
     localStorage.setItem('objectShiftTop', group.top)
     // post data and dimensions
-    post(URL, {
+    post(DRAWING_URL, {
         uuid: drawingObj.uuid,
         json: data,
         dimensions: { width: Math.ceil(group.width), height: Math.ceil(group.height) },
@@ -122,7 +123,7 @@ var push = throttleBounce(function(canvas) {
 }, RATE_LIMIT)
 
 function complete() {
-    get(URL + '/' + drawingObj.uuid + '/complete')
+    get(DRAWING_URL + '/' + drawingObj.uuid + '/complete')
 }
 
 // past drawings
@@ -171,6 +172,17 @@ function updatePastDrawings(container) {
             canvas.renderAll()
         })
     }
+}
+
+// commands
+var WIGGLE_COOLDOWN = 30*1000 // WARNING: Make sure to change this in the [.past-drawing .commands .btn-wiggle:disabled .cooldown] CSS anim as well
+function handleWiggle(el) {
+    // cooldown
+    el.setAttribute('disabled', 'disabled') 
+    setTimeout(() => el.removeAttribute('disabled'), WIGGLE_COOLDOWN)
+    // send command
+    var uuid = el.parentElement.parentElement.dataset.uuid
+    get(BASE_URL + '/command/wiggle/' + uuid + '/add/1')
 }
 
 // main

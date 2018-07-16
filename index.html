@@ -348,7 +348,7 @@
         .past-drawing .commands .btn-wiggle:disabled .cooldown {
             opacity: 1;
             height: 0px;
-            transition: 2s height linear;
+            transition: 30s height linear;
         }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
@@ -407,7 +407,7 @@
         <div class="past-time fancy-text"></div>
         <canvas class="past-canvas"></canvas>
         <div class="commands">
-            <button class="btn-wiggle" onclick="this.setAttribute('disabled', 'disabled'); setTimeout(() => this.removeAttribute('disabled'), 2*1000);">
+            <button class="btn-wiggle" onclick="handleWiggle(this);">
                 <span class="fancy-text">Wiggle!</span>
                 <div class="cooldown"></div>
             </button>
