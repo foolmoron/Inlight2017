@@ -64,13 +64,14 @@ function resetStorage() {
 }
 
 // server
-var URL = 'https://inlight.fool.games/drawing'
+var BASE_URL = 'http://localhost:8000'
+var DRAWING_URL = BASE_URL + '/drawing'
 var RATE_LIMIT = 1000
 var DRAWING_MIN_TIME = 10000
 
 var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
 var readyToSetup = false
-get(URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) {
+get(DRAWING_URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) {
     if (!res.responseText) {
         return
     }
@@ -114,7 +115,7 @@ var push = throttleBounce(function(canvas) {
     localStorage.setItem('objectShiftLeft', group.left)
     localStorage.setItem('objectShiftTop', group.top)
     // post data and dimensions
-    post(URL, {
+    post(DRAWING_URL, {
         uuid: drawingObj.uuid,
         json: data,
         dimensions: { width: Math.ceil(group.width), height: Math.ceil(group.height) },
@@ -122,7 +123,7 @@ var push = throttleBounce(function(canvas) {
 }, RATE_LIMIT)
 
 function complete() {
-    get(URL + '/' + drawingObj.uuid + '/complete')
+    get(DRAWING_URL + '/' + drawingObj.uuid + '/complete')
 }
 
 // past drawings
@@ -131,19 +132,19 @@ function updatePastDrawings(container) {
     var pastDrawings = JSON.parse(localStorage.getItem('pastdrawings')) || []
     container.parentElement.classList.toggle('hidden', !pastDrawings.length)
 
+    // clear div
+    container.innerHTML = ''
+    // populate div
+    var tpl = document.querySelector('#tpl-past-drawing')
     for (var i = 0; i < pastDrawings.length; i++) {
-        // canvas el
-        var canvasEl = document.createElement('canvas')
-        canvasEl.classList.add('past-canvas')
-        // time el
-        var timeEl = document.createElement('div')
+        // base node
+        var node = document.importNode(tpl.content.children[0], true)
+        node.dataset.uuid = pastDrawings[i].uuid
+        container.appendChild(node)
+        // elements
+        var canvasEl = node.querySelector('canvas')
+        var timeEl = node.querySelector('.past-time')
         timeEl.textContent = new Date(pastDrawings[i].completionTime || 0).toLocaleString()
-        timeEl.classList.add('past-time')
-        timeEl.classList.add('fancy-text')
-        // layout
-        container.appendChild(timeEl)
-        container.appendChild(canvasEl)
-        container.appendChild(document.createElement('br'))
         // canvas
         var canvas = new fabric.StaticCanvas(canvasEl)
         canvas.loadFromJSON(pastDrawings[i].json, function() {
@@ -171,6 +172,17 @@ function updatePastDrawings(container) {
             canvas.renderAll()
         })
     }
+}
+
+// commands
+var WIGGLE_COOLDOWN = 30*1000 // WARNING: Make sure to change this in the [.past-drawing .commands .btn-wiggle:disabled .cooldown] CSS anim as well
+function handleWiggle(el) {
+    // cooldown
+    el.setAttribute('disabled', 'disabled') 
+    setTimeout(() => el.removeAttribute('disabled'), WIGGLE_COOLDOWN)
+    // send command
+    var uuid = el.parentElement.parentElement.dataset.uuid
+    get(BASE_URL + '/command/wiggle/' + uuid + '/add/1')
 }
 
 // main
