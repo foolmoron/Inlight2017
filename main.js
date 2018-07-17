@@ -63,6 +63,10 @@ function resetStorage() {
     localStorage.removeItem('objectShiftTop')
 }
 
+function hasAllSameColors(canvas) {
+    return canvas._objects.reduce((acc, item) => acc.stroke == item.stroke ? item : false)
+}
+
 // server
 var BASE_URL = 'http://localhost:8000'
 var DRAWING_URL = BASE_URL + '/drawing'
@@ -90,7 +94,6 @@ get(DRAWING_URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) 
     drawingObj.prompt = obj.type == 'a' ? 'animal' : 'plant'
     drawingObj.json = obj.json
     readyToSetup = true
-    console.log('UUID = ' + drawingObj.uuid + " withJSON = " + !!obj.json)
     localStorage.setItem('clearStorageFixAttempt', 0)
 }, function(error) {
     if (!parseInt(localStorage.getItem('clearStorageFixAttempt')) && (error.responseText || '').indexOf('invalid drawing uuid') >= 0) {
@@ -271,11 +274,12 @@ window.onload = function() {
         var instructions = Array.from(document.querySelectorAll('.prompt .instructions'))
         var timeErrors = Array.from(document.querySelectorAll('.prompt .time-error'))
         var emptyErrors = Array.from(document.querySelectorAll('.prompt .empty-error'))
+        var colorErrors = Array.from(document.querySelectorAll('.prompt .color-error'))
         var okayMessages = Array.from(document.querySelectorAll('.prompt .okay-message'))
         var submitMessages = Array.from(document.querySelectorAll('.prompt .submit-message'))
         var doneMessages = Array.from(document.querySelectorAll('.prompt .done-message'))
         var dots = Array.from(document.querySelectorAll('.prompt .dots'))
-        var allMessages = [].concat([instructions, timeErrors, emptyErrors, okayMessages, submitMessages, doneMessages, dots])
+        var allMessages = [].concat([instructions, timeErrors, colorErrors, emptyErrors, okayMessages, submitMessages, doneMessages, dots])
 
         var SUBMIT_PRAISES = ['BRILLIANT', 'AMAZING', 'MAGNIFICENT', 'MARVELOUS', 'SPLENDID', 'AWESOME', 'BEAUTIFUL', 'FANTASTIC', 'UNIQUE', 'PHENOMENAL', 'GORGEOUS']
         var praiseTexts = Array.from(document.querySelectorAll('.prompt .praise-text'))
@@ -301,6 +305,14 @@ window.onload = function() {
             doFunc(0)
         }
 
+        // set up color texts
+        var colorTexts = [1,2,3,4,5].map(i => Array.from(document.querySelectorAll('.prompt .color' + i)))
+        for (var i = 0; i < drawingObj.colors.length && i < colorTexts.length; i++) {
+            for (var c = 0; c < colorTexts[i].length; c++) {
+                colorTexts[i][c].style.color = drawingObj.colors[i]
+            }
+        }
+
         // show intro
         showOnly(intros)
 
@@ -321,6 +333,9 @@ window.onload = function() {
                 hadError = true
             } else if (canvas._objects.length == 0) {
                 showOnly(emptyErrors)
+                hadError = true
+            } else if (canvas._objects.length > 0 && hasAllSameColors(canvas)) {
+                showOnly(colorErrors)
                 hadError = true
             } else {
                 // submit
@@ -362,7 +377,7 @@ window.onload = function() {
         // check for error being resolved
         setInterval(function() {
             if (hadError) {
-                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0) {
+                if ((new Date().getTime() - drawingObj.uuidTime) <= DRAWING_MIN_TIME || canvas._objects.length == 0 || hasAllSameColors(canvas)) {
                     return
                 }
                 hadError = false
