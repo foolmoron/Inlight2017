@@ -58,11 +58,10 @@ public class CommandReader : Manager<CommandReader> {
 									Debug.LogError("WIGGLING " + command.uuid);
 									var record = ImageReader.Inst.Records.Find(command.uuid, (r, uuid) => r.Name == uuid);
 									if (record != null) {
-										foreach (var recordObj in HasImageRecord.AllInCurrentScene) {
-											if (recordObj.Record == record) {
-												var spawned = recordObj.GetComponent<SpawnedObject>();
-												spawned.IsWiggling = true;
-												spawned.Update();
+										foreach (var obj in SpawnedObject.AllInCurrentScene) {
+											if (obj.Record.Record == record) {
+												obj.IsWiggling = true;
+												obj.Update();
 											}
 										}
 										wiggleTimes[record] = WiggleTime;
@@ -91,11 +90,10 @@ public class CommandReader : Manager<CommandReader> {
 			wiggleTimes.Values[i] -= Time.deltaTime;
 			if (wiggleTimes.Values[i] <= 0) {
 				var record = wiggleTimes.Keys[i];
-				foreach (var recordObj in HasImageRecord.AllInCurrentScene) {
-					if (recordObj.Record == record) {
-						var spawned = recordObj.GetComponent<SpawnedObject>();
-						spawned.IsWiggling = false;
-						spawned.Update();
+				foreach (var obj in SpawnedObject.AllInCurrentScene) {
+					if (obj.Record.Record == record) {
+						obj.IsWiggling = false;
+						obj.Update();
 					}
 				}
 				wiggleTimes.RemoveAt(i);

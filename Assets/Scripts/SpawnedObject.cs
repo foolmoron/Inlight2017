@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class SpawnedObject : MonoBehaviour {
+
+    public static List<SpawnedObject> AllInCurrentScene = new List<SpawnedObject>();
 
     public MaterialPropertyBlock Properties { get; private set; }
     
@@ -24,7 +27,7 @@ public class SpawnedObject : MonoBehaviour {
     bool prevWiggling;
 
     Vector2 originalScale;
-    HasImageRecord record;
+    public HasImageRecord Record { get; private set; }
     new Renderer renderer;
 
     Texture2D prevTex;
@@ -32,7 +35,8 @@ public class SpawnedObject : MonoBehaviour {
     int framesWithNoChange = 0;
 
     void Awake() {
-        record = GetComponent<HasImageRecord>();
+        AllInCurrentScene.Add(this);
+        Record = GetComponent<HasImageRecord>();
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
         Properties = new MaterialPropertyBlock();
         renderer.GetPropertyBlock(Properties);
@@ -59,37 +63,41 @@ public class SpawnedObject : MonoBehaviour {
     }
 
     public void Update() {
-        if (record.Record != null) {
-            if (record.Record.Dimensions != Vector2.zero && !ZAligned)
-                ScaleTarget.localScale = new Vector3(originalScale.x * record.Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
-            if (record.Record.Dimensions != Vector2.zero && ZAligned)
-                ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * record.Record.Dimensions.aspect()) * ScaleFactor;
+        if (Record.Record != null) {
+            if (Record.Record.Dimensions != Vector2.zero && !ZAligned)
+                ScaleTarget.localScale = new Vector3(originalScale.x * Record.Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
+            if (Record.Record.Dimensions != Vector2.zero && ZAligned)
+                ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * Record.Record.Dimensions.aspect()) * ScaleFactor;
             var shouldSetMaterial = false;
-            if (record.Record.Texture && record.Record.Texture != prevTex) {
-                var mats = ImageReader.MaterialsCache.Get(record.Record.Texture);
+            if (Record.Record.Texture && Record.Record.Texture != prevTex) {
+                var mats = ImageReader.MaterialsCache.Get(Record.Record.Texture);
                 if (mats == null) {
                     mats = new MaterialSet {
                         TallMaterial = new Material(TallMaterial),
                         LongMaterial = new Material(LongMaterial),
                         WiggleMaterial = new Material(WiggleMaterial),
                     };
-                    mats.SetTexture(record.Record.Texture);
-                    mats.SetFlip(record.Record.Facing == ImageFacing.Left);
-                    ImageReader.MaterialsCache[record.Record.Texture] = mats;
+                    mats.SetTexture(Record.Record.Texture);
+                    mats.SetFlip(Record.Record.Facing == ImageFacing.Left);
+                    ImageReader.MaterialsCache[Record.Record.Texture] = mats;
                 }
                 shouldSetMaterial = true;
-                prevTex = record.Record.Texture;
+                prevTex = Record.Record.Texture;
             }
             shouldSetMaterial |= prevWiggling != IsWiggling;
             if (shouldSetMaterial) {
-                var mats = ImageReader.MaterialsCache.Get(record.Record.Texture);
-                renderer.material = IsWiggling ? mats.WiggleMaterial : record.Record.IsTall ? mats.TallMaterial : mats.LongMaterial;
+                var mats = ImageReader.MaterialsCache.Get(Record.Record.Texture);
+                renderer.material = IsWiggling ? mats.WiggleMaterial : Record.Record.IsTall ? mats.TallMaterial : mats.LongMaterial;
                 renderer.SetPropertyBlock(Properties);
             }
             prevWiggling = IsWiggling;
         }
-        if (record.Record == null || record.Record.Dimensions == Vector2.zero) {
+        if (Record.Record == null || Record.Record.Dimensions == Vector2.zero) {
             ScaleTarget.localScale = Vector3.one * ScaleFactor;
         }
+    }
+
+    void OnDestroy() {
+        AllInCurrentScene.Remove(this);
     }
 }
