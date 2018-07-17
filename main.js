@@ -202,7 +202,10 @@ window.onload = function() {
     var history = []
     var historyIndex = 0
     var doingHistory = false
+    var justCleared = false
     function doHistory(index, forcePush) {
+        justCleared = false
+
         // redraw
         canvas.clear()
         doingHistory = true
@@ -221,14 +224,20 @@ window.onload = function() {
     var undoButton = document.querySelector('.undo')
     var redoButton = document.querySelector('.redo')
     var clearButton = document.querySelector('.clear')
-    undoButton.onclick = function(e) {
-        if (historyIndex > 0) {
+    undoButton.onclick = function(e) { 
+        if (justCleared) {
+            historyIndex = history.length
+            doHistory(historyIndex, true)
+        } else if (historyIndex > 0) {
             historyIndex = Math.max(historyIndex - 1, 0)
             doHistory(historyIndex, true)
         }
     }
     redoButton.onclick = function(e) {
-        if (historyIndex < history.length) {
+        if (justCleared) {
+            historyIndex = history.length
+            doHistory(historyIndex, true)
+        } else if (historyIndex < history.length) {
             historyIndex = Math.min(historyIndex + 1, history.length)
             doHistory(historyIndex, true)
         }
@@ -237,6 +246,7 @@ window.onload = function() {
         if (historyIndex > 0) {
             historyIndex = 0
             doHistory(historyIndex, true)
+            justCleared = true
         }
     }
 
@@ -244,6 +254,7 @@ window.onload = function() {
     canvas.on('object:added', function(e) {
         if (doingHistory) return
 
+        justCleared = false
         if (historyIndex < history.length) {
             history = history.slice(0, historyIndex)
         }
@@ -510,8 +521,8 @@ window.onload = function() {
             readyToSetup = false
         }
         // toggle canvas buttons
-        undoButton.classList.toggle('disabled', historyIndex <= 0 && canvas.isDrawingMode)
-        redoButton.classList.toggle('disabled', historyIndex >= history.length && canvas.isDrawingMode)
+        undoButton.classList.toggle('disabled', !justCleared && historyIndex <= 0 && canvas.isDrawingMode)
+        redoButton.classList.toggle('disabled', !justCleared && historyIndex >= history.length && canvas.isDrawingMode)
         clearButton.classList.toggle('disabled', canvas._objects.length == 0 && canvas.isDrawingMode)
         // loop
         requestAnimationFrame(update)
