@@ -1,4 +1,6 @@
-﻿Shader "Animal & Plant Wobble" {
+﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
+Shader "Animal & Plant Wobble" {
     Properties {
 	    _Color("Main Color", Color) = (0.5, 0.5, 0.5, 1)
         _MainTex("Texture", 2D) = "white" {}
@@ -24,6 +26,12 @@
 	    _XOffset("Offset X", float) = 0.5
 	    _YOffset("Offset Y", float) = 0.5 // y offset, below this is no animation
 	    _ZOffset("Offset Z", float) = 0.5
+
+        _ScaleSpeed("Scale Speed",  Range(1, 200)) = 50
+        _ScaleAmount("Scale Amount", Range(0, 1)) = 0.3
+
+        [MaterialToggle] _WorldTimeOffset("World Pos Time Offset", Float) = 0
+        _WorldTimescale("World Timescale", Range(0, 10)) = 3
     }
 
     SubShader {
@@ -69,6 +77,12 @@
 		    float _YOffset;
             float _ZOffset;
 
+            float _ScaleSpeed;
+            float _ScaleAmount;
+
+            float _WorldTimeOffset;
+            float _WorldTimescale;
+
             struct VertexInput {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
@@ -88,7 +102,11 @@
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
 
-                float time = _Time.x * UNITY_ACCESS_INSTANCED_PROP(Props, _Timescale) + UNITY_ACCESS_INSTANCED_PROP(Props, _TimeOffset);
+                float4 world = mul(unity_ObjectToWorld, v.vertex);
+
+                float instanceTime = _Time.x * UNITY_ACCESS_INSTANCED_PROP(Props, _Timescale) + UNITY_ACCESS_INSTANCED_PROP(Props, _TimeOffset);
+                float worldTime = _Time.x * _WorldTimescale + sin((world.x + world.y) / 100);
+                float time = lerp(instanceTime, worldTime, _WorldTimeOffset);
 
                 o.uv = v.uv;
                 if (_MainTex_ST.x < 0) {
@@ -100,6 +118,8 @@
                 //o.vertexColor = v.vertexColor * float4(_Color.rgb * _Color.a, _Color.a);
 
                 float4 pos = v.vertex;
+
+                pos.xyz *= 1 + (_ScaleAmount * sin(time * _ScaleSpeed));
 			    
                 float x = sin(pos.y / _XRigidness + (time * _XSpeed)) * (pos.y - _YOffset) * 5;// x axis movements
 			    float z = sin(pos.z / _YRigidness + (time * _YSpeed)) * (pos.y - _YOffset) * 1;// z axis movements
