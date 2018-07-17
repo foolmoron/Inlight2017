@@ -31,6 +31,10 @@ public class CommandReader : Manager<CommandReader> {
     public float PollInterval = 1f;
     long latestPollTime;
 
+	[Range(0, 20)]
+	public float WiggleTime = 5f;
+	ListDict<ImageRecord, float> wiggleTimes = new ListDict<ImageRecord, float>();
+
     void Start() {
         StartCoroutine(Poll());
     }
@@ -52,6 +56,17 @@ public class CommandReader : Manager<CommandReader> {
 							switch (command.type) {
 								case CommandType.WIGGLE:
 									Debug.LogError("WIGGLING " + command.uuid);
+									var record = ImageReader.Inst.Records.Find(command.uuid, (r, uuid) => r.Name == uuid);
+									if (record != null) {
+										foreach (var recordObj in HasImageRecord.AllInCurrentScene) {
+											if (recordObj.Record == record) {
+												var spawned = recordObj.GetComponent<SpawnedObject>();
+												spawned.IsWiggling = true;
+												spawned.Update();
+											}
+										}
+										wiggleTimes[record] = WiggleTime;
+									}
 									break;
 							}
 							// clear command
@@ -70,4 +85,22 @@ public class CommandReader : Manager<CommandReader> {
 			yield return new WaitForSeconds(PollInterval);
         }
     }
+
+	void Update() {
+		for (int i = 0; i < wiggleTimes.Count; i++) {
+			wiggleTimes.Values[i] -= Time.deltaTime;
+			if (wiggleTimes.Values[i] <= 0) {
+				var record = wiggleTimes.Keys[i];
+				foreach (var recordObj in HasImageRecord.AllInCurrentScene) {
+					if (recordObj.Record == record) {
+						var spawned = recordObj.GetComponent<SpawnedObject>();
+						spawned.IsWiggling = false;
+						spawned.Update();
+					}
+				}
+				wiggleTimes.RemoveAt(i);
+				i--;
+			}
+		}
+	}
 }

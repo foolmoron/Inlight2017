@@ -16,6 +16,13 @@ public class SpawnedObject : MonoBehaviour {
     public bool UseScaleSpeed = true;
     public Transform ScaleTarget;
 
+    public Material TallMaterial;
+    public Material LongMaterial;
+    public Material WiggleMaterial;
+
+    public bool IsWiggling;
+    bool prevWiggling;
+
     Vector2 originalScale;
     HasImageRecord record;
     new Renderer renderer;
@@ -51,25 +58,35 @@ public class SpawnedObject : MonoBehaviour {
         }
     }
 
-    void Update() {
+    public void Update() {
         if (record.Record != null) {
             if (record.Record.Dimensions != Vector2.zero && !ZAligned)
                 ScaleTarget.localScale = new Vector3(originalScale.x * record.Record.Dimensions.aspect(), originalScale.y, 1) * ScaleFactor;
             if (record.Record.Dimensions != Vector2.zero && ZAligned)
                 ScaleTarget.localScale = new Vector3(1, originalScale.y, originalScale.x * record.Record.Dimensions.aspect()) * ScaleFactor;
+            var shouldSetMaterial = false;
             if (record.Record.Texture && record.Record.Texture != prevTex) {
-                var material = ImageReader.MaterialsCache.Get(record.Record.Texture);
-                if (material == null) {
-                    material = new Material(renderer.material) {
-                        mainTexture = record.Record.Texture,
-                        mainTextureScale = new Vector2(record.Record.Facing == ImageFacing.Left ? 1 : -1, 1)
+                var mats = ImageReader.MaterialsCache.Get(record.Record.Texture);
+                if (mats == null) {
+                    mats = new MaterialSet {
+                        TallMaterial = new Material(TallMaterial),
+                        LongMaterial = new Material(LongMaterial),
+                        WiggleMaterial = new Material(WiggleMaterial),
                     };
-                    ImageReader.MaterialsCache[record.Record.Texture] = material;
+                    mats.SetTexture(record.Record.Texture);
+                    mats.SetFlip(record.Record.Facing == ImageFacing.Left);
+                    ImageReader.MaterialsCache[record.Record.Texture] = mats;
                 }
-                renderer.material = material;
-                renderer.SetPropertyBlock(Properties);
+                shouldSetMaterial = true;
                 prevTex = record.Record.Texture;
             }
+            shouldSetMaterial |= prevWiggling != IsWiggling;
+            if (shouldSetMaterial) {
+                var mats = ImageReader.MaterialsCache.Get(record.Record.Texture);
+                renderer.material = IsWiggling ? mats.WiggleMaterial : record.Record.IsTall ? mats.TallMaterial : mats.LongMaterial;
+                renderer.SetPropertyBlock(Properties);
+            }
+            prevWiggling = IsWiggling;
         }
         if (record.Record == null || record.Record.Dimensions == Vector2.zero) {
             ScaleTarget.localScale = Vector3.one * ScaleFactor;

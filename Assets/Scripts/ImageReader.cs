@@ -28,6 +28,26 @@ public class ImageRecord {
 
     public const int MAIN_COLOR_MIP_LEVEL = 3;
     public Texture2D Texture { get; set; }
+
+    public bool IsTall { get { return Dimensions.y / Dimensions.x > 0.67f; } }
+}
+
+[Serializable]
+public class MaterialSet {
+    public Material TallMaterial;
+    public Material LongMaterial;
+    public Material WiggleMaterial;
+
+    public void SetTexture(Texture2D tex) {
+        TallMaterial.mainTexture = tex;
+        LongMaterial.mainTexture = tex;
+        WiggleMaterial.mainTexture = tex;
+    }
+    public void SetFlip(bool flip) {
+        TallMaterial.mainTextureScale = new Vector2(flip ? -1 : 1, 1);
+        LongMaterial.mainTextureScale = new Vector2(flip ? -1 : 1, 1);
+        WiggleMaterial.mainTextureScale = new Vector2(flip ? -1 : 1, 1);
+    }
 }
 
 public class ImageReader : Manager<ImageReader> {
@@ -38,7 +58,7 @@ public class ImageReader : Manager<ImageReader> {
 
     public string RootPath = @"\..\Images\";
 
-    public static Dictionary<Texture2D, Material> MaterialsCache = new Dictionary<Texture2D, Material>();
+    public static Dictionary<Texture2D, MaterialSet> MaterialsCache = new Dictionary<Texture2D, MaterialSet>();
 
     string root;
     string indexPath;
@@ -111,8 +131,6 @@ public class ImageReader : Manager<ImageReader> {
                     record = new ImageRecord {
                         Name = file,
                         Path = root + file + ".png",
-                        Type = type,
-                        Facing = facing,
                         Texture = new Texture2D(2, 2),
                     };
                     record.Texture.wrapMode = TextureWrapMode.Clamp; // eliminate slight artifacts at edges of image
@@ -120,6 +138,17 @@ public class ImageReader : Manager<ImageReader> {
                     recordsJustAdded.Add(record);
                     yield return null;
                 }
+                // update record metadata
+                record.Type = type;
+                if (record.Facing != facing) {
+                    // update facing and cached material scale
+                    record.Facing = facing;
+                    var mats = MaterialsCache.Get(record.Texture);
+                    if (mats != null) {
+                        mats.SetFlip(record.Facing == ImageFacing.Left);
+                    }
+                }
+                yield return null;
                 // update file if image was changed
                 if (File.Exists(record.Path) && File.GetLastWriteTime(record.Path) > record.LastUpdated) {
                     // do all file-reading work in one atomic chunk

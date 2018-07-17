@@ -40,8 +40,7 @@ public class Spawner : MonoBehaviour {
 
         // kill objects on image removed
         ImageReader.Inst.OnRemoved += record => {
-            var recordObjs = FindObjectsOfType<HasImageRecord>();
-            foreach (var recordObj in recordObjs) {
+            foreach (var recordObj in HasImageRecord.AllInCurrentScene) {
                 if (recordObj.Record == record) {
                     Destroy(recordObj.transform.root.gameObject);
                 }

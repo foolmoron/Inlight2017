@@ -12,12 +12,14 @@ public class Wander : MonoBehaviour
     public float directionChangeTime = 0;
     public float maxHeadingChange = 30;
 
+    SpawnedObject spawned;
     CharacterController controller;
     float heading;
     Vector3 targetRotation;
 
     void Awake()
     {
+        spawned = GetComponent<SpawnedObject>();
         controller = GetComponent<CharacterController>();
     }
 
@@ -34,6 +36,8 @@ public class Wander : MonoBehaviour
         
         transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, targetRotation, Time.deltaTime * directionChangeInterval);
         var forward = transform.TransformDirection(Vector3.forward);
-        controller.SimpleMove(forward * speed);
+        if (!spawned.IsWiggling) {
+            controller.SimpleMove(forward * speed);
+        }
     }
 }
