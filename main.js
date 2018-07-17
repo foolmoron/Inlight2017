@@ -247,6 +247,16 @@ window.onload = function() {
             historyIndex = 0
             doHistory(historyIndex, true)
             justCleared = true
+            // flash canvas red
+            var canvasContainer = document.querySelector('.canvas-container')
+            var prevTransition = canvasContainer.style.transition
+            var prevColor = canvasContainer.style.backgroundColor
+            canvasContainer.style.transition = 'none'
+            canvasContainer.style.backgroundColor = '#ff5151'
+            setTimeout(() => {
+                canvasContainer.style.transition = prevTransition
+                canvasContainer.style.backgroundColor = prevColor
+            }, 0)
         }
     }
 
