@@ -115,6 +115,7 @@
             border-radius: 12px;
             box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.39);
             margin-bottom: 9px;
+            transition: 0.5s background-color ease-out;
         }
 
         .top-border {
@@ -277,18 +278,17 @@
             opacity: 0.3;
         }
         .past-drawings .content {
-            height: 100%;
-            padding: 0px 12px;
-            padding-top: 70px;
+            height: calc(100% - 70px);
+            padding: 0px 14px;
+            margin-top: 70px;
             text-align: center;
             overflow: auto;
         }
         .past-drawings .title {
             position: fixed;
+            z-index: 1000;
             width: 100%;
-            width: calc(100% - 36px);
-            margin-left: calc(18px);
-            margin-top: 10px;
+            padding-top: 10px;
             max-height: 60px;
             background-color: blueviolet;
             color: white;
@@ -376,8 +376,8 @@
         </div>
     </div>
     <div class="intro fancy-text">
-        <span data-type="plant">Draw a nice <span class="text-plant">PLANT</span>!</span>
-        <span data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span>!</span>
+        <span class="hidden" data-type="plant">Draw a nice <span class="text-plant">PLANT</span>!</span>
+        <span class="hidden" data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span>!</span>
     </div>
     <div class="prompt fancy-text">
         <span class="instructions" data-type="plant">Draw a nice <span class="text-plant">PLANT</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
@@ -386,6 +386,8 @@
         <span class="time-error" data-type="animal">Shouldn't you spend some more<br>time drawing your <span class="text-animal">ANIMAL</span>..?</span>
         <span class="empty-error" data-type="plant">Hey I said draw a <span class="text-plant">PLANT</span>,<br>not a blank page!</span>
         <span class="empty-error" data-type="animal">Hey I said draw an <span class="text-animal">ANIMAL</span>,<br>not a blank page!</span>
+        <span class="color-error" data-type="plant">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-plant">PLANT</span>?</span>
+        <span class="color-error" data-type="animal">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-animal">ANIMAL</span>?</span>
         <span class="okay-message" data-type="*">Okay that's better, tap here to<br> <span class="text-finish">FINISH</span> when you're ready!</span>
         <span class="submit-message" data-type="plant">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-plant">PLANT</span> drawing</span>
         <span class="submit-message" data-type="animal">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-animal">ANIMAL</span> drawing</span>
