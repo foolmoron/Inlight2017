@@ -165,7 +165,6 @@ function updatePastDrawings(container) {
             var w = h * aspect
             canvasEl.style.width = w + 'px'
             canvasEl.style.height = h + 'px'
-            console.log(width, height, w, h)
             // shift to top right
             canvas._objects.forEach(function(obj) {
                 obj.setLeft(obj.left - group.left)
