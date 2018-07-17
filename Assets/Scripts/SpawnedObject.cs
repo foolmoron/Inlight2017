@@ -88,6 +88,9 @@ public class SpawnedObject : MonoBehaviour {
             if (shouldSetMaterial) {
                 var mats = ImageReader.MaterialsCache.Get(Record.Record.Texture);
                 renderer.material = IsWiggling ? mats.WiggleMaterial : Record.Record.IsTall ? mats.TallMaterial : mats.LongMaterial;
+                if (ImageReader.Inst.ALWAYS_WIGGLE) {
+                    renderer.material = mats.WiggleMaterial;
+                }
                 renderer.SetPropertyBlock(Properties);
             }
             prevWiggling = IsWiggling;

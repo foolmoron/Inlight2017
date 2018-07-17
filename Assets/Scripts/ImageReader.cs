@@ -52,6 +52,8 @@ public class MaterialSet {
 
 public class ImageReader : Manager<ImageReader> {
 
+    public bool ALWAYS_WIGGLE = false;
+
     public event Action<ImageRecord> OnAdded = delegate { };
     public event Action<ImageRecord> OnUpdated = delegate { };
     public event Action<ImageRecord> OnRemoved = delegate { };
