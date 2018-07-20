@@ -312,10 +312,13 @@
             background-color: transparent;
             border: 10px dotted #39e4ff;
             border-radius: 26px;
-            margin-right: 10px;
+            margin-right: 12px;
             padding: 0px;
             transition: 0.1s transform linear;
             transform: scale3d(1, 1, 1);
+        }
+        .past-drawing .commands .btn-wiggle:not([disabled]) .fancy-text.disabled-text {
+            display: none;
         }
         .past-drawing .commands .btn-wiggle:hover {
             transform: scale3d(1.25, 1.25, 1);
@@ -324,6 +327,9 @@
             opacity: 0.5;
             transition: 0.3s transform cubic-bezier(0.85, -1.73, 0.34, 2.65);
             transform: scale3d(1, 1, 1);
+        }
+        .past-drawing .commands .btn-wiggle:disabled .fancy-text.active-text {
+            display: none;
         }
         .past-drawing .commands .btn-wiggle .fancy-text {
             display: flex;
@@ -412,7 +418,8 @@
         <canvas class="past-canvas"></canvas>
         <div class="commands">
             <button class="btn-wiggle" onclick="handleWiggle(this);">
-                <span class="fancy-text">Wiggle!</span>
+                <span class="active-text fancy-text">Wiggle!</span>
+                <span class="disabled-text fancy-text">Look at screen!</span>
                 <div class="cooldown"></div>
             </button>
             <!-- <button class="btn-spawn" onclick="">Spawn!</button> -->
