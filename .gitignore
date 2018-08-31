@@ -30,3 +30,4 @@ Images/*.jpg
 !/Assets/*/*/*/*/*.obj
 Assets/PostProcessing/
 Assets/PostProcessing.meta
+.vs/
