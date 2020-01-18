@@ -83,8 +83,8 @@ app.post('/login', (req, res, next) => {
         req.session.isAdmin = true
         res.redirect('/drawings')
     } else {
-        res.render('login', { 
-            previousInput: req.body.password, 
+        res.render('login', {
+            previousInput: req.body.password,
             error: `That's the incorrect incantation... are you sure you're in the right place?`,
         })
     }
@@ -95,9 +95,9 @@ app.get('/', adminAuth, (req, res, next) => {
     res.render('index', { })
 })
 app.get('/drawings', adminAuth, (req, res, next) => {
-    res.render('drawings', { 
-        drawings: data.drawings.data, 
-        globalAutoApprove: GLOBAL.autoapprove, 
+    res.render('drawings', {
+        drawings: data.drawings.data,
+        globalAutoApprove: GLOBAL.autoapprove,
         dirNew: `${config.HOST}:${config.HTTPS_PORT}/img/drawings/new/`,
         dirApproved: `${config.HOST}:${config.HTTPS_PORT}/img/drawings/approved/`
     })
@@ -385,7 +385,7 @@ app.get('/command/:type?/:uuid?/:sincetime', (req, res, next) => {
     var sinceTime = parseInt(req.params.sincetime) || 0
     var upperType = (req.params.type + '').toUpperCase()
     var commands = data.commands
-        .where(command => 
+        .where(command =>
             (req.params.type == null || upperType === command.type) &&
             (req.params.uuid == null || req.params.uuid === command.uuid) &&
             (command.meta.updated >= sinceTime)
