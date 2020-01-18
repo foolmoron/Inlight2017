@@ -153,7 +153,7 @@ function updatePastDrawings(container) {
         // elements
         var canvasEl = node.querySelector('canvas')
         var timeEl = node.querySelector('.past-time')
-        timeEl.textContent = new Date(pastDrawings[i].completionTime || 0).toLocaleString()
+        timeEl.textContent = new Date(pastDrawings[i].completionTime || 0).toLocaleString() + (pastDrawings[i].type ? ' - ' + pastDrawings[i].type : '')
         // canvas
         var canvas = new fabric.StaticCanvas(canvasEl)
         canvas.loadFromJSON(pastDrawings[i].json, function() {
@@ -389,6 +389,7 @@ window.onload = function() {
                         var pastDrawings = JSON.parse(localStorage.getItem('pastdrawings')) || []
                         pastDrawings.unshift({
                             uuid: drawingObj.uuid,
+                            type: prompt,
                             json: JSON.parse(JSON.stringify(canvas.toObject())),
                             completionTime: new Date().getTime(),
                         })
