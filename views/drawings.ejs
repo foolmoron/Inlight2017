@@ -3,17 +3,25 @@
 
 <div class="container-fluid drawings">
     <div class="row">
-        <div class="col-xs-12 col-sm-4 picker hue-shift-speed">
+        <div class="col-sm-12 col-md-2 picker hue-shift-speed">
             <div>Hue Shift <span></span></div>
             <input type="range" min=0 max=10 step=0.5 onchange="get('/hueshiftspeed/' + this.value); setHueShiftSpeed(this.value);" oninput="setHueShiftSpeed(this.value)"></input>
         </div>
-        <div class="col-xs-12 col-sm-4 picker" data-type='animal'>
+        <div class="col-sm-12 col-md-3 picker" data-type='animal'>
             <div>Animal Color</div>
             <input type="range" min=0 max=360 step=1 onchange="get('/color/animal/' + this.value); setColorPicker('animal', this.value);" oninput="setColorPicker('animal', this.value)"></input>
         </div>
-        <div class="col-xs-12 col-sm-4 picker" data-type='plant'>
+        <div class="col-sm-12 col-md-3 picker" data-type='plant'>
             <div>Plant Color</div>
             <input type="range" min=0 max=360 step=1 onchange="get('/color/plant/' + this.value); setColorPicker('plant', this.value);" oninput="setColorPicker('plant', this.value)"></input>
+        </div>
+        <div class="col-sm-12 col-md-3 picker" data-type='bird'>
+            <div>Bird Color</div>
+            <input type="range" min=0 max=360 step=1 onchange="get('/color/bird/' + this.value); setColorPicker('bird', this.value);" oninput="setColorPicker('bird', this.value)"></input>
+        </div>
+        <div class="col-sm-12 col-md-3 picker" data-type='building'>
+            <div>Building Color</div>
+            <input type="range" min=0 max=360 step=1 onchange="get('/color/building/' + this.value); setColorPicker('building', this.value);" oninput="setColorPicker('building', this.value)"></input>
         </div>
     </div>
     <div class="row">
@@ -38,16 +46,19 @@
     <div class="row drawing-row <$= drawing.status $> <$= drawing.completedTime ? 'completed' : '' $>" data-uuid="<$= drawing.uuid $>">
         <div class="row" style="padding: 0px 10px;">
             <div class="col-xs-5 text-left">
-                <b><$= drawing.uuid $> -- <$= drawing.status $> <$ if (drawing.completedTime) { $>-- COMPLETED<$ } $></b>
+                <b><$= drawing.uuid $> -- <$= drawing.status $></b>
             </div>
             <div class="col-xs-3 text-center">
                 <b><$= (drawing.dimensions || {}).width || 'N/A' $> x <$= (drawing.dimensions || {}).height || 'N/A' $></b>
                 <select onchange="get('/drawing/<$= drawing.uuid $>/type/' + this.value)">
-                    <option value="a" <$= drawing.type == 'a' ? 'selected' : '' $>>ANIMAL</option>
-                    <option value="p" <$= drawing.type == 'p' ? 'selected' : '' $>>PLANT</option>
-                    <option value="t" <$= drawing.type == 't' ? 'selected' : '' $>>TREE</option>
-                    <option value="b" <$= drawing.type == 'b' ? 'selected' : '' $>>BUSH</option>
-                    <option value="g" <$= drawing.type == 'g' ? 'selected' : '' $>>GRASS</option>
+                    <option value="a" <$= drawing.type == 'a' ? 'selected' : '' $>>a ANIMAL</option>
+                    <option value="p" <$= drawing.type == 'p' ? 'selected' : '' $>>p PLANT</option>
+                    <option value="t" <$= drawing.type == 't' ? 'selected' : '' $>>t TREE</option>
+                    <option value="b" <$= drawing.type == 'b' ? 'selected' : '' $>>b BUSH</option>
+                    <option value="g" <$= drawing.type == 'g' ? 'selected' : '' $>>g GRASS</option>
+                    <option value="r" <$= drawing.type == 'r' ? 'selected' : '' $>>r BIRD</option>
+                    <option value="f" <$= drawing.type == 'f' ? 'selected' : '' $>>f FLOCK</option>
+                    <option value="d" <$= drawing.type == 'd' ? 'selected' : '' $>>d BUILDING</option>
                 </select>
             </div>
             <div class="col-xs-4 text-right">
@@ -227,6 +238,8 @@ changeFilterMode(filterPickers[0])
 var colorPickers = {
     animal: document.querySelector('.picker[data-type="animal"]'),
     plant: document.querySelector('.picker[data-type="plant"]'),
+    bird: document.querySelector('.picker[data-type="bird"]'),
+    building: document.querySelector('.picker[data-type="building"]'),
 }
 var hueShiftText = document.querySelector('.hue-shift-speed span')
 var hueShiftInput = document.querySelector('.hue-shift-speed input')

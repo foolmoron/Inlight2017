@@ -67,6 +67,7 @@ footer {
     justify-content: center;
     align-items: center;
     padding: 10px;
+    padding-bottom: 5rem;
 }
 
 /* drawings */
@@ -80,10 +81,10 @@ footer {
     margin-bottom: 10px;
 }
 .drawings .drawing-row.completed {
-    box-shadow: 
-        inset 6px 0px 0px 0px #ff3bcc, 
-        inset 0px 6px 0px 0px #ff3bcc, 
-        inset -6px 0px 0px 0px #ff3bcc, 
+    box-shadow:
+        inset 6px 0px 0px 0px #ff3bcc,
+        inset 0px 6px 0px 0px #ff3bcc,
+        inset -6px 0px 0px 0px #ff3bcc,
         inset 0px -6px 0px 0px #ff3bcc;
 }
 .drawings .drawing-row.new {
@@ -104,17 +105,18 @@ footer {
     opacity: 0.7;
 }
 .drawings .drawing-row img {
-    max-width: 49%;
-    max-height: 250px;
+    max-width: 92%;
+    max-height: 290px;
     min-width: 50px;
     min-height: 50px;
+    margin-top: 5px;
     background-color: white;
 }
 .drawings .drawing-grid {
     display: grid;
     grid-template-columns: 13% auto auto 13%;
-    grid-template-rows: auto 15%;
-    min-height: 265px;
+    grid-template-rows: auto 13%;
+    min-height: 340px;
 }
 .drawings button {
     display: block;
@@ -125,10 +127,10 @@ footer {
     white-space: normal;
 }
 .drawings .primary-button {
-    height: 195px;
+    height: 240px;
 }
 .drawings .secondary-button {
-    height: 60px;
+    height: 86px;
     margin-bottom: 0px;
 }
 .drawings .tall-button {
@@ -160,7 +162,7 @@ footer {
     background: hsl(0, 0%, 33%);
     padding: 8px;
     margin-bottom: 18px;
-    margin-right: 2%;
+    margin-right: 1%;
     border-radius: 8px;
 }
 .drawings .picker:last-of-type {
@@ -172,8 +174,8 @@ footer {
     font-size: 1.1em;
     text-shadow: 1px 1px black;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
     .drawings .picker {
-        width: 32%;
+        width: 19.2%;
     }
 }

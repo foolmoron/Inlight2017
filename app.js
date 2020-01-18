@@ -56,9 +56,43 @@ db.loadDatabase({}, () => {
 const GLOBAL = {
     autoapprove: false,
     prevDrawingType: 'a',
+    typeToName: {
+        'a': 'animal',
+        'p': 'plant',
+        'r': 'bird',
+        'd': 'building',
+    },
+    nextDrawingChances: {
+        'a': {
+            'a': 0.0,
+            'p': 0.8,
+            'r': 0.1,
+            'd': 0.1,
+        },
+        'p': {
+            'a': 0.25,
+            'p': 0.35,
+            'r': 0.15,
+            'd': 0.25,
+        },
+        'r': {
+            'a': 0.2,
+            'p': 0.4,
+            'r': 0.0,
+            'd': 0.4,
+        },
+        'd': {
+            'a': 0.3,
+            'p': 0.3,
+            'r': 0.3,
+            'd': 0.1,
+        },
+    },
     colors: {
         animal: 36,
         plant: 96,
+        bird: 180,
+        building: 282,
     },
     hueshiftspeed: 1,
 }
@@ -153,7 +187,7 @@ const STATUS = {
 
 const Drawing = (init) => Object.assign({
     uuid: uuid(),
-    type: 'a',
+    type: 'p',
     facing: 'l',
     json: '',
     status: STATUS.NEW,
@@ -174,9 +208,20 @@ function checkDrawing(req, res, next) {
 
 app.get('/drawing', (req, res, next) => {
     var newDrawing = Drawing()
-    newDrawing.type = GLOBAL.prevDrawingType == 'a' ? 'p' : Math.random() < 0.333 ? 'p' : 'a'
+
+    var chances = GLOBAL.nextDrawingChances[GLOBAL.prevDrawingType]
+    var r = Math.random()
+    var totalChance = 0
+    for (var type in chances) {
+        totalChance += chances[type]
+        if (r <= totalChance) {
+            newDrawing.type = type;
+            break;
+        }
+    }
     GLOBAL.prevDrawingType = newDrawing.type
-    var colorType = newDrawing.type == 'a' ? 'animal' : 'plant'
+
+    var colorType = GLOBAL.typeToName[newDrawing.type]
     newDrawing.colors = getNewColorPalette(colorType)
     data.drawings.insert(newDrawing)
 
