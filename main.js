@@ -36,7 +36,7 @@ function throttleBounce(func, interval) {
 }
 function ajax(method, sync, url, form, callback, error) {
     var xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = function() { 
+    xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             if (xhr.status < 300 && callback) {
                 callback(xhr)
@@ -72,6 +72,12 @@ var BASE_URL = 'http://localhost:8000'
 var DRAWING_URL = BASE_URL + '/drawing'
 var RATE_LIMIT = 1000
 var DRAWING_MIN_TIME = 10000
+var TYPE_TO_NAME = {
+    'a': 'animal',
+    'p': 'plant',
+    'r': 'bird',
+    'd': 'building',
+}
 
 var drawingObj = JSON.parse(localStorage.getItem('drawing')) || {}
 var readyToSetup = false
@@ -91,7 +97,7 @@ get(DRAWING_URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) 
         localStorage.setItem('drawing', JSON.stringify(drawingObj))
     }
     // setup
-    drawingObj.prompt = obj.type == 'a' ? 'animal' : 'plant'
+    drawingObj.prompt = TYPE_TO_NAME[obj.type]
     drawingObj.json = obj.json
     readyToSetup = true
     localStorage.setItem('clearStorageFixAttempt', 0)
@@ -180,7 +186,7 @@ function updatePastDrawings(container) {
 var WIGGLE_COOLDOWN = 30*1000 // WARNING: Make sure to change this in the [.past-drawing .commands .btn-wiggle:disabled .cooldown] CSS anim as well
 function handleWiggle(el) {
     // cooldown
-    el.setAttribute('disabled', 'disabled') 
+    el.setAttribute('disabled', 'disabled')
     setTimeout(() => el.removeAttribute('disabled'), WIGGLE_COOLDOWN)
     // send command
     var uuid = el.parentElement.parentElement.dataset.uuid
@@ -223,7 +229,7 @@ window.onload = function() {
     var undoButton = document.querySelector('.undo')
     var redoButton = document.querySelector('.redo')
     var clearButton = document.querySelector('.clear')
-    undoButton.onclick = function(e) { 
+    undoButton.onclick = function(e) {
         if (justCleared) {
             historyIndex = history.length
             doHistory(historyIndex, true)
@@ -301,7 +307,7 @@ window.onload = function() {
         var dots = Array.from(document.querySelectorAll('.prompt .dots'))
         var allMessages = [].concat([instructions, timeErrors, colorErrors, emptyErrors, okayMessages, submitMessages, doneMessages, dots])
 
-        var SUBMIT_PRAISES = ['BRILLIANT', 'AMAZING', 'MAGNIFICENT', 'MARVELOUS', 'SPLENDID', 'AWESOME', 'BEAUTIFUL', 'FANTASTIC', 'UNIQUE', 'PHENOMENAL', 'GORGEOUS']
+        var SUBMIT_PRAISES = ['BRILLIANT', 'AMAZING', 'MAGNIFICENT', 'MARVELOUS', 'SPLENDID', 'AWESOME', 'BEAUTIFUL', 'FANTASTIC', 'INCREDIBLE', 'PHENOMENAL', 'GORGEOUS', 'GLORIOUS', 'ELEGANT', 'MAGNUM OPUS', 'MASTERPIECE']
         var praiseTexts = Array.from(document.querySelectorAll('.prompt .praise-text'))
 
         function disableAll() {
@@ -430,7 +436,7 @@ window.onload = function() {
 
     function setupColors(colors) {
         var colorContainer = document.querySelector('.colors')
-        
+
         // clear old buttons
         var colorButtons = Array.from(document.querySelectorAll('.colors > div'))
         for (var i = 0; i < colorButtons.length; i++) {
@@ -454,7 +460,7 @@ window.onload = function() {
 
     // width controls
     var widthButtons = Array.from(document.querySelectorAll('.width'))
-    
+
     function setWidth(widthButton) {
         // set width pickers
         for (var i = 0; i < widthButtons.length; i++) {
