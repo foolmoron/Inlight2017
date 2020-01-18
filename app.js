@@ -125,7 +125,7 @@ function getNewColorPalette(colorType) {
 }
 
 // drawing
-var canvas = fabric.createCanvasForNode(11, 13) // 1 canvas for whole app
+var canvas = new fabric.StaticCanvas(null, { width: 11, height: 13 }) // 1 canvas for whole app
 const drawingDirs = ['/public','/img','/drawings/']
 const drawingDirectory = drawingDirs.reduce((acc, dir) => {
     acc += dir

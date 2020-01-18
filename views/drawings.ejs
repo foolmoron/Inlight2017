@@ -41,7 +41,7 @@
                 <b><$= drawing.uuid $> -- <$= drawing.status $> <$ if (drawing.completedTime) { $>-- COMPLETED<$ } $></b>
             </div>
             <div class="col-xs-3 text-center">
-                <b><$= drawing.dimensions.width $> x <$= drawing.dimensions.height $></b>
+                <b><$= (drawing.dimensions || {}).width || 'N/A' $> x <$= (drawing.dimensions || {}).height || 'N/A' $></b>
                 <select onchange="get('/drawing/<$= drawing.uuid $>/type/' + this.value)">
                     <option value="a" <$= drawing.type == 'a' ? 'selected' : '' $>>ANIMAL</option>
                     <option value="p" <$= drawing.type == 'p' ? 'selected' : '' $>>PLANT</option>
