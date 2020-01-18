@@ -75,7 +75,7 @@ public class Egg : MonoBehaviour
 
     void Update() {
         if (record.Record == null) {
-            record.Record = ImageReader.Inst.GetWeightedRandomAnimal();
+            record.Record = ImageReader.Inst.GetWeightedRandomRecord(ImageType.Animal);
         }
         if (record.Record != null) {
             solid.GetComponent<Renderer>().material.color = record.Record.MainColor;

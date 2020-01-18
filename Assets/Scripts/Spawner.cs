@@ -69,7 +69,7 @@ public class Spawner : MonoBehaviour {
 
                     if (record.Type == ImageType.Animal) {
                         // small patch of grass
-                        var plantRecord = ImageReader.Inst.GetWeightedRandomPlant();
+                        var plantRecord = ImageReader.Inst.GetWeightedRandomRecord(ImageType.Plant);
                         var seedObj = Instantiate(SeedPrefab);
                         seedObj.transform.position = spawnPos;
                         seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = plantRecord;
