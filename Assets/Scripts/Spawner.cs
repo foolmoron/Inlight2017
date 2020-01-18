@@ -31,9 +31,17 @@ public class Spawner : MonoBehaviour {
     void Start() {
         // spawn initial things when added
         ImageReader.Inst.OnAdded += record => {
-            if (initialRecordsTime < InitialRecordsPeriod) {
+            if (initialRecordsTime < InitialRecordsPeriod && initialRecords.Count < MaxInitialRecords) {
+                initialRecords.Enqueue(record);
+                initialRecords.Enqueue(record);
+                initialRecords.Enqueue(record);
+                initialRecords.Enqueue(record);
                 initialRecords.Enqueue(record);
             } else {
+                autoSpawnQueue.Enqueue(record);
+                autoSpawnQueue.Enqueue(record);
+                autoSpawnQueue.Enqueue(record);
+                autoSpawnQueue.Enqueue(record);
                 autoSpawnQueue.Enqueue(record);
             }
         };
@@ -86,12 +94,12 @@ public class Spawner : MonoBehaviour {
                         nestObj.transform.position = spawnPos;
                         nestObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
                     } else {
-                        // grass (which also spawns some seeds)
+                        // any type of plant
                         var seedObj = Instantiate(SeedPrefab);
                         seedObj.transform.position = spawnPos;
                         seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
                         seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
-                        seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.Grass;
+                        //seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.Grass;
                     }
                 }
             }
