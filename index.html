@@ -75,7 +75,9 @@
         }
         .text-plant { color: #c3f10e; }
         .text-animal { color: #fd9a00; }
-        .text-praise { color: #f452fd; }
+        .text-bird { color: #0ecff1; }
+        .text-building { color: #ff4190; }
+        .text-praise { color: #ff3ee5; }
         .text-finish { animation: 750ms linear 0s infinite rainbow; }
         @keyframes rainbow {
             0% { color: hsl(0, 100%, 50%); }
@@ -117,7 +119,7 @@
         .top-border {
             -webkit-box-shadow: inset 0px 70px 0px 0px white;
             -moz-box-shadow: inset 0px 70px 0px 0px white;
-            box-shadow: inset 0px 70px 0px 0px white;            
+            box-shadow: inset 0px 70px 0px 0px white;
         }
         .float-left {
             float: left;
@@ -349,6 +351,11 @@
             border: 2px solid #39e4ff;
             margin: -2px;
         }
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .past-drawing .commands .btn-wiggle .fancy-text {
+                margin-top: 1rem;
+            }
+        }
         .past-drawing .commands .cooldown {
             position: absolute;
             width: calc(100% + 20px);
@@ -381,19 +388,31 @@
     <div class="intro fancy-text">
         <span class="hidden" data-type="plant">Draw a nice <span class="text-plant">PLANT</span>!</span>
         <span class="hidden" data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span>!</span>
+        <span class="hidden" data-type="bird">Draw a flying <span class="text-bird">BIRD</span>!</span>
+        <span class="hidden" data-type="building">Draw a mighty <span class="text-building">BUILDING</span>!</span>
     </div>
     <div class="prompt fancy-text">
         <span class="instructions" data-type="plant">Draw a nice <span class="text-plant">PLANT</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
         <span class="instructions" data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
+        <span class="instructions" data-type="bird">Draw a flying <span class="text-bird">BIRD</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
+        <span class="instructions" data-type="building">Draw a mighty <span class="text-building">BUILDING</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
         <span class="time-error" data-type="plant">Shouldn't you spend some more<br>time drawing your <span class="text-plant">PLANT</span>..?</span>
         <span class="time-error" data-type="animal">Shouldn't you spend some more<br>time drawing your <span class="text-animal">ANIMAL</span>..?</span>
-        <span class="empty-error" data-type="plant">Hey I said draw a <span class="text-plant">PLANT</span>,<br>not a blank page!</span>
-        <span class="empty-error" data-type="animal">Hey I said draw an <span class="text-animal">ANIMAL</span>,<br>not a blank page!</span>
+        <span class="time-error" data-type="bird">Shouldn't you spend some more<br>time drawing your <span class="text-bird">BIRD</span>..?</span>
+        <span class="time-error" data-type="building">Shouldn't you spend some more<br>time drawing your <span class="text-building">BUILDING</span>..?</span>
+        <span class="empty-error" data-type="plant">Hey! I said draw a <span class="text-plant">PLANT</span>,<br>not a blank page!</span>
+        <span class="empty-error" data-type="animal">Hey! I said draw an <span class="text-animal">ANIMAL</span>,<br>not a blank page!</span>
+        <span class="empty-error" data-type="bird">Hey! I said draw an <span class="text-bird">BIRD</span>,<br>not a blank page!</span>
+        <span class="empty-error" data-type="building">Hey! I said draw an <span class="text-building">BUILDING</span>,<br>not a blank page!</span>
         <span class="color-error" data-type="plant">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-plant">PLANT</span>?</span>
         <span class="color-error" data-type="animal">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-animal">ANIMAL</span>?</span>
+        <span class="color-error" data-type="bird">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-bird">BIRD</span>?</span>
+        <span class="color-error" data-type="building">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-building">BUILDING</span>?</span>
         <span class="okay-message" data-type="*">Okay that's better, tap here to<br> <span class="text-finish">FINISH</span> when you're ready!</span>
         <span class="submit-message" data-type="plant">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-plant">PLANT</span> drawing</span>
         <span class="submit-message" data-type="animal">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-animal">ANIMAL</span> drawing</span>
+        <span class="submit-message" data-type="bird">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-bird">BIRD</span> drawing</span>
+        <span class="submit-message" data-type="building">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-building">BUILDING</span> drawing</span>
         <span class="dots" data-type="*"></span>
         <span class="done-message" data-type="*"> DONE!</span>
     </div>
