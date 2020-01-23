@@ -314,45 +314,46 @@
             margin-left: -100%;
             margin-top: 18px;
         }
-        .past-drawing .commands .btn-wiggle {
+        .past-drawing .commands .btn-command {
             width: 9.125rem;
-            height: 5rem;
+            height: 4.4rem;
             background-color: transparent;
-            border: 0.5rem dotted #39e4ff;
+            border: 0.5rem solid black;
             border-radius: 26px;
-            margin-right: 0.5rem;
+            margin-top: 0.4rem;
+            margin-right: 1.2rem;
             padding: 0px;
             transition: 0.1s transform linear;
             transform: scale3d(1, 1, 1);
         }
-        .past-drawing .commands .btn-wiggle:not([disabled]) .fancy-text.disabled-text {
+        .past-drawing .commands .btn-command:not([disabled]) .fancy-text.disabled-text {
             display: none;
         }
-        .past-drawing .commands .btn-wiggle:hover {
+        .past-drawing .commands .btn-command:hover {
             transform: scale3d(1.25, 1.25, 1);
         }
-        .past-drawing .commands .btn-wiggle:disabled {
+        .past-drawing .commands .btn-command:disabled {
             opacity: 0.5;
             transition: 0.3s transform cubic-bezier(0.85, -1.73, 0.34, 2.65);
             transform: scale3d(1, 1, 1);
         }
-        .past-drawing .commands .btn-wiggle:disabled .fancy-text.active-text {
+        .past-drawing .commands .btn-command:disabled .fancy-text.active-text {
             display: none;
         }
-        .past-drawing .commands .btn-wiggle .fancy-text {
+        .past-drawing .commands .btn-command .fancy-text {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100%;
-            background-color: #39e4ff;
-            font-size: 1.8rem;
+            background-color: black;
+            font-size: 1.6rem;
             color: white;
             border-radius: 18px;
-            border: 2px solid #39e4ff;
+            border: 2px solid black;
             margin: -2px;
         }
         @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-        .past-drawing .commands .btn-wiggle .fancy-text {
+        .past-drawing .commands .btn-command .fancy-text {
                 margin-top: 1rem;
             }
         }
@@ -366,10 +367,46 @@
             opacity: 0;
             mix-blend-mode: color;
         }
-        .past-drawing .commands .btn-wiggle:disabled .cooldown {
+        .past-drawing .commands .btn-command:disabled .cooldown {
             opacity: 1;
             height: 0px;
-            transition: 30s height cubic-bezier(0.23, 0.49, 0.82, 0.49);
+            transition: 1s height cubic-bezier(0.23, 0.49, 0.82, 0.49);
+        }
+
+        .past-drawing .commands .btn-command[data-command="glimmer"] {
+            border-style: dotted;
+            border-color: #39e4ff;
+        }
+        .past-drawing .commands .btn-command[data-command="glimmer"] .fancy-text {
+            background-color: #39e4ff;
+            border-color: #39e4ff;
+        }
+        .past-drawing .commands .btn-command[data-command="glimmer"]:disabled .cooldown {
+            transition-duration: 13s;
+        }
+
+        .past-drawing .commands .btn-command[data-command="wiggle"] {
+            border-style: dotted;
+            border-color: #ff9113;
+        }
+        .past-drawing .commands .btn-command[data-command="wiggle"] .fancy-text {
+            background-color: #ff9113;
+            border-color: #ff9113;
+        }
+        .past-drawing .commands .btn-command[data-command="wiggle"]:disabled .cooldown {
+            transition-duration: 37s;
+        }
+
+        .past-drawing .commands .btn-command[data-command="spawn"] {
+            border-style: dotted;
+            border-color: #a7fb0b;
+        }
+        .past-drawing .commands .btn-command[data-command="spawn"] .fancy-text {
+            background-color: #a7fb0b;
+            border-color: #a7fb0b;
+        }
+        .past-drawing .commands .btn-command[data-command="spawn"]:disabled .cooldown {
+            transition-duration: 0.8s;
         }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
@@ -442,8 +479,18 @@
         <div class="past-time fancy-text"></div>
         <canvas class="past-canvas"></canvas>
         <div class="commands">
-            <button class="btn-wiggle" onclick="handleWiggle(this);">
+            <button class="btn-command" data-command="glimmer" onclick="handleCommand(this);">
+                <span class="active-text fancy-text">Glimmer!</span>
+                <span class="disabled-text fancy-text">Look at screen!</span>
+                <div class="cooldown"></div>
+            </button>
+            <button class="btn-command" data-command="wiggle" onclick="handleCommand(this);">
                 <span class="active-text fancy-text">Wiggle!</span>
+                <span class="disabled-text fancy-text">Look at screen!</span>
+                <div class="cooldown"></div>
+            </button>
+            <button class="btn-command" data-command="spawn" onclick="handleCommand(this);">
+                <span class="active-text fancy-text">Spawn!</span>
                 <span class="disabled-text fancy-text">Look at screen!</span>
                 <div class="cooldown"></div>
             </button>
