@@ -183,14 +183,19 @@ function updatePastDrawings(container) {
 }
 
 // commands
-var WIGGLE_COOLDOWN = 30*1000 // WARNING: Make sure to change this in the [.past-drawing .commands .btn-wiggle:disabled .cooldown] CSS anim as well
-function handleWiggle(el) {
+var COMMAND_COOLDOWNS = {
+    glimmer: 13*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="glimmer"]:disabled .cooldown} CSS anim as well
+    wiggle: 37*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="wiggle"]:disabled .cooldown} CSS anim as well
+    spawn: 0.8*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="spawn"]:disabled .cooldown} CSS anim as well
+}
+function handleCommand(el) {
+    var command = el.dataset.command
     // cooldown
     el.setAttribute('disabled', 'disabled')
-    setTimeout(() => el.removeAttribute('disabled'), WIGGLE_COOLDOWN)
+    setTimeout(() => el.removeAttribute('disabled'), COMMAND_COOLDOWNS[command])
     // send command
     var uuid = el.parentElement.parentElement.dataset.uuid
-    get(BASE_URL + '/command/wiggle/' + uuid + '/add/1')
+    get(`${BASE_URL}/command/${command}/${uuid}/add/1`)
 }
 
 // main
