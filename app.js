@@ -378,6 +378,7 @@ app.get('/drawing/:uuid/facing/:facing', checkDrawing, (req, res, next) => {
 })
 
 const COMMAND_TYPE = {
+    GLIMMER: 'glimmer',
     WIGGLE: 'wiggle',
     SPAWN: 'spawn',
 }
