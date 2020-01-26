@@ -58,7 +58,7 @@ public class Seed : MonoBehaviour
 
     void Update() {
         if (record.Record == null) {
-            record.Record = ImageReader.Inst.GetWeightedRandomPlant();
+            record.Record = ImageReader.Inst.GetWeightedRandomRecord(ImageType.Plant);
         }
         if (record.Record != null) {
             seedRenderer.material.color = record.Record.MainColor;

@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public enum ImageType {
-    Animal, Plant, Tree, Bush, Grass, TinyPatch
+    Animal, Plant, Tree, Bush, Grass, TinyPatch, Bird, Flock, Building
 }
 public enum ImageFacing {
     Left, Right
@@ -75,6 +75,9 @@ public class ImageReader : Manager<ImageReader> {
         {'t', ImageType.Tree },
         {'b', ImageType.Bush },
         {'g', ImageType.Grass },
+        {'r', ImageType.Bird },
+        {'f', ImageType.Flock },
+        {'d', ImageType.Building },
     };
     readonly Dictionary<char, ImageFacing> CHAR_TO_FACING = new Dictionary<char, ImageFacing> {
         {'l', ImageFacing.Left },
@@ -84,12 +87,43 @@ public class ImageReader : Manager<ImageReader> {
     public List<ImageRecord> Records = new List<ImageRecord>(100);
     public AnimationCurve RecordAgeWeighting;
 
+    readonly Dictionary<ImageType, List<ImageRecord>> recordsByType = new Dictionary<ImageType, List<ImageRecord>> {
+        { ImageType.Animal, new List<ImageRecord>() },
+        { ImageType.Plant, new List<ImageRecord>() },
+        { ImageType.Bird, new List<ImageRecord>() },
+        { ImageType.Building, new List<ImageRecord>() },
+    };
+
     [Range(0, 5f)]
     public float FrameBudgetMillis = 1;
     readonly WaitForEndOfFrame endOfFrame = new WaitForEndOfFrame();
     ProgressiveFunc reader;
 
-    List<ImageRecord> recordsJustAdded = new List<ImageRecord>(20);
+    readonly List<ImageRecord> recordsJustAdded = new List<ImageRecord>(20);
+
+    void Awake() {
+        OnAdded += record => {
+            switch (record.Type) {
+                case ImageType.Animal:
+                    recordsByType[ImageType.Animal].Add(record);
+                    break;
+                case ImageType.Plant:
+                case ImageType.Tree:
+                case ImageType.Bush:
+                case ImageType.Grass:
+                case ImageType.TinyPatch:
+                    recordsByType[ImageType.Plant].Add(record);
+                    break;
+                case ImageType.Bird:
+                case ImageType.Flock:
+                    recordsByType[ImageType.Bird].Add(record);
+                    break;
+                case ImageType.Building:
+                    recordsByType[ImageType.Building].Add(record);
+                    break;
+            }
+        };
+    }
 
     void Start() {
         root = Application.dataPath + RootPath;
@@ -234,24 +268,19 @@ public class ImageReader : Manager<ImageReader> {
         return hsbColor.ToColor();
     }
 
-    public ImageRecord GetWeightedRandomRecord(bool animal, bool plant) {
-        var bestRecord = Records.Count > 0 ? Records[0] : null;
+    public ImageRecord GetWeightedRandomRecord(ImageType primaryType) {
+        // !! primaryType should only be one of the main types of drawings, not the sub-types !!
+        var records = recordsByType[primaryType];
+        var bestRecord = records.Count > 0 ? records[0] : null;
         var bestRecordScore = 0f;
-        for (var i = 0; i < Records.Count; i++) {
-            var weight = RecordAgeWeighting.Evaluate((float)i / Records.Count);
+        for (var i = 0; i < records.Count; i++) {
+            var weight = RecordAgeWeighting.Evaluate((float)i / records.Count);
             var score = Random.value * weight;
-            if (score > bestRecordScore && ((animal && Records[i].Type == ImageType.Animal) || (plant && Records[i].Type != ImageType.Animal))) {
-                bestRecord = Records[i];
+            if (score > bestRecordScore) {
+                bestRecord = records[i];
                 bestRecordScore = score;
             }
         }
         return bestRecord;
-    }
-
-    public ImageRecord GetWeightedRandomAnimal() {
-        return GetWeightedRandomRecord(true, false);
-    }
-    public ImageRecord GetWeightedRandomPlant() {
-        return GetWeightedRandomRecord(false, true);
     }
 }
