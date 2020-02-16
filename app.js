@@ -432,9 +432,10 @@ app.get('/command/:type?/:uuid?/:sincetime', (req, res, next) => {
     var upperType = (req.params.type + '').toUpperCase()
     var commands = data.commands
         .where(command =>
+            (command.meta.updated >= sinceTime) &&
+            (command.num > 0) &&
             (req.params.type == null || upperType === command.type) &&
-            (req.params.uuid == null || req.params.uuid === command.uuid) &&
-            (command.meta.updated >= sinceTime)
+            (req.params.uuid == null || req.params.uuid === command.uuid)
         )
         .map(command => ({
             uuid: command.uuid,
