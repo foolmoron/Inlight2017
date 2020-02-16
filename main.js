@@ -136,6 +136,7 @@ function complete() {
 }
 
 // past drawings
+var PAST_DRAWING_MAX_WIDTH = 410
 var PAST_DRAWING_MAX_HEIGHT = 250
 function updatePastDrawings(container) {
     var pastDrawings = JSON.parse(localStorage.getItem('pastdrawings')) || []
@@ -169,6 +170,10 @@ function updatePastDrawings(container) {
             // div size
             var h = Math.min(height, PAST_DRAWING_MAX_HEIGHT)
             var w = h * aspect
+            if (w > PAST_DRAWING_MAX_WIDTH) {
+                w = PAST_DRAWING_MAX_WIDTH
+                h = w / aspect
+            }
             canvasEl.style.width = w + 'px'
             canvasEl.style.height = h + 'px'
             // shift to top right
