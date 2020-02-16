@@ -33,15 +33,7 @@ public class Spawner : MonoBehaviour {
         ImageReader.Inst.OnAdded += record => {
             if (initialRecordsTime < InitialRecordsPeriod && initialRecords.Count < MaxInitialRecords) {
                 initialRecords.Enqueue(record);
-                initialRecords.Enqueue(record);
-                initialRecords.Enqueue(record);
-                initialRecords.Enqueue(record);
-                initialRecords.Enqueue(record);
             } else {
-                autoSpawnQueue.Enqueue(record);
-                autoSpawnQueue.Enqueue(record);
-                autoSpawnQueue.Enqueue(record);
-                autoSpawnQueue.Enqueue(record);
                 autoSpawnQueue.Enqueue(record);
             }
         };
@@ -67,12 +59,15 @@ public class Spawner : MonoBehaviour {
                 var record = autoSpawnQueue.Count > 0 ? autoSpawnQueue.Dequeue() : initialRecords.Count > 0 ? initialRecords.Dequeue() : null;
                 if (record != null) {
                     // spawn
+                    var startPos = transform.position + Random.insideUnitCircle.to3() * Mathf.Lerp(MinDistance, MaxDistance, Random.value);
                     var target = SpawnViewTargets.Find(possibleTarget => possibleTarget.gameObject.activeInHierarchy);
-                    var forward = target.forward.withY(0).normalized; // spawn in player's view
-                    var dir = Quaternion.AngleAxis(Mathf.Lerp(-AngleRange, AngleRange, Random.value), Vector3.up);
-                    var startPos = dir * forward * Mathf.Lerp(MinDistance, MaxDistance, Random.value) + new Vector3(0, 200, 0);
+                    if (target) {
+                        var forward = target.forward.withY(0).normalized; // spawn in player's view
+                        var dir = Quaternion.AngleAxis(Mathf.Lerp(-AngleRange, AngleRange, Random.value), Vector3.up);
+                        startPos = dir * forward * Mathf.Lerp(MinDistance, MaxDistance, Random.value);
+                    }
                     RaycastHit hit;
-                    Physics.Raycast(startPos, Vector3.down, out hit, 500, CollisionLayers.value);
+                    Physics.Raycast(startPos + new Vector3(0, 200, 0), Vector3.down, out hit, 500, CollisionLayers.value);
                     var spawnPos = hit.point.plusY(HeightOffsetFromGround);
 
                     if (record.Type == ImageType.Animal) {
@@ -105,7 +100,16 @@ public class Spawner : MonoBehaviour {
             }
         }
     }
-    
+
+    void OnDrawGizmosSelected() {
+        if (!SpawnViewTargets.Find(possibleTarget => possibleTarget.gameObject.activeInHierarchy)) {
+            Gizmos.color = Color.red.withAlpha(0.25f);
+            Gizmos.DrawSphere(transform.position, MinDistance);
+            Gizmos.color = Color.white.withAlpha(0.25f);
+            Gizmos.DrawSphere(transform.position, MaxDistance);
+        }
+    }
+
     //void Spawn(ImageRecord record) {
     //    var obj = Instantiate(record.Type == ImageType.Animal ? EggPrefab : SeedPrefab);
 
@@ -132,4 +136,6 @@ public class Spawner : MonoBehaviour {
     //    Physics.Raycast(startPosition, Vector3.down, out hit, 500, CollisionLayers.value);
     //    obj.transform.position = hit.point.plusY(HeightOffsetFromGround);
     //}
+
+
 }
