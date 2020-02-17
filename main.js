@@ -117,7 +117,7 @@ function _doPushDrawing(canvas) {
     var group = new fabric.Group(canvas._objects, null, true)
     group._calcBounds()
     // get data and shift objects to top-left
-    var data = JSON.parse(JSON.stringify(canvas.toObject()))
+    var data = canvas.toObject()
     data.objects.forEach(function(obj) {
         obj.left = obj.left - group.left
         obj.top = obj.top - group.top
