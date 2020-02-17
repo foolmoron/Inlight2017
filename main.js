@@ -17,10 +17,12 @@ function lerp(a, b, t) {
 function ilerp(x, a, b) {
     return (x - a) / (b - a)
 }
-function throttleBounce(func, interval) {
+TIMEOUT_MAP = {}
+function throttleBounce(func, interval, id) {
     var firedThisInterval = false
     var timeoutId = null
     return function() { // use explicit function syntax to get wrapped arguments context
+        clearTimeout(timeoutId)
         var args = arguments
         if (!firedThisInterval) {
             // throttle
@@ -29,8 +31,8 @@ function throttleBounce(func, interval) {
             setTimeout(function() { firedThisInterval = false }, interval)
         } else {
             // debounce
-            clearTimeout(timeoutId)
             timeoutId = setTimeout(function() { func.apply(null, args) }, interval)
+            TIMEOUT_MAP[id] = timeoutId
         }
     }
 }
@@ -70,7 +72,7 @@ function hasAllSameColors(canvas) {
 // server
 var BASE_URL = 'http://localhost:8000'
 var DRAWING_URL = BASE_URL + '/drawing'
-var RATE_LIMIT = 1000
+var RATE_LIMIT = 2500
 var DRAWING_MIN_TIME = 10000
 var TYPE_TO_NAME = {
     'a': 'animal',
@@ -109,7 +111,7 @@ get(DRAWING_URL + (drawingObj.uuid ? "/" + drawingObj.uuid : ""), function(res) 
     }
 })
 
-var push = throttleBounce(function(canvas) {
+function _doPushDrawing(canvas) {
     if (!drawingObj.uuid) return
     // calculate bounds
     var group = new fabric.Group(canvas._objects, null, true)
@@ -129,7 +131,8 @@ var push = throttleBounce(function(canvas) {
         json: data,
         dimensions: { width: Math.ceil(group.width), height: Math.ceil(group.height) },
     })
-}, RATE_LIMIT)
+}
+var pushDrawing = throttleBounce(_doPushDrawing, RATE_LIMIT, 'drawing')
 
 function complete() {
     get(DRAWING_URL + '/' + drawingObj.uuid + '/complete')
@@ -232,7 +235,7 @@ window.onload = function() {
 
         // push to server
         if (canvas._objects.length > 0 || forcePush) {
-            push(canvas)
+            pushDrawing(canvas)
         }
     }
 
@@ -288,7 +291,7 @@ window.onload = function() {
 
         // push new drawings to server
         if (!window.loadingJSON) {
-            push(canvas)
+            pushDrawing(canvas)
         }
     })
 
@@ -374,6 +377,10 @@ window.onload = function() {
                 showOnly(colorErrors)
                 hadError = true
             } else {
+                // before submit, force push final drawing and clear any pending pushes
+                _doPushDrawing(canvas)
+                clearTimeout(TIMEOUT_MAP['drawing'])
+
                 // submit
                 submitted = true
                 document.body.style.pointerEvents = 'none' // hard freeze all input on screen
@@ -535,7 +542,7 @@ window.onload = function() {
                     // render
                     canvas.renderAll()
                     // save
-                    push(canvas)
+                    pushDrawing(canvas)
                     // clear loading flag
                     window.loadingJSON = false
                 })
