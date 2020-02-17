@@ -434,6 +434,7 @@ window.onload = function() {
     function setColor(colorPicker, colorButtons) {
         // set color pickers
         var currentIndex = colorButtons.indexOf(colorPicker)
+        localStorage.setItem('colorIndex', currentIndex)
         for (var i = 0; i < colorButtons.length; i++) {
             var button = colorButtons[i]
             button.classList.remove('bottom-left-radius')
@@ -452,7 +453,7 @@ window.onload = function() {
         document.body.style.backgroundColor = color
     }
 
-    function setupColors(colors) {
+    function setupColors(colors, initialColorIndex) {
         var colorContainer = document.querySelector('.colors')
 
         // clear old buttons
@@ -473,7 +474,7 @@ window.onload = function() {
             colorButtons.push(button)
         }
 
-        setColor(colorButtons[0], colorButtons)
+        setColor(colorButtons[initialColorIndex || 0], colorButtons)
     }
 
     // width controls
@@ -522,7 +523,7 @@ window.onload = function() {
         var dt = d - (d = new Date().getTime())
         if (readyToSetup && canvas) {
             // load colors
-            setupColors(drawingObj.colors)
+            setupColors(drawingObj.colors, parseInt(localStorage.getItem('colorIndex')))
 
             // load prompt
             setupPrompt(drawingObj.prompt)
