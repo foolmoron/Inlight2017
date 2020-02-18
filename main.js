@@ -70,7 +70,7 @@ function hasAllSameColors(canvas) {
 }
 
 // server
-var BASE_URL = 'http://localhost:8000'
+var BASE_URL = 'https://lightfield.fool.games'
 var DRAWING_URL = BASE_URL + '/drawing'
 var RATE_LIMIT = 2500
 var DRAWING_MIN_TIME = 10000
