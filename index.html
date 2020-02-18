@@ -13,7 +13,7 @@
 
     <title>Glimmer Zone - Drawing & Controls</title>
     <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
-    <meta name="viewport" content="maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="maximum-scale=1.0, width=device-width, height=device-height, user-scalable=no" />
     <link rel="stylesheet" href="icons.css">
     <style>
         html {
@@ -67,7 +67,7 @@
 
         .prompt {
             background-color: white;
-            padding: 0.8rem 0px;
+            padding-top: 2rem;
             font-size: 2.7rem;
             line-height: 1.5em;
             text-align: center;
@@ -92,15 +92,14 @@
             90% { color: hsl(324, 100%, 50%); }
             100% { color: hsl(360, 100%, 50%); }
         }
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-        }
-        @media (max-width : 864px) {
+        @media (max-width: 720px) {
             .prompt {
-                font-size: 1.6rem;
-                padding: 1.8rem 0px;
+                font-size: 1.7rem;
+                padding-top: 2.6rem;
+                padding-bottom: 0.4rem;
             }
         }
-        @media (max-width : 552px) {
+        @media (max-width: 498px) {
             .prompt {
                 font-size: 1.38rem;
             }
@@ -118,9 +117,9 @@
         }
 
         .top-border {
-            -webkit-box-shadow: inset 0px 70px 0px 0px white;
-            -moz-box-shadow: inset 0px 70px 0px 0px white;
-            box-shadow: inset 0px 70px 0px 0px white;
+            -webkit-box-shadow: inset 0px 5vh 0px 0px white;
+            -moz-box-shadow: inset 0px 5vh 0px 0px white;
+            box-shadow: inset 0px 5vh 0px 0px white;
         }
         .float-left {
             float: left;
@@ -168,11 +167,12 @@
         }
 
         .border-button {
-            height: 3.8vh;
+            height: 100%;
             width: 6.3vh;
             box-sizing: border-box;
             margin-top: 0.4vh;
-            border: 8px solid white;
+            margin-left: min(3vw, 14px);
+            border: 1vh solid white;
             border-radius: 8px;
             opacity: 0.7;
             cursor: pointer;
@@ -182,27 +182,19 @@
             opacity: 1;
             cursor: default;
         }
-        .border-button.tiny { border-top-width: 16px; border-bottom-width: 16px; }
-        .border-button.small { border-top-width: 14px; border-bottom-width: 14px; }
-        .border-button.medium { border-top-width: 11px; border-bottom-width: 11px; }
-        .border-button.large { border-top-width: 8px; border-bottom-width: 8px; }
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .border-button {
-                border-width: 14px;
-            }
-            .border-button.tiny { border-top-width: 28px; border-bottom-width: 28px; }
-            .border-button.small { border-top-width: 22px; border-bottom-width: 22px; }
-            .border-button.medium { border-top-width: 18px; border-bottom-width: 18px; }
-            .border-button.large { border-top-width: 12px; border-bottom-width: 12px; }
-        }
+        .border-button.tiny { border-top-width: 1.6vh; border-bottom-width: 1.6vh; }
+        .border-button.small { border-top-width: 1.4vh; border-bottom-width: 1.4vh; }
+        .border-button.medium { border-top-width: 1.1vh; border-bottom-width: 1.1vh; }
+        .border-button.large { border-top-width: 0.8vh; border-bottom-width: 0.8vh; }
 
         .img-button {
-            height: 3.8vh;
+            height: 100%;
             width: 6.3vh;
-            background-size: contain;
+            background-size: cover;
             background-repeat: no-repeat;
             border-radius: 8px;
             margin-top: 0.4vh;
+            margin-right: min(3vw, 14px);
             background-position: 50%;
             cursor: pointer;
             transition: opacity 0.3s;
@@ -222,17 +214,13 @@
             background-image: url('img/clear.png');
         }
 
-        @media (max-width : 535px) {
-            .prompt {
-                font-size: 1.38rem;
-            }
+        @media (max-width : 498px) {
             .border-button {
-                width: 4.3vh;
+                width: 5vh;
             }
             .img-button {
-                width: 4.3vh;
-                height: 2.69vh;
-                margin-top: 0.8vh;
+                width: 5.3vh;
+                margin-right: 5px;
             }
         }
 
@@ -250,19 +238,18 @@
         }
         .past-drawings .open-button {
             position: fixed;
-            width: 3.1rem;
-            height: 3.5rem;
-            right: -3.0rem;
-            border-top-right-radius: 12px;
+            width: 17rem;
+            height: 2.2rem;
+            right: -16.9rem;
             border-bottom-right-radius: 12px;
             background: blueviolet;
             cursor: pointer;
-        }
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .open-button {
-                transform: scale(1.5);
-                transform-origin: 0 0;
-            }
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.6rem;
+            color: white;
+            font-size: 1.6rem;
         }
         .past-drawings .close-on-click {
             visibility: hidden;
@@ -279,9 +266,10 @@
             opacity: 0.3;
         }
         .past-drawings .content {
-            height: calc(100% - 70px);
-            padding: 0px 14px;
-            margin-top: 70px;
+            position: relative;
+            box-sizing: border-box;
+            height: 100vh;
+            padding: 30px 14px;
             text-align: center;
             overflow-x: hidden;
             overflow-y: auto;
@@ -415,10 +403,9 @@
     <div class="past-drawings">
         <div class="close-on-click" onclick="this.parentElement.classList.remove('open')">
         </div>
-        <div class="open-button" onclick="this.parentElement.classList.toggle('open')">
-            <div class="menu icon" style="transform: translate3d(4px, 14px, 0);"></div>
+        <div class="open-button fancy-text" onclick="this.parentElement.classList.toggle('open')">
+            PAST DRAWINGS >
         </div>
-        <div class="title fancy-text">Past Drawings</div>
         <div class="content">
         </div>
     </div>
@@ -437,14 +424,14 @@
         <span class="time-error" data-type="animal">Shouldn't you spend some more<br>time drawing your <span class="text-animal">ANIMAL</span>..?</span>
         <span class="time-error" data-type="bird">Shouldn't you spend some more<br>time drawing your <span class="text-bird">BIRD</span>..?</span>
         <span class="time-error" data-type="building">Shouldn't you spend some more<br>time drawing your <span class="text-building">BUILDING</span>..?</span>
-        <span class="empty-error" data-type="plant">Hey! I said draw a <span class="text-plant">PLANT</span>,<br>not a blank page!</span>
-        <span class="empty-error" data-type="animal">Hey! I said draw an <span class="text-animal">ANIMAL</span>,<br>not a blank page!</span>
-        <span class="empty-error" data-type="bird">Hey! I said draw an <span class="text-bird">BIRD</span>,<br>not a blank page!</span>
-        <span class="empty-error" data-type="building">Hey! I said draw an <span class="text-building">BUILDING</span>,<br>not a blank page!</span>
-        <span class="color-error" data-type="plant">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-plant">PLANT</span>?</span>
-        <span class="color-error" data-type="animal">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-animal">ANIMAL</span>?</span>
-        <span class="color-error" data-type="bird">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-bird">BIRD</span>?</span>
-        <span class="color-error" data-type="building">Wouldn't it be cool if you used<br><span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span> to draw your <span class="text-building">BUILDING</span>?</span>
+        <span class="empty-error" data-type="plant">Hey! I said draw a<br><span class="text-plant">PLANT</span>, not a blank page!</span>
+        <span class="empty-error" data-type="animal">Hey! I said draw an<br><span class="text-animal">ANIMAL</span>, not a blank page!</span>
+        <span class="empty-error" data-type="bird">Hey! I said draw a<br><span class="text-bird">BIRD</span>, not a blank page!</span>
+        <span class="empty-error" data-type="building">Hey! I said draw a<br><span class="text-building">BUILDING</span>, not a blank page!</span>
+        <span class="color-error" data-type="plant">Wouldn't it be cool if your<br><span class="text-plant">PLANT</span> used <span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span>?</span>
+        <span class="color-error" data-type="animal">Wouldn't it be cool if your<br><span class="text-animal">ANIMAL</span> used <span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span>?</span>
+        <span class="color-error" data-type="bird">Wouldn't it be cool if your<br><span class="text-bird">BIRD</span> used <span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span>?</span>
+        <span class="color-error" data-type="building">Wouldn't it be cool if your<br><span class="text-building">BUILDING</span> used <span class="color1">lo</span><span class="color2">ts</span> <span class="color3">of</span> <span class="color4">col</span><span class="color5">ors</span>?</span>
         <span class="okay-message" data-type="*">Okay that's better, tap here to<br> <span class="text-finish">FINISH</span> when you're ready!</span>
         <span class="submit-message" data-type="plant">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-plant">PLANT</span> drawing</span>
         <span class="submit-message" data-type="animal">Submitting your <span class="praise-text text-praise">BRILLIANT</span><br><span class="text-animal">ANIMAL</span> drawing</span>
