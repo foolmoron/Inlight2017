@@ -45,7 +45,7 @@
             width: 100%;
             height: 100%;
             background-color: white;
-            font-size: 6.3rem;
+            font-size: min(7rem, 20vw);
             -webkit-text-stroke: 5px black;
             display: flex;
             justify-content: center;
@@ -226,7 +226,7 @@
 
         .past-drawings {
             position: absolute;
-            z-index: 1000;
+            z-index: 3000;
             width: 80%;
             height: 100%;
             background-color: blueviolet;
@@ -294,7 +294,7 @@
         .past-drawings .past-time {
             color: white;
             -webkit-text-stroke-width: 0.06em;
-            font-size: 1.8rem;
+            font-size: min(7vw, 1.8rem);
         }
 
         .past-drawing {
@@ -308,9 +308,12 @@
             height: 200px;
             margin-left: -100%;
         }
+        .commands-pre-br {
+            display: none;
+        }
         .past-drawing .commands .btn-command {
-            width: 9.75rem;
-            height: 4.4rem;
+            width: min(9.75rem, 28vw);
+            height: min(4.4rem, 14vw);
             background-color: transparent;
             border: 0.5rem solid black;
             border-radius: 26px;
@@ -319,6 +322,26 @@
             transition: 0.1s transform linear;
             transform: scale3d(1, 1, 1);
         }
+        @media (max-aspect-ratio: 9/8) {
+            .commands-pre-br {
+                display: unset;
+            }
+            .commands-post-br {
+                display: none;
+            }
+            .past-drawing .commands {
+                float: unset;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                height: auto;
+                margin: 0;
+            }
+            .past-drawing .commands .btn-command {
+                margin: 0 min(10px, 0.4vw);
+            }
+        }
+
         .past-drawing .commands .btn-command:not([disabled]) .fancy-text.disabled-text {
             display: none;
         }
@@ -335,11 +358,12 @@
         }
         .past-drawing .commands .btn-command .fancy-text {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100%;
             background-color: black;
-            font-size: 1.6rem;
+            font-size: min(1.6rem, 4.4vw);
             color: white;
             border-radius: 18px;
             border: 2px solid black;
@@ -394,7 +418,7 @@
             border-color: #a7fb0b;
         }
         .past-drawing .commands .btn-command[data-command="spawn"]:disabled .cooldown {
-            transition-duration: 0.8s;
+            transition-duration: 3s;
         }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
@@ -465,25 +489,26 @@
     <div class='past-drawing'>
         <div class="past-time fancy-text"></div>
         <canvas class="past-canvas"></canvas>
+        <br class="commands-pre-br">
         <div class="commands">
             <button class="btn-command" data-command="glimmer" onclick="handleCommand(this);">
                 <span class="active-text fancy-text">Glimmer!</span>
-                <span class="disabled-text fancy-text">Look at screen!</span>
+                <span class="disabled-text fancy-text"><span style="white-space: nowrap;">Look at</span>screen!</span>
                 <div class="cooldown"></div>
             </button>
             <button class="btn-command" data-command="wiggle" onclick="handleCommand(this);">
                 <span class="active-text fancy-text">Wiggle!</span>
-                <span class="disabled-text fancy-text">Look at screen!</span>
+                <span class="disabled-text fancy-text"><span style="white-space: nowrap;">Look at</span>screen!</span>
                 <div class="cooldown"></div>
             </button>
             <button class="btn-command" data-command="spawn" onclick="handleCommand(this);">
                 <span class="active-text fancy-text">Spawn!</span>
-                <span class="disabled-text fancy-text">Look at screen!</span>
+                <span class="disabled-text fancy-text"><span style="white-space: nowrap;">Look at</span>screen!</span>
                 <div class="cooldown"></div>
             </button>
             <!-- <button class="btn-spawn" onclick="">Spawn!</button> -->
         </div>
-        <br>
+        <br class="commands-post-br">
     </div>
 </template>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.16/fabric.min.js"></script>

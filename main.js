@@ -140,7 +140,26 @@ function complete() {
 
 // past drawings
 var PAST_DRAWING_MAX_WIDTH = 410
+var PAST_DRAWING_X_PAD = 30
 var PAST_DRAWING_MAX_HEIGHT = 250
+function updatePastDrawingsCanvases(container) {
+    for (var canvasEl of container.querySelectorAll('canvas')) {
+        var canvas = canvasEl.fabricCanvas
+        if (!canvas) {
+            continue
+        }
+        var aspect = canvas.width / canvas.height
+        var h = Math.min(canvas.height, PAST_DRAWING_MAX_HEIGHT)
+        var w = h * aspect
+        var maxW = Math.min(PAST_DRAWING_MAX_WIDTH, container.clientWidth - (2 * PAST_DRAWING_X_PAD))
+        if (w > maxW) {
+            w = maxW
+            h = w / aspect
+        }
+        canvasEl.style.width = w + 'px'
+        canvasEl.style.height = h + 'px'
+    }
+}
 function updatePastDrawings(container) {
     var pastDrawings = JSON.parse(localStorage.getItem('pastdrawings')) || []
     container.parentElement.classList.toggle('hidden', !pastDrawings.length)
@@ -160,25 +179,16 @@ function updatePastDrawings(container) {
         timeEl.textContent = new Date(pastDrawings[i].completionTime || 0).toLocaleString() + (pastDrawings[i].type ? ' - ' + pastDrawings[i].type : '')
         // canvas
         var canvas = new fabric.StaticCanvas(canvasEl)
+        canvasEl.fabricCanvas = canvas
         canvas.loadFromJSON(pastDrawings[i].json, function() {
             // calculate bounds
             var group = new fabric.Group(canvas._objects, null, true)
             group._calcBounds()
             var width = Math.ceil(group.width)
             var height = Math.ceil(group.height)
-            var aspect = width / height
             // canvas size
             canvas.setWidth(width)
             canvas.setHeight(height)
-            // div size
-            var h = Math.min(height, PAST_DRAWING_MAX_HEIGHT)
-            var w = h * aspect
-            if (w > PAST_DRAWING_MAX_WIDTH) {
-                w = PAST_DRAWING_MAX_WIDTH
-                h = w / aspect
-            }
-            canvasEl.style.width = w + 'px'
-            canvasEl.style.height = h + 'px'
             // shift to top right
             canvas._objects.forEach(function(obj) {
                 obj.setLeft(obj.left - group.left)
@@ -188,13 +198,15 @@ function updatePastDrawings(container) {
             canvas.renderAll()
         })
     }
+
+    updatePastDrawingsCanvases(container)
 }
 
 // commands
 var COMMAND_COOLDOWNS = {
     glimmer: 13*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="glimmer"]:disabled .cooldown} CSS anim as well
     wiggle: 37*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="wiggle"]:disabled .cooldown} CSS anim as well
-    spawn: 0.8*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="spawn"]:disabled .cooldown} CSS anim as well
+    spawn: 3*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="spawn"]:disabled .cooldown} CSS anim as well
 }
 function handleCommand(el) {
     var command = el.dataset.command
@@ -214,7 +226,7 @@ window.onload = function() {
     })
 
     // misc
-    var doneButton = document.querySelector('.button.done')
+    var pastDrawingContainer = document.querySelector('.past-drawings .content')
 
     // undo/redo/clear
     var history = []
@@ -510,6 +522,7 @@ window.onload = function() {
             canvas.setWidth(window.innerWidth - 2*padding)
             canvas.renderAll()
             prevElementOffset = elementOffset
+            updatePastDrawingsCanvases(pastDrawingContainer)
         }
         requestAnimationFrame(resizerSentinel)
     }
@@ -567,6 +580,5 @@ window.onload = function() {
     doHistory(0)
 
     // load past drawings
-    var pastDrawingContainer = document.querySelector('.past-drawings .content')
     updatePastDrawings(pastDrawingContainer)
 }
