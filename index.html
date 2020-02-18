@@ -13,7 +13,7 @@
 
     <title>Glimmer Zone - Drawing & Controls</title>
     <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
-    <meta name="viewport" content="maximum-scale=1.0, width=device-width, height=device-height, user-scalable=no" />
+    <meta name="viewport" content="maximum-scale=1.0, width=device-width, user-scalable=no" />
     <link rel="stylesheet" href="icons.css">
     <style>
         html {
@@ -424,7 +424,7 @@
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
 </head>
 <body class="loading" style="touch-action: manipulation;">
-    <div class="past-drawings">
+    <div class="past-drawings hidden">
         <div class="close-on-click" onclick="this.parentElement.classList.remove('open')">
         </div>
         <div class="open-button fancy-text" onclick="this.parentElement.classList.toggle('open')">
@@ -444,10 +444,10 @@
         <span class="instructions" data-type="animal">Draw a moving <span class="text-animal">ANIMAL</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
         <span class="instructions" data-type="bird">Draw a flying <span class="text-bird">BIRD</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
         <span class="instructions" data-type="building">Draw a mighty <span class="text-building">BUILDING</span><br>then tap here to <span class="text-finish">FINISH!</span></span>
-        <span class="time-error" data-type="plant">Shouldn't you spend some more<br>time drawing your <span class="text-plant">PLANT</span>..?</span>
-        <span class="time-error" data-type="animal">Shouldn't you spend some more<br>time drawing your <span class="text-animal">ANIMAL</span>..?</span>
-        <span class="time-error" data-type="bird">Shouldn't you spend some more<br>time drawing your <span class="text-bird">BIRD</span>..?</span>
-        <span class="time-error" data-type="building">Shouldn't you spend some more<br>time drawing your <span class="text-building">BUILDING</span>..?</span>
+        <span class="time-error" data-type="plant">Shouldn't you spend more<br>time drawing your <span class="text-plant">PLANT</span>..?</span>
+        <span class="time-error" data-type="animal">Shouldn't you spend more<br>time drawing your <span class="text-animal">ANIMAL</span>..?</span>
+        <span class="time-error" data-type="bird">Shouldn't you spend more<br>time drawing your <span class="text-bird">BIRD</span>..?</span>
+        <span class="time-error" data-type="building">Shouldn't you spend more<br>time drawing your <span class="text-building">BUILDING</span>..?</span>
         <span class="empty-error" data-type="plant">Hey! I said draw a<br><span class="text-plant">PLANT</span>, not a blank page!</span>
         <span class="empty-error" data-type="animal">Hey! I said draw an<br><span class="text-animal">ANIMAL</span>, not a blank page!</span>
         <span class="empty-error" data-type="bird">Hey! I said draw a<br><span class="text-bird">BIRD</span>, not a blank page!</span>
