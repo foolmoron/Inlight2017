@@ -5,8 +5,8 @@ using UnityEngine;
 public class CameraMotion : MonoBehaviour {
 
     public Vector3 AngleRange = new Vector3(25, 25, 25);
-    [Range(0, 180)]
-    public float RotationSpeed = 10;
+    [Range(0, 0.01f)]
+    public float RotationSpeed = 0.005f;
     [Range(0, 10)]
     public float RotationInterval = 2;
     [Range(0, 1)]
@@ -26,6 +26,7 @@ public class CameraMotion : MonoBehaviour {
             timeToInterval = RotationInterval * (1 + (Random.value - 0.5f) * RotationIntervalVariance);
             targetRotation = originalRotation * Quaternion.Euler(new Vector3((Random.value - 0.5f) * AngleRange.x, (Random.value - 0.5f) * AngleRange.y, (Random.value - 0.5f) * AngleRange.z));
         }
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed);
+        //transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, targetRotation.eulerAngles, RotationSpeed * Time.deltaTime);
     }
 }
