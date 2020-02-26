@@ -268,9 +268,9 @@ public class ImageReader : Manager<ImageReader> {
         return hsbColor.ToColor();
     }
 
-    public ImageRecord GetWeightedRandomRecord(ImageType primaryType) {
+    public ImageRecord GetWeightedRandomRecord(ImageType? primaryType = null) {
         // !! primaryType should only be one of the main types of drawings, not the sub-types !!
-        var records = recordsByType[primaryType];
+        var records = primaryType.HasValue ? recordsByType[primaryType.Value] : Records;
         var bestRecord = records.Count > 0 ? records[0] : null;
         var bestRecordScore = 0f;
         for (var i = 0; i < records.Count; i++) {

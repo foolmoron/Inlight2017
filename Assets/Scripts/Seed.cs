@@ -22,6 +22,13 @@ public class Seed : MonoBehaviour
     ParticleSystem particles;
     new Collider collider;
 
+    [Range(0, 1)]
+    public float TreePerc = 0.33f;
+    [Range(0, 1)]
+    public float BushPerc = 0.33f;
+    [Range(0, 1)]
+    public float GrassPerc = 0.34f;
+
     public PlanterParams TreeParams;
     public PlanterParams BushParams;
     public PlanterParams GrassParams;
@@ -95,7 +102,7 @@ public class Seed : MonoBehaviour
                         break;
                     default:
                         var r = Random.value;
-                        planter.Params = r <= 0.33f ? TreeParams : r <= 0.66f ? BushParams : GrassParams;
+                        planter.Params = r <= TreePerc ? TreeParams : r <= (TreePerc + BushPerc) ? BushParams : r <= (TreePerc + BushPerc + GrassPerc) ? GrassParams : TinyPatchParams;
                         break;
                 }
                 planter.DoPlanting();

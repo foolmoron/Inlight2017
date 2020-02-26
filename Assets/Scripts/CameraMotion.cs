@@ -27,6 +27,5 @@ public class CameraMotion : MonoBehaviour {
             targetRotation = originalRotation * Quaternion.Euler(new Vector3((Random.value - 0.5f) * AngleRange.x, (Random.value - 0.5f) * AngleRange.y, (Random.value - 0.5f) * AngleRange.z));
         }
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed);
-        //transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, targetRotation.eulerAngles, RotationSpeed * Time.deltaTime);
     }
 }

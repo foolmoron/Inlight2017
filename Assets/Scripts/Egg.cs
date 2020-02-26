@@ -30,6 +30,8 @@ public class AnimalParams {
     public float MinAnimSpeed;
     [Range(0, 5)]
     public float MaxAnimSpeed;
+    [Range(0, 5)]
+    public float AnimSpeedScale = 1;
 }
 
 public class Egg : MonoBehaviour
@@ -45,6 +47,9 @@ public class Egg : MonoBehaviour
     public AnimalParams GroupParams;
     public AnimalParams MonsterParams;
     public bool ForceGroupParams;
+
+    public Vector2 BirdYRange = new Vector2(20, 35);
+    public float BirdSpeedScale = 2.5f;
 
     HasImageRecord record;
     GameObject solid;
@@ -129,6 +134,9 @@ public class Egg : MonoBehaviour
                 var animal = animalPool.Obtain<SpawnedObject>(transform.parent.position);
                 animal.GetComponent<HasImageRecord>().Record = record.Record;
                 animal.UseScaleSpeed = false;
+                if (record.Record.Type == ImageType.Bird) {
+                    animal.transform.Find("Anim").transform.localPosition = Vector3.up * Mathf.Lerp(BirdYRange.x, BirdYRange.y, Random.value);
+                }
 
                 var animalScaled = animal.GetComponent<SmoothScaler>();
                 var scaleLerp = Random.value;
@@ -137,7 +145,7 @@ public class Egg : MonoBehaviour
                 animalScaled.ScaleDuration = Mathf.Lerp(animalParams.MinScaleDuration, animalParams.MaxScaleDuration, scaleLerp);
                 animal.GetComponentInSelfOrChildren<Wander>().enabled = true;
                 animal.GetComponentInSelfOrChildren<Wander>().speed = Mathf.Lerp(animalParams.MinSpeed, animalParams.MaxSpeed, scaleLerp);
-                animal.Properties.SetFloat("_Timescale", Mathf.Lerp(animalParams.MaxAnimSpeed, animalParams.MinAnimSpeed, scaleLerp));
+                animal.Properties.SetFloat("_Timescale", Mathf.Lerp(animalParams.MaxAnimSpeed, animalParams.MinAnimSpeed, scaleLerp) * animalParams.AnimSpeedScale);
                 animal.Properties.SetFloat("_TimeOffset", Random.value * 5);
             }
 
