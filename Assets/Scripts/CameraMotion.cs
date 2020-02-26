@@ -13,11 +13,22 @@ public class CameraMotion : MonoBehaviour {
     public float RotationIntervalVariance = 0.5f;
     float timeToInterval;
 
+    public bool Zoomed;
+    public Vector2 ZoomAmounts = new Vector2(13.1f, 34.3f);
+    public Vector2 ZoomChances = new Vector2(0.1f, 0.5f);
+    [Range(0, 0.1f)]
+    public float ZoomSpeed = 0.05f;
+    [Range(0, 100)]
+    public float ZoomInterval = 10;
+    float timeToZoom;
+
     Quaternion originalRotation;
     Quaternion targetRotation;
+    Camera cam;
 
     void Start() {
         originalRotation = transform.rotation;
+        cam = GetComponent<Camera>();
     }
 
     void Update() {
@@ -27,5 +38,16 @@ public class CameraMotion : MonoBehaviour {
             targetRotation = originalRotation * Quaternion.Euler(new Vector3((Random.value - 0.5f) * AngleRange.x, (Random.value - 0.5f) * AngleRange.y, (Random.value - 0.5f) * AngleRange.z));
         }
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed);
+
+
+        timeToZoom -= Time.deltaTime;
+        if (timeToZoom <= 0) {
+            timeToZoom = ZoomInterval;
+            if (Random.value < (Zoomed ? ZoomChances.y : ZoomChances.x)) {
+                Zoomed = !Zoomed;
+            }
+        }
+        var targetSize = Zoomed ? ZoomAmounts.x : ZoomAmounts.y;
+        cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, targetSize, ZoomSpeed);
     }
 }
