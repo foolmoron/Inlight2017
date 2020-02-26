@@ -3,8 +3,8 @@ import threading
 import requests
 
 # config
-URL_INDEX = 'https://inlight.fool.games/drawingindex/'
-URL_IMG = 'https://inlight.fool.games/img/drawings/approved/'
+URL_INDEX = 'https://lightfield.fool.games/drawingindex/'
+URL_IMG = 'https://lightfield.fool.games/img/drawings/approved/'
 INTERVAL = 1.5
 
 # lib
