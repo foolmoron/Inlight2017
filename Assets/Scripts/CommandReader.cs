@@ -93,7 +93,7 @@ public class CommandReader : Manager<CommandReader> {
 						                o.Record.Record == record
 						            );
 						            if (target) {
-						                CameraMotion.Inst.ZoomTarget = target.transform;
+						                CameraMotion.Inst.ZoomTarget = target.GetComponentInChildren<Renderer>().transform;
 						            }
                                     break;
 					        }

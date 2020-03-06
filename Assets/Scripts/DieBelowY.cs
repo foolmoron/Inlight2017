@@ -7,7 +7,7 @@ public class DieBelowY : MonoBehaviour {
     public bool Release;
     
     void Update() {
-        if (transform.position.y < 0) {
+        if (transform.position.y < Y) {
             if (Release) {
                 gameObject.Release();
             } else {

@@ -49,6 +49,9 @@ public class CameraMotion : Manager<CameraMotion> {
             timeToInterval2 = RotationInterval2 * (1 + (Random.value - 0.5f) * RotationIntervalVariance2);
             targetRotation = targetRotation * Quaternion.Euler(new Vector3((Random.value - 0.5f) * AngleRange2.x, (Random.value - 0.5f) * AngleRange2.y, (Random.value - 0.5f) * AngleRange2.z));
         }
+        if (ZoomTarget && !ZoomTarget.gameObject.activeSelf) {
+            ZoomTarget = null;
+        }
         if (ZoomTarget) {
             targetRotation = Quaternion.LookRotation(ZoomTarget.position - transform.position);
         }
@@ -60,7 +63,7 @@ public class CameraMotion : Manager<CameraMotion> {
             if (Random.value < (ZoomTarget != null ? ZoomChances.y : ZoomChances.x)) {
                 ZoomTarget = ZoomTarget != null 
                     ? null 
-                    : SpawnedObject.AllInCurrentScene.RandomWhere(o => o.gameObject.activeSelf).transform
+                    : SpawnedObject.AllInCurrentScene.RandomWhere(o => o.gameObject.activeSelf).GetComponentInChildren<Renderer>().transform
                     ;
             }
         }

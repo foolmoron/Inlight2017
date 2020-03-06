@@ -12,6 +12,12 @@ public class Wander : MonoBehaviour
     public float directionChangeTime = 0;
     public float maxHeadingChange = 30;
 
+    [Range(0, 1)]
+    public float HeadingFlipChange = 0.95f;
+    [Range(0, 20)]
+    public float NoHeadingChangeTime = 10f;
+    float noHeadingTime;
+
     SpawnedObject spawned;
     CharacterController controller;
     float heading;
@@ -25,8 +31,11 @@ public class Wander : MonoBehaviour
 
     void Update()
     {
+        if (noHeadingTime > 0) {
+            noHeadingTime -= Time.deltaTime;
+        }
         directionChangeTime -= Time.deltaTime;
-        if (directionChangeTime <= 0) {
+        if (directionChangeTime <= 0 && noHeadingTime <= 0) {
             directionChangeTime = directionChangeInterval;
             var floor = Mathf.Clamp(heading - maxHeadingChange, 0, 360);
             var ceil = Mathf.Clamp(heading + maxHeadingChange, 0, 360);
@@ -40,4 +49,13 @@ public class Wander : MonoBehaviour
             controller.SimpleMove(forward * speed);
         }
     }
+
+    void OnTriggerEnter(Collider other) {
+        if (Random.value < HeadingFlipChange) {
+            heading = (heading + 180f) % 360f;
+            targetRotation = Quaternion.AngleAxis(heading, Vector3.up).eulerAngles;
+            noHeadingTime = NoHeadingChangeTime;
+        }
+    }
+
 }

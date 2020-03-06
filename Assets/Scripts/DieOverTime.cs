@@ -15,7 +15,10 @@ public class DieOverTime : MonoBehaviour {
         LifeTime += Time.deltaTime;
         transform.localScale = originalScale * DieCurve.Evaluate(LifeTime);
         if (DieCurve.Evaluate(LifeTime) <= 0) {
-            Destroy(gameObject);
+            if (gameObject.GetComponent<PooledObject>())
+                gameObject.Release();
+            else
+                Destroy(gameObject);
         }
     }
 }
