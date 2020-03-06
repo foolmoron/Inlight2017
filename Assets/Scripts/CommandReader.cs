@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 public class CommandMeta {
 	public long updated;
 }
-public enum CommandType { WIGGLE }
+public enum CommandType { WIGGLE, GLIMMER, SPAWN }
 [Serializable]
 public class CommandData {
 	public string uuid;
@@ -30,9 +30,13 @@ public class CommandReader : Manager<CommandReader> {
     public float PollInterval = 1f;
     long latestPollTime;
 
-	[Range(0, 20)]
-	public float WiggleTime = 5f;
-	readonly ListDict<ImageRecord, float> wiggleTimes = new ListDict<ImageRecord, float>();
+    [Range(0, 20)]
+    public float WiggleTime = 5f;
+    readonly ListDict<ImageRecord, float> wiggleTimes = new ListDict<ImageRecord, float>();
+
+    [Range(0, 20)]
+    public float GlimmerTime = 1f;
+    readonly ListDict<ImageRecord, float> glimmerTimes = new ListDict<ImageRecord, float>();
 
     void Start() {
         StartCoroutine(Poll());
@@ -50,24 +54,35 @@ public class CommandReader : Manager<CommandReader> {
 				if (!firstLoad) { // wait until 2nd poll so we know we are pulling using the correct time
 					// process commands
 					foreach (var command in data.commands) {
-						// do command
-						switch (command.type) {
-							case CommandType.WIGGLE:
-								Debug.LogError("WIGGLING " + command.uuid);
-								var record = ImageReader.Inst.Records.Find(command.uuid, (r, uuid) => r.Name == uuid);
-								if (record != null) {
-									foreach (var obj in SpawnedObject.AllInCurrentScene) {
-										if (obj.Record.Record == record) {
-											obj.IsWiggling = true;
-											obj.Update();
-										}
-									}
-									wiggleTimes[record] = WiggleTime;
-								}
-								break;
-						}
-						// clear command
-						clearReqs.Add(UnityWebRequest.Get(string.Format("{0}command/{1}/{2}/clear", BaseUrl, command.type, command.uuid)));
+					    // do command
+					    Debug.Log(command.type + " " + command.uuid);
+					    var record = ImageReader.Inst.Records.Find(command.uuid, (r, uuid) => r.Name == uuid);
+					    if (record != null) {
+                            switch (command.type) {
+							    case CommandType.WIGGLE:
+								    foreach (var obj in SpawnedObject.AllInCurrentScene) {
+									    if (obj.Record.Record == record) {
+										    obj.IsWiggling = true;
+										    obj.Update();
+									    }
+								    }
+								    wiggleTimes[record] = WiggleTime;
+								    break;
+						        case CommandType.GLIMMER:
+						            foreach (var obj in SpawnedObject.AllInCurrentScene) {
+						                if (obj.Record.Record == record) {
+						                    obj.IsGlimmering = true;
+						                    obj.Update();
+						                }
+						            }
+						            glimmerTimes[record] = GlimmerTime;
+                                    break;
+						        case CommandType.SPAWN:
+                                    break;
+					        }
+					    }
+                        // clear command
+                        clearReqs.Add(UnityWebRequest.Get(string.Format("{0}command/{1}/{2}/clear", BaseUrl, command.type, command.uuid)));
 					}
 					// wait for clears
 					foreach (var clearReq in clearReqs) {
@@ -83,19 +98,33 @@ public class CommandReader : Manager<CommandReader> {
     }
 
 	void Update() {
-		for (int i = 0; i < wiggleTimes.Count; i++) {
-			wiggleTimes.Values[i] -= Time.deltaTime;
-			if (wiggleTimes.Values[i] <= 0) {
-				var record = wiggleTimes.Keys[i];
-				foreach (var obj in SpawnedObject.AllInCurrentScene) {
-					if (obj.Record.Record == record) {
-						obj.IsWiggling = false;
-						obj.Update();
-					}
-				}
-				wiggleTimes.RemoveAt(i);
-				i--;
-			}
-		}
-	}
+	    for (int i = 0; i < wiggleTimes.Count; i++) {
+	        wiggleTimes.Values[i] -= Time.deltaTime;
+	        if (wiggleTimes.Values[i] <= 0) {
+	            var record = wiggleTimes.Keys[i];
+	            foreach (var obj in SpawnedObject.AllInCurrentScene) {
+	                if (obj.Record.Record == record) {
+	                    obj.IsWiggling = false;
+	                    obj.Update();
+	                }
+	            }
+	            wiggleTimes.RemoveAt(i);
+	            i--;
+	        }
+	    }
+	    for (int i = 0; i < glimmerTimes.Count; i++) {
+	        glimmerTimes.Values[i] -= Time.deltaTime;
+	        if (glimmerTimes.Values[i] <= 0) {
+	            var record = glimmerTimes.Keys[i];
+	            foreach (var obj in SpawnedObject.AllInCurrentScene) {
+	                if (obj.Record.Record == record) {
+	                    obj.IsGlimmering = false;
+	                    obj.Update();
+	                }
+	            }
+	            glimmerTimes.RemoveAt(i);
+	            i--;
+	        }
+	    }
+    }
 }

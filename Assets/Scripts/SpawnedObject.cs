@@ -29,6 +29,9 @@ public class SpawnedObject : MonoBehaviour {
     public bool IsWiggling;
     bool prevWiggling;
 
+    ParticleSystem glimmerParticles;
+    public bool IsGlimmering;
+
     Vector2 originalScale;
     public HasImageRecord Record { get; private set; }
     new Renderer renderer;
@@ -46,6 +49,8 @@ public class SpawnedObject : MonoBehaviour {
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
         Properties = new MaterialPropertyBlock();
         renderer.GetPropertyBlock(Properties);
+        glimmerParticles = this.GetComponentInChildren<ParticleSystem>();
+        glimmerParticles.enableEmission(false);
     }
 
     void Start() {
@@ -55,6 +60,8 @@ public class SpawnedObject : MonoBehaviour {
     }
 
     void OnObtain() {
+        IsWiggling = false;
+        IsGlimmering = false;
         dieOverTime.enabled = false;
         dieOverTime.LifeTime = 0;
     }
@@ -108,6 +115,17 @@ public class SpawnedObject : MonoBehaviour {
                 renderer.SetPropertyBlock(Properties);
             }
             prevWiggling = IsWiggling;
+
+            glimmerParticles.enableEmission(IsGlimmering);
+            var gpcol = glimmerParticles.colorOverLifetime;
+            var gpcolc = gpcol.color;
+            var gpcolcg = gpcolc.gradient;
+            var gpcolcgc = gpcolc.gradient.colorKeys;
+            gpcolcgc[0].color = Record.Record.Color2;
+            gpcolcgc[1].color = Record.Record.Color1;
+            gpcolcg.colorKeys = gpcolcgc;
+            gpcolc.gradient = gpcolcg;
+            gpcol.color = gpcolc;
         }
         if (Record.Record == null || Record.Record.Dimensions == Vector2.zero) {
             ScaleTarget.localScale = Vector3.one * ScaleFactor;

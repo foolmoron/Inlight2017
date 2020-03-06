@@ -25,6 +25,8 @@ public class ImageRecord {
     public Vector2 Dimensions;
     public DateTime LastUpdated;
     public Color MainColor;
+    public Color Color1;
+    public Color Color2;
 
     public const int MAIN_COLOR_MIP_LEVEL = 3;
     public Texture2D Texture { get; set; }
@@ -193,7 +195,10 @@ public class ImageReader : Manager<ImageReader> {
                     yield return endOfFrame;
                     var pixels = record.Texture.GetPixels32(ImageRecord.MAIN_COLOR_MIP_LEVEL);
                     yield return null;
-                    record.MainColor = GetMainColorFromPixels(pixels, 2); // blend top 2 colors
+                    List<Color> topColors;
+                    record.MainColor = GetMainColorFromPixels(pixels, out topColors, 2); // blend top 2 colors
+                    record.Color1 = topColors[0];
+                    record.Color2 = topColors[1];
                     yield return null;
                     record.Dimensions = new Vector2(record.Texture.width / 100f, record.Texture.height / 100f);
                     OnUpdated(record);
@@ -223,7 +228,7 @@ public class ImageReader : Manager<ImageReader> {
         }
     }
 
-    static Color GetMainColorFromPixels(Color32[] pixels, int blendTopColors = 1) {
+    static Color GetMainColorFromPixels(Color32[] pixels, out List<Color> topColors, int blendTopColors = 1) {
         // get frequency of each solid pixel color
         var pixelFrequencies = new Dictionary<Color32, int>();
         foreach (var pixel in pixels) {
@@ -234,10 +239,11 @@ public class ImageReader : Manager<ImageReader> {
         }
         // black if nothing
         if (pixelFrequencies.Count == 0) {
+            topColors = new List<Color> { Color.black, Color.black };
             return Color.black;
         }
         // get most common colors
-        var topColors = pixelFrequencies.OrderByDescending(pair => pair.Value).Select(pair => (Color)pair.Key).ToList();
+        topColors = pixelFrequencies.OrderByDescending(pair => pair.Value).Select(pair => (Color)pair.Key).ToList();
         // blend top colors together in equal proportion
         var finalColor = topColors[0];
         for (int i = 1; i < topColors.Count && i < blendTopColors; i++) {
