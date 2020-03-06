@@ -12,7 +12,7 @@ public enum CommandType { WIGGLE, GLIMMER, SPAWN }
 [Serializable]
 public class CommandData {
 	public string uuid;
-	public CommandType type;
+	public string type;
 	public int num;
 	public CommandMeta meta;
 }
@@ -54,11 +54,14 @@ public class CommandReader : Manager<CommandReader> {
 				if (!firstLoad) { // wait until 2nd poll so we know we are pulling using the correct time
 					// process commands
 					foreach (var command in data.commands) {
+					    if (command.num == 0) {
+					        continue;
+					    }
 					    // do command
 					    Debug.Log(command.type + " " + command.uuid);
 					    var record = ImageReader.Inst.Records.Find(command.uuid, (r, uuid) => r.Name == uuid);
 					    if (record != null) {
-                            switch (command.type) {
+                            switch ((CommandType)Enum.Parse(typeof(CommandType), command.type)) {
 							    case CommandType.WIGGLE:
 								    foreach (var obj in SpawnedObject.AllInCurrentScene) {
 									    if (obj.Record.Record == record) {
@@ -86,6 +89,7 @@ public class CommandReader : Manager<CommandReader> {
 						            yield return null;
 						            var target = SpawnedObject.AllInCurrentScene.RandomWhere(o =>
 						                o.gameObject.activeSelf &&
+						                o.enabled &&
 						                o.Record.Record == record
 						            );
 						            if (target) {
