@@ -11,7 +11,7 @@ public class SpawnedObject : MonoBehaviour {
     public bool ZAligned;
 
     [Range(0, 1200)]
-    public float DeathTime2 = 10;
+    public float DeathTime = 240;
 
     [Range(0, 10)]
     public float ScaleFactor = 1;
@@ -70,7 +70,7 @@ public class SpawnedObject : MonoBehaviour {
         prevScale = ScaleFactor;
         if (framesWithNoChange > 10) {
             enabled = false;
-            EventManager.Inst.Delay(Die, DeathTime2);
+            EventManager.Inst.Delay(Die, DeathTime);
         }
     }
 
