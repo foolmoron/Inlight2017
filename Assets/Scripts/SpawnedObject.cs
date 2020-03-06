@@ -124,6 +124,8 @@ public class SpawnedObject : MonoBehaviour {
             var gpcolcgc = gpcolc.gradient.colorKeys;
             gpcolcgc[0].color = Record.Record.Color2;
             gpcolcgc[1].color = Record.Record.Color1;
+            gpcolcgc[2].color = Record.Record.Color2;
+            gpcolcgc[3].color = Record.Record.Color1;
             gpcolcg.colorKeys = gpcolcgc;
             gpcolc.gradient = gpcolcg;
             gpcol.color = gpcolc;
