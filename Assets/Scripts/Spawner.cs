@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Spawner : MonoBehaviour {
+public class Spawner : Manager<Spawner> {
 
     public GameObject SeedPrefab;
     public GameObject EggPrefab;
@@ -67,62 +67,66 @@ public class Spawner : MonoBehaviour {
                     record = ImageReader.Inst.GetWeightedRandomRecord();
                 }
                 if (record != null) {
-                    // spawn
-                    var startPos = new Vector2(transform.position.x, transform.position.z) + Random.insideUnitCircle.normalized * Mathf.Lerp(MinDistance, MaxDistance, Random.value);
-                    var target = SpawnViewTargets.Find(possibleTarget => possibleTarget.gameObject.activeInHierarchy);
-                    if (target) {
-                        var forward = target.forward.withY(0).normalized; // spawn in player's view
-                        var dir = Quaternion.AngleAxis(Mathf.Lerp(-AngleRange, AngleRange, Random.value), Vector3.up);
-                        startPos = dir * forward * Mathf.Lerp(MinDistance, MaxDistance, Random.value);
-                    }
-                    RaycastHit hit;
-                    Physics.Raycast(new Vector3(startPos.x, 300, startPos.y), Vector3.down, out hit, 500, CollisionLayers.value);
-                    var spawnPos = hit.point.plusY(HeightOffsetFromGround);
-
-                    if (record.Type == ImageType.Animal) {
-                        if (DoNestOnAnimalSpawn) {
-                            // small patch of grass
-                            var plantRecord = ImageReader.Inst.GetWeightedRandomRecord(ImageType.Plant);
-                            var seedObj = Instantiate(SeedPrefab);
-                            seedObj.transform.position = spawnPos;
-                            seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = plantRecord;
-                            seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
-                            seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.TinyPatch;
-                            // nest that keeps spawning eggs
-                            var nestObj = Instantiate(NestPrefab);
-                            nestObj.transform.position = spawnPos;
-                            nestObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
-                        }
-                        // egg
-                        var eggObj = Instantiate(EggPrefab);
-                        eggObj.transform.position = spawnPos;
-                        eggObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
-                        eggObj.GetComponentInSelfOrChildren<Egg>().AutoBreak = true;
-                        eggObj.GetComponentInSelfOrChildren<Egg>().ForceGroupParams = true;
-                    } else if (record.Type == ImageType.Bird) {
-                        // bird is an animal
-                        var eggObj = Instantiate(EggPrefab);
-                        eggObj.transform.position = spawnPos;
-                        eggObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
-                        eggObj.GetComponentInSelfOrChildren<Egg>().AutoBreak = true;
-                        eggObj.GetComponentInSelfOrChildren<Egg>().ForceGroupParams = true;
-                        eggObj.GetComponentInSelfOrChildren<Egg>().AnimalPrefab = BirdPrefab;
-                    } else if (record.Type == ImageType.Plant) {
-                        // any type of plant
-                        var seedObj = Instantiate(SeedPrefab);
-                        seedObj.transform.position = spawnPos;
-                        seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
-                        seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
-                    } else if (record.Type == ImageType.Building) {
-                        // building is a tree
-                        var seedObj = Instantiate(SeedPrefab);
-                        seedObj.transform.position = spawnPos;
-                        seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
-                        seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
-                        seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.Tree;
-                    }
+                    Spawn(record);
                 }
             }
+        }
+    }
+
+    public void Spawn(ImageRecord record) {
+        // spawn
+        var startPos = new Vector2(transform.position.x, transform.position.z) + Random.insideUnitCircle.normalized * Mathf.Lerp(MinDistance, MaxDistance, Random.value);
+        var target = SpawnViewTargets.Find(possibleTarget => possibleTarget.gameObject.activeInHierarchy);
+        if (target) {
+            var forward = target.forward.withY(0).normalized; // spawn in player's view
+            var dir = Quaternion.AngleAxis(Mathf.Lerp(-AngleRange, AngleRange, Random.value), Vector3.up);
+            startPos = dir * forward * Mathf.Lerp(MinDistance, MaxDistance, Random.value);
+        }
+        RaycastHit hit;
+        Physics.Raycast(new Vector3(startPos.x, 300, startPos.y), Vector3.down, out hit, 500, CollisionLayers.value);
+        var spawnPos = hit.point.plusY(HeightOffsetFromGround);
+
+        if (record.Type == ImageType.Animal) {
+            if (DoNestOnAnimalSpawn) {
+                // small patch of grass
+                var plantRecord = ImageReader.Inst.GetWeightedRandomRecord(ImageType.Plant);
+                var seedObj = Instantiate(SeedPrefab);
+                seedObj.transform.position = spawnPos;
+                seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = plantRecord;
+                seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
+                seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.TinyPatch;
+                // nest that keeps spawning eggs
+                var nestObj = Instantiate(NestPrefab);
+                nestObj.transform.position = spawnPos;
+                nestObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+            }
+            // egg
+            var eggObj = Instantiate(EggPrefab);
+            eggObj.transform.position = spawnPos;
+            eggObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+            eggObj.GetComponentInSelfOrChildren<Egg>().AutoBreak = true;
+            eggObj.GetComponentInSelfOrChildren<Egg>().ForceGroupParams = true;
+        } else if (record.Type == ImageType.Bird) {
+            // bird is an animal
+            var eggObj = Instantiate(EggPrefab);
+            eggObj.transform.position = spawnPos;
+            eggObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+            eggObj.GetComponentInSelfOrChildren<Egg>().AutoBreak = true;
+            eggObj.GetComponentInSelfOrChildren<Egg>().ForceGroupParams = true;
+            eggObj.GetComponentInSelfOrChildren<Egg>().AnimalPrefab = BirdPrefab;
+        } else if (record.Type == ImageType.Plant) {
+            // any type of plant
+            var seedObj = Instantiate(SeedPrefab);
+            seedObj.transform.position = spawnPos;
+            seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+            seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
+        } else if (record.Type == ImageType.Building) {
+            // building is a tree
+            var seedObj = Instantiate(SeedPrefab);
+            seedObj.transform.position = spawnPos;
+            seedObj.GetComponentInSelfOrChildren<HasImageRecord>().Record = record;
+            seedObj.GetComponentInSelfOrChildren<Seed>().WillGrowPlant = true;
+            seedObj.GetComponentInSelfOrChildren<Seed>().ForcedType = ImageType.Tree;
         }
     }
 

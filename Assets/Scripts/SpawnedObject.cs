@@ -60,6 +60,7 @@ public class SpawnedObject : MonoBehaviour {
     }
 
     void OnObtain() {
+        enabled = true;
         IsWiggling = false;
         IsGlimmering = false;
         dieOverTime.enabled = false;

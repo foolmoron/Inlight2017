@@ -37,7 +37,7 @@ public class CommandReader : Manager<CommandReader> {
     [Range(0, 20)]
     public float GlimmerTime = 1f;
     readonly ListDict<ImageRecord, float> glimmerTimes = new ListDict<ImageRecord, float>();
-
+    
     void Start() {
         StartCoroutine(Poll());
     }
@@ -78,6 +78,19 @@ public class CommandReader : Manager<CommandReader> {
 						            glimmerTimes[record] = GlimmerTime;
                                     break;
 						        case CommandType.SPAWN:
+                                    Spawner.Inst.Spawn(record);
+						            yield return null;
+						            yield return null;
+						            yield return null;
+						            yield return null;
+						            yield return null;
+						            var target = SpawnedObject.AllInCurrentScene.RandomWhere(o =>
+						                o.gameObject.activeSelf &&
+						                o.Record.Record == record
+						            );
+						            if (target) {
+						                CameraMotion.Inst.ZoomTarget = target.transform;
+						            }
                                     break;
 					        }
 					    }

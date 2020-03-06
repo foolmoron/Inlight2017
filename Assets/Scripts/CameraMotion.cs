@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraMotion : MonoBehaviour {
+public class CameraMotion : Manager<CameraMotion> {
 
     public Vector3 AngleRange = new Vector3(25, 25, 25);
     [Range(0, 0.01f)]
