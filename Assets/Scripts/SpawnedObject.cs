@@ -10,6 +10,9 @@ public class SpawnedObject : MonoBehaviour {
     
     public bool ZAligned;
 
+    [Range(0, 1200)]
+    public float DeathTime2 = 10;
+
     [Range(0, 10)]
     public float ScaleFactor = 1;
     [Range(0, 10)]
@@ -29,6 +32,7 @@ public class SpawnedObject : MonoBehaviour {
     Vector2 originalScale;
     public HasImageRecord Record { get; private set; }
     new Renderer renderer;
+    DieOverTime dieOverTime;
 
     Texture2D prevTex;
     float prevScale;
@@ -37,6 +41,8 @@ public class SpawnedObject : MonoBehaviour {
     void Awake() {
         AllInCurrentScene.Add(this);
         Record = GetComponent<HasImageRecord>();
+        dieOverTime = GetComponent<DieOverTime>();
+        dieOverTime.enabled = false;
         renderer = this.GetComponentInSelfOrChildren<Renderer>();
         Properties = new MaterialPropertyBlock();
         renderer.GetPropertyBlock(Properties);
@@ -46,6 +52,11 @@ public class SpawnedObject : MonoBehaviour {
         ScaleTarget = ScaleTarget != null ? ScaleTarget : transform;
         originalScale = ScaleTarget.localScale;
         Update();
+    }
+
+    void OnObtain() {
+        dieOverTime.enabled = false;
+        dieOverTime.LifeTime = 0;
     }
 
     void FixedUpdate() {
@@ -59,7 +70,12 @@ public class SpawnedObject : MonoBehaviour {
         prevScale = ScaleFactor;
         if (framesWithNoChange > 10) {
             enabled = false;
+            EventManager.Inst.Delay(Die, DeathTime2);
         }
+    }
+
+    void Die() {
+        dieOverTime.enabled = true;
     }
 
     public void Update() {

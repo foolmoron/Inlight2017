@@ -6,7 +6,7 @@ using UnityEngine.Video;
 public class Pauser : MonoBehaviour {
 
     public KeyCode Key = KeyCode.Space;
-    [Range(0.001f, 1)]
+    [Range(0.001f, 5)]
     public float TargetTimescale = 1;
     [Range(0, 0.5f)]
     public float TimescaleSpeed = 0.25f;

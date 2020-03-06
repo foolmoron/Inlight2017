@@ -20,7 +20,7 @@ public class CameraMotion : MonoBehaviour {
     public float RotationIntervalVariance2 = 0.5f;
     float timeToInterval2;
 
-    public bool Zoomed;
+    public Transform ZoomTarget;
     public Vector2 ZoomAmounts = new Vector2(13.1f, 34.3f);
     public Vector2 ZoomChances = new Vector2(0.1f, 0.5f);
     [Range(0, 0.1f)]
@@ -49,17 +49,22 @@ public class CameraMotion : MonoBehaviour {
             timeToInterval2 = RotationInterval2 * (1 + (Random.value - 0.5f) * RotationIntervalVariance2);
             targetRotation = targetRotation * Quaternion.Euler(new Vector3((Random.value - 0.5f) * AngleRange2.x, (Random.value - 0.5f) * AngleRange2.y, (Random.value - 0.5f) * AngleRange2.z));
         }
+        if (ZoomTarget) {
+            targetRotation = Quaternion.LookRotation(ZoomTarget.position - transform.position);
+        }
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed);
-
 
         timeToZoom -= Time.deltaTime;
         if (timeToZoom <= 0) {
             timeToZoom = ZoomInterval;
-            if (Random.value < (Zoomed ? ZoomChances.y : ZoomChances.x)) {
-                Zoomed = !Zoomed;
+            if (Random.value < (ZoomTarget != null ? ZoomChances.y : ZoomChances.x)) {
+                ZoomTarget = ZoomTarget != null 
+                    ? null 
+                    : SpawnedObject.AllInCurrentScene.RandomWhere(o => o.gameObject.activeSelf).transform
+                    ;
             }
         }
-        var targetSize = Zoomed ? ZoomAmounts.x : ZoomAmounts.y;
+        var targetSize = ZoomTarget != null ? ZoomAmounts.x : ZoomAmounts.y;
         cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, targetSize, ZoomSpeed);
     }
 }
