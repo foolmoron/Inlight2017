@@ -204,9 +204,9 @@ function updatePastDrawings(container) {
 
 // commands
 var COMMAND_COOLDOWNS = {
-    glimmer: 13*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="glimmer"]:disabled .cooldown} CSS anim as well
+    glimmer: 2*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="glimmer"]:disabled .cooldown} CSS anim as well
     wiggle: 37*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="wiggle"]:disabled .cooldown} CSS anim as well
-    spawn: 3*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="spawn"]:disabled .cooldown} CSS anim as well
+    spawn: 53*1000, // WARNING: Change this in the {}.past-drawing .commands .btn-command[data-command="spawn"]:disabled .cooldown} CSS anim as well
 }
 function handleCommand(el) {
     var command = el.dataset.command
