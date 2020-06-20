@@ -4,6 +4,6 @@ module.exports = {
     HOST: 'http://localhost',
     HTTP_PORT: 8000,
     HTTPS_PORT: 8443,
-    KEY_PATH: '/etc/letsencrypt/live/inlight.fool.games/privkey.pem',
-    CERT_PATH: '/etc/letsencrypt/live/inlight.fool.games/cert.pem',
+    KEY_PATH: '/etc/letsencrypt/live/amanda.momin.love/privkey.pem',
+    CERT_PATH: '/etc/letsencrypt/live/amanda.momin.love/cert.pem',
 }
