@@ -14,7 +14,7 @@ git clone -b server https://github.com/foolmoron/Inlight2017.git
 cd Inlight2017/
 npm install
 mkdir certs
-sudo certbot certonly --standalone -w certs -d lightfield.fool.games
+sudo certbot certonly --manual --preferred-challenges dns -w certs -d lightfield.fool.games
 
 echo "1. Change ports to 80/443"
 echo "2. Change config.js secret/pass/host"
